@@ -81,6 +81,9 @@ export function Header({
               <Sparkles className="h-3 w-3 text-blue-500" />
               FY 2026-27
             </span>
+            <span className="hidden lg:inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+              22 Enterprise Modules Ready
+            </span>
           </div>
           <p className="hidden md:block text-xs text-slate-500 dark:text-slate-400">
             {currentInfo.subtitle}

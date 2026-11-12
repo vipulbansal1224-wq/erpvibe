@@ -133,6 +133,9 @@ export function Sidebar({
     }))
     .filter((section) => section.items.length > 0);
 
+  const totalModulesCount = allNavSections.reduce((sum, sec) => sum + sec.items.length, 0);
+  const activeModulesCount = visibleNavSections.reduce((sum, sec) => sum + sec.items.length, 0);
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -161,8 +164,11 @@ export function Sidebar({
                 <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/30">
                   INDIA
                 </span>
+                <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 border border-blue-500/30">
+                  {activeModulesCount} Modules
+                </span>
               </div>
-              <p className="text-[11px] text-slate-400">Statutory & Enterprise Suite</p>
+              <p className="text-[11px] text-slate-400">Enterprise Suite ({activeModulesCount}/{totalModulesCount} Active)</p>
             </div>
           </div>
         </div>
@@ -232,10 +238,12 @@ export function Sidebar({
                 <SlidersHorizontal className="h-4 w-4 text-blue-400" />
                 <span className="text-xs font-medium text-blue-200">Configure Modules</span>
               </div>
-              <ChevronRight className="h-3.5 w-3.5 text-blue-400" />
+              <span className="text-[10px] bg-blue-500/30 text-blue-200 px-1.5 py-0.5 rounded font-bold font-mono">
+                {activeModulesCount}/{totalModulesCount}
+              </span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Enable / disable features to fit your exact business needs.
+              {activeModulesCount} of {totalModulesCount} enterprise modules active (Click to toggle)
             </p>
           </button>
         </div>

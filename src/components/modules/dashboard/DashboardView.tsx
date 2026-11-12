@@ -15,6 +15,7 @@ import {
   Download,
   Eye,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import {
   SalesInvoice,
@@ -66,9 +67,15 @@ export function DashboardView({
         <div className="absolute right-0 top-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 text-xs font-semibold text-emerald-300 mb-2">
-              <ShieldCheck className="h-4 w-4" />
-              GST & MCA Compliance Engine Active
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 text-xs font-semibold text-emerald-300">
+                <ShieldCheck className="h-4 w-4" />
+                GST & MCA Compliance Engine Active
+              </div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/30 border border-blue-400/30 px-3 py-1 text-xs font-bold text-white shadow">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                22 Enterprise Modules Embedded
+              </div>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
               Apex Technovations - India Enterprise Hub
@@ -412,7 +419,74 @@ export function DashboardView({
         </div>
       </div>
 
-      {/* MCA Audit Trail Snapshot */}
+      {/* Quick Launchpad: All 22 Modules Matrix */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              Complete Enterprise Directory (22 Modules Ready)
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              India Statutory Compliance, Production, Retail, Logistics, CRM & HR Modules
+            </p>
+          </div>
+          <button
+            onClick={() => setActiveModule("settings")}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition"
+          >
+            Configure & Toggle Modules →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+          {[
+            { id: "gst-compliance", label: "GST & Compliance", badge: "e-Inv/e-Way", tag: "Statutory" },
+            { id: "invoices", label: "Tax Invoices", badge: "B2B / B2C", tag: "Sales" },
+            { id: "pos", label: "POS Terminal", badge: "UPI / Cash", tag: "Retail" },
+            { id: "inventory", label: "Stock & Warehouses", badge: "Multi-Loc", tag: "Inventory" },
+            { id: "manufacturing", label: "Manufacturing & BOM", badge: "Work Orders", tag: "Production" },
+            { id: "quality", label: "Quality Control (QM)", badge: "ISO / GRN", tag: "Quality" },
+            { id: "fleet", label: "Fleet & Logistics", badge: "TMS / Vahan", tag: "Logistics" },
+            { id: "jobwork", label: "Job Work (ITC-04)", badge: "Sec 143", tag: "Production" },
+            { id: "subscriptions", label: "Subscriptions & AMC", badge: "MRR Engine", tag: "SaaS" },
+            { id: "projects", label: "Projects & Tasks", badge: "Timesheets", tag: "Services" },
+            { id: "banking", label: "Bank Reconciliation", badge: "Multi-Bank", tag: "Finance" },
+            { id: "expenses", label: "Employee Expenses", badge: "Reimburse", tag: "Finance" },
+            { id: "assets", label: "Fixed Assets (SLM/WDV)", badge: "Sched. II", tag: "Finance" },
+            { id: "helpdesk", label: "Customer Helpdesk", badge: "SLA Timers", tag: "Support" },
+            { id: "customers", label: "CRM & Customers", badge: "GSTIN Lead", tag: "Sales" },
+            { id: "suppliers", label: "Suppliers & MSME", badge: "45-Day Rule", tag: "Buying" },
+            { id: "recruitment", label: "Recruitment (ATS)", badge: "Hiring", tag: "HR" },
+            { id: "payroll", label: "Payroll & Payslips", badge: "PF / ESIC", tag: "HR" },
+            { id: "documents", label: "Legal Document Vault", badge: "AES-256", tag: "Legal" },
+            { id: "financial-reports", label: "P&L / Balance Sheet", badge: "Sched. III", tag: "Reports" },
+            { id: "accounts", label: "Chart of Accounts", badge: "General Ledger", tag: "Accounts" },
+            { id: "audit-trail", label: "MCA Audit Trail", badge: "Sec 134(5)", tag: "Audit" },
+          ].map((m, idx) => (
+            <button
+              key={m.id}
+              onClick={() => setActiveModule(m.id as ModuleType)}
+              className="flex flex-col items-start p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-700 transition text-left group"
+            >
+              <div className="flex justify-between items-center w-full">
+                <span className="text-[10px] font-mono text-slate-400 group-hover:text-blue-500 font-semibold">
+                  #{String(idx + 1).padStart(2, "0")}
+                </span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium">
+                  {m.badge}
+                </span>
+              </div>
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                {m.label}
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {m.tag}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
