@@ -10,20 +10,28 @@ import {
   CheckCircle2,
   DollarSign,
   TrendingUp,
-  FileCheck,
-  PauseCircle,
   CreditCard,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 interface SubscriptionsViewProps {
   subscriptions: SubscriptionRecord[];
   onAddSubscription: (sub: SubscriptionRecord) => void;
+  onUpdateSubscription?: (sub: SubscriptionRecord) => void;
+  onDeleteSubscription?: (id: string) => void;
 }
 
-export function SubscriptionsView({ subscriptions, onAddSubscription }: SubscriptionsViewProps) {
+export function SubscriptionsView({
+  subscriptions,
+  onAddSubscription,
+  onUpdateSubscription,
+  onDeleteSubscription,
+}: SubscriptionsViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [contractNo, setContractNo] = useState(`SUB/AMC/26-${Date.now().toString().slice(-3)}`);
@@ -35,6 +43,7 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [nextInvoiceDate, setNextInvoiceDate] = useState("2026-12-01");
   const [autoRenew, setAutoRenew] = useState(true);
+  const [status, setStatus] = useState<SubscriptionRecord["status"]>("Active");
 
   const filtered = subscriptions.filter((s) => {
     const matchSearch =
@@ -45,7 +54,6 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
     return matchSearch && matchStatus;
   });
 
-  // Calculate MRR (Monthly Recurring Revenue)
   const monthlyRecurringRevenue = subscriptions
     .filter((s) => s.status === "Active")
     .reduce((sum, s) => {
@@ -57,11 +65,36 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
 
   const activeCount = subscriptions.filter((s) => s.status === "Active").length;
 
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setContractNo(`SUB/AMC/26-${Date.now().toString().slice(-3)}`);
+    setClientName("");
+    setPlanName("Enterprise ERP AMC Support");
+    setRecurringAmount(25000);
+    setStatus("Active");
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (s: SubscriptionRecord) => {
+    setEditingId(s.id);
+    setContractNo(s.contractNo);
+    setClientName(s.clientName);
+    setPlanName(s.planName);
+    setBillingFrequency(s.billingFrequency);
+    setRecurringAmount(s.recurringAmount);
+    setGstRate(s.gstRate);
+    setStartDate(s.startDate);
+    setNextInvoiceDate(s.nextInvoiceDate);
+    setAutoRenew(s.autoRenew);
+    setStatus(s.status);
+    setShowModal(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName) return;
-    const newRecord: SubscriptionRecord = {
-      id: `SUB-${Date.now()}`,
+    const record: SubscriptionRecord = {
+      id: editingId || `SUB-${Date.now()}`,
       contractNo,
       clientName,
       planName,
@@ -71,11 +104,15 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
       startDate,
       nextInvoiceDate,
       autoRenew,
-      status: "Active",
+      status,
     };
-    onAddSubscription(newRecord);
+
+    if (editingId && onUpdateSubscription) {
+      onUpdateSubscription(record);
+    } else {
+      onAddSubscription(record);
+    }
     setShowModal(false);
-    setClientName("");
   };
 
   return (
@@ -97,7 +134,7 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
           </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenNew}
           className="flex items-center gap-2 px-5 py-2.5 bg-white text-purple-800 rounded-xl font-semibold shadow hover:bg-purple-50 transition"
         >
           <Plus className="w-5 h-5" />
@@ -195,6 +232,7 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
                 <th className="py-3 px-4">Next Billing Date</th>
                 <th className="py-3 px-4">Auto Renew</th>
                 <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -251,11 +289,31 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
                       {s.status}
                     </span>
                   </td>
+                  <td className="py-3 px-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => handleOpenEdit(s)}
+                        className="p-1.5 rounded text-slate-400 hover:text-purple-600 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        title="Edit Subscription"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      {onDeleteSubscription && (
+                        <button
+                          onClick={() => onDeleteSubscription(s.id)}
+                          className="p-1.5 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          title="Delete Subscription"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-500 text-sm">
+                  <td colSpan={8} className="text-center py-8 text-slate-500 text-sm">
                     No subscription contracts found.
                   </td>
                 </tr>
@@ -271,7 +329,7 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-purple-600" />
-              New Subscription Contract
+              {editingId ? "Edit Subscription Contract" : "New Subscription Contract"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -330,16 +388,16 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Recurring Amount (₹)
+                    Amount (₹)
                   </label>
                   <input
                     type="number"
                     value={recurringAmount}
                     onChange={(e) => setRecurringAmount(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold font-mono"
                     required
                   />
                 </div>
@@ -350,12 +408,26 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
                   <select
                     value={gstRate}
                     onChange={(e) => setGstRate(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
                   >
-                    <option value={18}>18% (SAC Standard)</option>
+                    <option value={18}>18% (SAC)</option>
                     <option value={12}>12%</option>
                     <option value={5}>5%</option>
-                    <option value={0}>0% (Export / Exempt)</option>
+                    <option value={0}>0%</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as any)}
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Paused">Paused</option>
+                    <option value="Cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>
@@ -394,7 +466,7 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
                   className="rounded text-purple-600 focus:ring-purple-500 h-4 w-4"
                 />
                 <label htmlFor="autoRenew" className="text-xs text-slate-700 dark:text-slate-300">
-                  Enable automated recurring invoice creation & email to client
+                  Enable automated recurring invoice creation
                 </label>
               </div>
 
@@ -410,7 +482,7 @@ export function SubscriptionsView({ subscriptions, onAddSubscription }: Subscrip
                   type="submit"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700"
                 >
-                  Save Subscription
+                  {editingId ? "Update Subscription" : "Save Subscription"}
                 </button>
               </div>
             </form>

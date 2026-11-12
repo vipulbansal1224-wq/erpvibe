@@ -13,18 +13,27 @@ import {
   CheckCircle2,
   Calendar,
   UserCheck,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 interface RecruitmentViewProps {
   candidates: JobCandidate[];
   onAddCandidate: (candidate: JobCandidate) => void;
-  onUpdateStage?: (id: string, stage: JobCandidate["stage"]) => void;
+  onUpdateCandidate?: (candidate: JobCandidate) => void;
+  onDeleteCandidate?: (id: string) => void;
 }
 
-export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewProps) {
+export function RecruitmentView({
+  candidates,
+  onAddCandidate,
+  onUpdateCandidate,
+  onDeleteCandidate,
+}: RecruitmentViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("All");
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [candidateName, setCandidateName] = useState("");
@@ -58,11 +67,33 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
     (c) => c.stage === "Technical Interview" || c.stage === "HR Round"
   ).length;
 
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setCandidateName("");
+    setEmail("");
+    setPhone("+91 ");
+    setStage("Applied");
+    setRating(4);
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (c: JobCandidate) => {
+    setEditingId(c.id);
+    setCandidateName(c.candidateName);
+    setJobRole(c.jobRole);
+    setEmail(c.email);
+    setPhone(c.phone);
+    setExperienceYears(c.experienceYears);
+    setStage(c.stage);
+    setRating(c.rating);
+    setShowModal(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!candidateName || !email) return;
-    const newCandidate: JobCandidate = {
-      id: `CAND-${Date.now().toString().slice(-4)}`,
+    const record: JobCandidate = {
+      id: editingId || `CAND-${Date.now().toString().slice(-4)}`,
       candidateName,
       jobRole,
       email,
@@ -72,10 +103,13 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
       stage,
       rating,
     };
-    onAddCandidate(newCandidate);
+
+    if (editingId && onUpdateCandidate) {
+      onUpdateCandidate(record);
+    } else {
+      onAddCandidate(record);
+    }
     setShowModal(false);
-    setCandidateName("");
-    setEmail("");
   };
 
   return (
@@ -97,7 +131,7 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
           </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenNew}
           className="flex items-center gap-2 px-5 py-2.5 bg-white text-sky-800 rounded-xl font-semibold shadow hover:bg-sky-50 transition"
         >
           <Plus className="w-5 h-5" />
@@ -198,15 +232,33 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
                     {c.jobRole}
                   </div>
                 </div>
-                <div className="flex text-amber-400">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-3.5 h-3.5 ${
-                        i < c.rating ? "fill-amber-400" : "text-slate-300 dark:text-slate-600"
-                      }`}
-                    />
-                  ))}
+                <div className="flex items-center gap-1.5">
+                  <div className="flex text-amber-400">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-3.5 h-3.5 ${
+                          i < c.rating ? "fill-amber-400" : "text-slate-300 dark:text-slate-600"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => handleOpenEdit(c)}
+                    className="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    title="Edit Candidate / Change Stage"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  {onDeleteCandidate && (
+                    <button
+                      onClick={() => onDeleteCandidate(c.id)}
+                      className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                      title="Delete Candidate"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -240,8 +292,11 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
               >
                 {c.stage}
               </span>
-              <button className="text-xs text-sky-600 font-semibold hover:underline">
-                View Dossier →
+              <button
+                onClick={() => handleOpenEdit(c)}
+                className="text-xs text-sky-600 font-semibold hover:underline"
+              >
+                Progress Stage →
               </button>
             </div>
           </div>
@@ -254,7 +309,7 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-sky-600" />
-              Add Candidate to Pipeline
+              {editingId ? "Edit Candidate Dossier" : "Add Candidate to Pipeline"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -326,12 +381,12 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Stage
+                    Hiring Stage
                   </label>
                   <select
                     value={stage}
                     onChange={(e) => setStage(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
                   >
                     {stages.map((st) => (
                       <option key={st} value={st}>
@@ -370,7 +425,7 @@ export function RecruitmentView({ candidates, onAddCandidate }: RecruitmentViewP
                   type="submit"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-sky-600 text-white hover:bg-sky-700"
                 >
-                  Add Candidate
+                  {editingId ? "Update Candidate" : "Add Candidate"}
                 </button>
               </div>
             </form>

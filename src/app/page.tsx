@@ -67,6 +67,9 @@ import {
   JobCandidate,
   VaultDocument,
   ModuleSettings,
+  Customer,
+  Supplier,
+  Employee,
 } from "@/types/erp";
 import {
   defaultCompany,
@@ -361,6 +364,250 @@ export default function Home() {
     );
   };
 
+  // Customer CRUD
+  const handleAddCustomer = (c: Customer) => {
+    setCustomers((prev) => [c, ...prev]);
+    appendAuditLog("CREATE", "Customer CRM", c.id, c.name, `New customer registered: ${c.name} (GSTIN: ${c.gstin})`);
+  };
+  const handleUpdateCustomer = (c: Customer) => {
+    setCustomers((prev) => prev.map((item) => (item.id === c.id ? c : item)));
+    appendAuditLog("UPDATE", "Customer CRM", c.id, c.name, `Updated customer master for ${c.name}`);
+  };
+  const handleDeleteCustomer = (id: string) => {
+    const item = customers.find((c) => c.id === id);
+    setCustomers((prev) => prev.filter((c) => c.id !== id));
+    appendAuditLog("DELETE", "Customer CRM", id, item?.name || id, `Deleted customer ${item?.name || id}`);
+  };
+
+  // Supplier CRUD
+  const handleAddSupplier = (s: Supplier) => {
+    setSuppliers((prev) => [s, ...prev]);
+    appendAuditLog("CREATE", "Vendor Portal", s.id, s.name, `New vendor enrolled: ${s.name} (MSME: ${s.msmeCategory || "N/A"})`);
+  };
+  const handleUpdateSupplier = (s: Supplier) => {
+    setSuppliers((prev) => prev.map((item) => (item.id === s.id ? s : item)));
+    appendAuditLog("UPDATE", "Vendor Portal", s.id, s.name, `Updated vendor details for ${s.name}`);
+  };
+  const handleDeleteSupplier = (id: string) => {
+    const item = suppliers.find((s) => s.id === id);
+    setSuppliers((prev) => prev.filter((s) => s.id !== id));
+    appendAuditLog("DELETE", "Vendor Portal", id, item?.name || id, `Deleted vendor ${item?.name || id}`);
+  };
+
+  // Item Save & Delete
+  const handleSaveItemModal = (item: InventoryItem) => {
+    const exists = items.some((i) => i.id === item.id);
+    if (exists) {
+      setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+      appendAuditLog(
+        "UPDATE",
+        "Inventory Master",
+        item.id,
+        item.sku,
+        `Item master updated: ${item.name} (HSN: ${item.hsnSacCode}, GST: ${item.gstRate}%)`
+      );
+    } else {
+      setItems((prev) => [item, ...prev]);
+      appendAuditLog(
+        "CREATE",
+        "Inventory Master",
+        item.id,
+        item.sku,
+        `Item master created: ${item.name} (HSN: ${item.hsnSacCode}, GST: ${item.gstRate}%)`
+      );
+    }
+  };
+  const handleDeleteItem = (id: string) => {
+    const item = items.find((i) => i.id === id);
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    appendAuditLog(
+      "DELETE",
+      "Inventory Master",
+      id,
+      item ? item.sku : id,
+      `Item master deleted: ${item?.name || id}`
+    );
+  };
+
+  // Quality Inspection CRUD
+  const handleUpdateInspection = (q: QualityInspection) => {
+    setQualityInspections((prev) => prev.map((item) => (item.id === q.id ? q : item)));
+    appendAuditLog("UPDATE", "Quality Inspection", q.id, q.inspectionNo, `Updated QC inspection for ${q.itemName}`);
+  };
+  const handleDeleteInspection = (id: string) => {
+    const item = qualityInspections.find((q) => q.id === id);
+    setQualityInspections((prev) => prev.filter((q) => q.id !== id));
+    appendAuditLog("DELETE", "Quality Inspection", id, item?.inspectionNo || id, `Deleted QC inspection for ${item?.itemName || id}`);
+  };
+
+  // Fleet CRUD
+  const handleUpdateVehicle = (v: FleetVehicle) => {
+    setFleetVehicles((prev) => prev.map((item) => (item.id === v.id ? v : item)));
+    appendAuditLog("UPDATE", "Fleet Logistics", v.id, v.vehicleNo, `Updated fleet vehicle record for ${v.vehicleNo}`);
+  };
+  const handleDeleteVehicle = (id: string) => {
+    const item = fleetVehicles.find((v) => v.id === id);
+    setFleetVehicles((prev) => prev.filter((v) => v.id !== id));
+    appendAuditLog("DELETE", "Fleet Logistics", id, item?.vehicleNo || id, `Removed vehicle ${item?.vehicleNo || id}`);
+  };
+
+  // Job Work CRUD
+  const handleUpdateJobWork = (jw: JobWorkOrder) => {
+    setJobWorkOrders((prev) => prev.map((item) => (item.id === jw.id ? jw : item)));
+    appendAuditLog("UPDATE", "Subcontracting", jw.id, jw.challanNo, `Updated job work order ${jw.challanNo} for ${jw.jobWorkerName}`);
+  };
+  const handleDeleteJobWork = (id: string) => {
+    const item = jobWorkOrders.find((jw) => jw.id === id);
+    setJobWorkOrders((prev) => prev.filter((jw) => jw.id !== id));
+    appendAuditLog("DELETE", "Subcontracting", id, item?.challanNo || id, `Deleted job work order ${item?.challanNo || id}`);
+  };
+
+  // Subscriptions CRUD
+  const handleUpdateSubscription = (s: SubscriptionRecord) => {
+    setSubscriptions((prev) => prev.map((item) => (item.id === s.id ? s : item)));
+    appendAuditLog("UPDATE", "Subscriptions", s.id, s.contractNo, `Modified recurring contract for ${s.clientName}`);
+  };
+  const handleDeleteSubscription = (id: string) => {
+    const item = subscriptions.find((s) => s.id === id);
+    setSubscriptions((prev) => prev.filter((s) => s.id !== id));
+    appendAuditLog("DELETE", "Subscriptions", id, item?.contractNo || id, `Terminated contract ${item?.contractNo || id}`);
+  };
+
+  // Expenses CRUD
+  const handleUpdateExpense = (c: ExpenseClaim) => {
+    setExpenseClaims((prev) => prev.map((item) => (item.id === c.id ? c : item)));
+    appendAuditLog("UPDATE", "Employee Expenses", c.id, c.claimNo, `Updated expense claim ${c.claimNo}`);
+  };
+  const handleDeleteExpense = (id: string) => {
+    const item = expenseClaims.find((c) => c.id === id);
+    setExpenseClaims((prev) => prev.filter((c) => c.id !== id));
+    appendAuditLog("DELETE", "Employee Expenses", id, item?.claimNo || id, `Deleted expense claim ${item?.claimNo || id}`);
+  };
+
+  // Recruitment CRUD
+  const handleUpdateCandidate = (cand: JobCandidate) => {
+    setJobCandidates((prev) => prev.map((item) => (item.id === cand.id ? cand : item)));
+    appendAuditLog("UPDATE", "Recruitment ATS", cand.id, cand.candidateName, `Updated applicant status for ${cand.candidateName}`);
+  };
+  const handleDeleteCandidate = (id: string) => {
+    const item = jobCandidates.find((c) => c.id === id);
+    setJobCandidates((prev) => prev.filter((c) => c.id !== id));
+    appendAuditLog("DELETE", "Recruitment ATS", id, item?.candidateName || id, `Deleted applicant ${item?.candidateName || id}`);
+  };
+
+  // Documents CRUD
+  const handleUpdateDocument = (doc: VaultDocument) => {
+    setVaultDocuments((prev) => prev.map((item) => (item.id === doc.id ? doc : item)));
+    appendAuditLog("UPDATE", "Document Vault", doc.id, doc.fileNumber, `Updated metadata for document ${doc.documentTitle}`);
+  };
+  const handleDeleteDocument = (id: string) => {
+    const item = vaultDocuments.find((d) => d.id === id);
+    setVaultDocuments((prev) => prev.filter((d) => d.id !== id));
+    appendAuditLog("DELETE", "Document Vault", id, item?.fileNumber || id, `Archived document ${item?.documentTitle || id}`);
+  };
+
+  // Assets CRUD
+  const handleAddAsset = (asset: FixedAsset) => {
+    setFixedAssets((prev) => [asset, ...prev]);
+    appendAuditLog("CREATE", "Fixed Assets", asset.id, asset.assetCode, `Added fixed asset ${asset.name} (${formatINR(asset.purchaseCost)})`);
+  };
+  const handleUpdateAsset = (asset: FixedAsset) => {
+    setFixedAssets((prev) => prev.map((item) => (item.id === asset.id ? asset : item)));
+    appendAuditLog("UPDATE", "Fixed Assets", asset.id, asset.assetCode, `Updated asset record for ${asset.name}`);
+  };
+  const handleDeleteAsset = (id: string) => {
+    const item = fixedAssets.find((a) => a.id === id);
+    setFixedAssets((prev) => prev.filter((a) => a.id !== id));
+    appendAuditLog("DELETE", "Fixed Assets", id, item?.assetCode || id, `Scrapped/Deleted asset ${item?.name || id}`);
+  };
+
+  // Helpdesk CRUD
+  const handleAddTicket = (ticket: SupportTicket) => {
+    setSupportTickets((prev) => [ticket, ...prev]);
+    appendAuditLog("CREATE", "Helpdesk SLA", ticket.id, ticket.ticketNumber, `Logged support ticket for ${ticket.customerName}: ${ticket.subject}`);
+  };
+  const handleUpdateTicket = (ticket: SupportTicket) => {
+    setSupportTickets((prev) => prev.map((item) => (item.id === ticket.id ? ticket : item)));
+    appendAuditLog("UPDATE", "Helpdesk SLA", ticket.id, ticket.ticketNumber, `Updated ticket ${ticket.ticketNumber} status to ${ticket.status}`);
+  };
+  const handleDeleteTicket = (id: string) => {
+    const item = supportTickets.find((t) => t.id === id);
+    setSupportTickets((prev) => prev.filter((t) => t.id !== id));
+    appendAuditLog("DELETE", "Helpdesk SLA", id, item?.ticketNumber || id, `Resolved/Deleted ticket ${item?.ticketNumber || id}`);
+  };
+
+  // Manufacturing / Work Orders CRUD
+  const handleAddWorkOrder = (wo: WorkOrder) => {
+    setWorkOrders((prev) => [wo, ...prev]);
+    appendAuditLog("CREATE", "Manufacturing", wo.id, wo.orderNumber, `Created work order ${wo.orderNumber} for ${wo.finishedGoodName}`);
+  };
+  const handleUpdateWorkOrder = (wo: WorkOrder) => {
+    setWorkOrders((prev) => prev.map((item) => (item.id === wo.id ? wo : item)));
+    appendAuditLog("UPDATE", "Manufacturing", wo.id, wo.orderNumber, `Updated work order ${wo.orderNumber} status: ${wo.status}`);
+  };
+  const handleDeleteWorkOrder = (id: string) => {
+    const item = workOrders.find((w) => w.id === id);
+    setWorkOrders((prev) => prev.filter((w) => w.id !== id));
+    appendAuditLog("DELETE", "Manufacturing", id, item?.orderNumber || id, `Cancelled work order ${item?.orderNumber || id}`);
+  };
+
+  // Projects CRUD
+  const handleAddProject = (p: Project) => {
+    setProjects((prev) => [p, ...prev]);
+    appendAuditLog("CREATE", "Project Management", p.id, p.code, `Created project ${p.name} (Budget: ${formatINR(p.budget)})`);
+  };
+  const handleUpdateProject = (p: Project) => {
+    setProjects((prev) => prev.map((item) => (item.id === p.id ? p : item)));
+    appendAuditLog("UPDATE", "Project Management", p.id, p.code, `Updated project status/details for ${p.name}`);
+  };
+  const handleDeleteProject = (id: string) => {
+    const item = projects.find((p) => p.id === id);
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    appendAuditLog("DELETE", "Project Management", id, item?.code || id, `Deleted project ${item?.name || id}`);
+  };
+
+  // Banking CRUD
+  const handleAddBankTransaction = (txn: BankTransaction) => {
+    setBankTransactions((prev) => [txn, ...prev]);
+    appendAuditLog("CREATE", "Banking & Reconciliation", txn.id, txn.referenceNo, `Added bank entry ${txn.description} (${formatINR(txn.credit || txn.debit)})`);
+  };
+  const handleDeleteBankTransaction = (id: string) => {
+    const item = bankTransactions.find((t) => t.id === id);
+    setBankTransactions((prev) => prev.filter((t) => t.id !== id));
+    appendAuditLog("DELETE", "Banking & Reconciliation", id, item?.referenceNo || id, `Removed statement item ${item?.referenceNo || id}`);
+  };
+
+  // Payroll / Employee CRUD
+  const handleAddEmployee = (emp: Employee) => {
+    setEmployees((prev) => [emp, ...prev]);
+    appendAuditLog("CREATE", "Payroll HRMS", emp.id, emp.empCode, `Onboarded employee ${emp.name} (${emp.designation})`);
+  };
+  const handleUpdateEmployee = (emp: Employee) => {
+    setEmployees((prev) => prev.map((item) => (item.id === emp.id ? emp : item)));
+    appendAuditLog("UPDATE", "Payroll HRMS", emp.id, emp.empCode, `Updated profile for employee ${emp.name}`);
+  };
+  const handleDeleteEmployee = (id: string) => {
+    const item = employees.find((e) => e.id === id);
+    setEmployees((prev) => prev.filter((e) => e.id !== id));
+    appendAuditLog("DELETE", "Payroll HRMS", id, item?.empCode || id, `Deactivated employee ${item?.name || id}`);
+  };
+
+  // Invoices CRUD
+  const handleDeleteInvoice = (id: string) => {
+    const item = invoices.find((i) => i.id === id);
+    setInvoices((prev) => prev.filter((i) => i.id !== id));
+    appendAuditLog("DELETE", "Sales Invoicing", id, item?.invoiceNumber || id, `Deleted tax invoice ${item?.invoiceNumber || id} for ${item?.customerName}`);
+  };
+  const handleTogglePaymentStatus = (id: string) => {
+    const item = invoices.find((i) => i.id === id);
+    if (!item) return;
+    const nextStatus = item.paymentStatus === "Paid" ? "Unpaid" : "Paid";
+    setInvoices((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, paymentStatus: nextStatus } : i))
+    );
+    appendAuditLog("UPDATE", "Sales Invoicing", id, item.invoiceNumber, `Payment status updated to ${nextStatus} for ${item.customerName}`);
+  };
+
   return (
     <div className="flex h-screen bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden text-slate-900 dark:text-slate-100">
       {/* Sidebar */}
@@ -405,6 +652,8 @@ export default function Home() {
               onOpenNewInvoice={() => setIsNewInvoiceOpen(true)}
               onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
               onGenerateIRN={handleGenerateIRN}
+              onDeleteInvoice={handleDeleteInvoice}
+              onTogglePaymentStatus={handleTogglePaymentStatus}
             />
           )}
 
@@ -433,6 +682,9 @@ export default function Home() {
             <ManufacturingView
               boms={boms}
               workOrders={workOrders}
+              onAddWorkOrder={handleAddWorkOrder}
+              onUpdateWorkOrder={handleUpdateWorkOrder}
+              onDeleteWorkOrder={handleDeleteWorkOrder}
             />
           )}
 
@@ -443,6 +695,8 @@ export default function Home() {
                 setQualityInspections((prev) => [q, ...prev]);
                 appendAuditLog("CREATE", "Quality Inspection", q.id, q.inspectionNo, `Logged QC test for ${q.itemName}`);
               }}
+              onUpdateInspection={handleUpdateInspection}
+              onDeleteInspection={handleDeleteInspection}
             />
           )}
 
@@ -453,6 +707,8 @@ export default function Home() {
                 setFleetVehicles((prev) => [v, ...prev]);
                 appendAuditLog("CREATE", "Fleet Logistics", v.id, v.vehicleNo, `Registered commercial vehicle ${v.model}`);
               }}
+              onUpdateVehicle={handleUpdateVehicle}
+              onDeleteVehicle={handleDeleteVehicle}
             />
           )}
 
@@ -463,6 +719,8 @@ export default function Home() {
                 setJobWorkOrders((prev) => [jw, ...prev]);
                 appendAuditLog("CREATE", "Subcontracting", jw.id, jw.challanNo, `Issued GST ITC-04 delivery challan to ${jw.jobWorkerName}`);
               }}
+              onUpdateOrder={handleUpdateJobWork}
+              onDeleteOrder={handleDeleteJobWork}
             />
           )}
 
@@ -473,6 +731,8 @@ export default function Home() {
                 setSubscriptions((prev) => [s, ...prev]);
                 appendAuditLog("CREATE", "Subscriptions", s.id, s.contractNo, `Activated recurring contract for ${s.clientName}`);
               }}
+              onUpdateSubscription={handleUpdateSubscription}
+              onDeleteSubscription={handleDeleteSubscription}
             />
           )}
 
@@ -480,6 +740,9 @@ export default function Home() {
             <ProjectsView
               projects={projects}
               timesheets={timesheets}
+              onAddProject={handleAddProject}
+              onUpdateProject={handleUpdateProject}
+              onDeleteProject={handleDeleteProject}
             />
           )}
 
@@ -487,6 +750,8 @@ export default function Home() {
             <BankingView
               accounts={bankAccounts}
               transactions={bankTransactions}
+              onAddTransaction={handleAddBankTransaction}
+              onDeleteTransaction={handleDeleteBankTransaction}
             />
           )}
 
@@ -497,18 +762,26 @@ export default function Home() {
                 setExpenseClaims((prev) => [c, ...prev]);
                 appendAuditLog("CREATE", "Employee Expenses", c.id, c.claimNo, `Claim filed by ${c.employeeName} for ₹${c.amount}`);
               }}
+              onUpdateClaim={handleUpdateExpense}
+              onDeleteClaim={handleDeleteExpense}
             />
           )}
 
           {activeModule === "assets" && (
             <AssetsView
               assets={fixedAssets}
+              onAddAsset={handleAddAsset}
+              onUpdateAsset={handleUpdateAsset}
+              onDeleteAsset={handleDeleteAsset}
             />
           )}
 
           {activeModule === "helpdesk" && (
             <HelpdeskView
               tickets={supportTickets}
+              onAddTicket={handleAddTicket}
+              onUpdateTicket={handleUpdateTicket}
+              onDeleteTicket={handleDeleteTicket}
             />
           )}
 
@@ -519,6 +792,8 @@ export default function Home() {
                 setJobCandidates((prev) => [cand, ...prev]);
                 appendAuditLog("CREATE", "Recruitment ATS", cand.id, cand.candidateName, `Candidate applied for ${cand.jobRole}`);
               }}
+              onUpdateCandidate={handleUpdateCandidate}
+              onDeleteCandidate={handleDeleteCandidate}
             />
           )}
 
@@ -529,6 +804,8 @@ export default function Home() {
                 setVaultDocuments((prev) => [doc, ...prev]);
                 appendAuditLog("CREATE", "Document Vault", doc.id, doc.fileNumber, `Deposited ${doc.documentTitle}`);
               }}
+              onUpdateDocument={handleUpdateDocument}
+              onDeleteDocument={handleDeleteDocument}
             />
           )}
 
@@ -540,19 +817,36 @@ export default function Home() {
             <InventoryView
               items={items}
               onOpenNewItem={() => setIsNewItemOpen(true)}
+              onSaveItem={handleSaveItemModal}
+              onDeleteItem={handleDeleteItem}
             />
           )}
 
           {activeModule === "customers" && (
-            <CustomersView customers={customers} />
+            <CustomersView
+              customers={customers}
+              onAddCustomer={handleAddCustomer}
+              onUpdateCustomer={handleUpdateCustomer}
+              onDeleteCustomer={handleDeleteCustomer}
+            />
           )}
 
           {activeModule === "suppliers" && (
-            <SuppliersView suppliers={suppliers} />
+            <SuppliersView
+              suppliers={suppliers}
+              onAddSupplier={handleAddSupplier}
+              onUpdateSupplier={handleUpdateSupplier}
+              onDeleteSupplier={handleDeleteSupplier}
+            />
           )}
 
           {activeModule === "purchase-orders" && (
-            <SuppliersView suppliers={suppliers} />
+            <SuppliersView
+              suppliers={suppliers}
+              onAddSupplier={handleAddSupplier}
+              onUpdateSupplier={handleUpdateSupplier}
+              onDeleteSupplier={handleDeleteSupplier}
+            />
           )}
 
           {activeModule === "quotations" && (
@@ -561,6 +855,8 @@ export default function Home() {
               onOpenNewInvoice={() => setIsNewInvoiceOpen(true)}
               onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
               onGenerateIRN={handleGenerateIRN}
+              onDeleteInvoice={handleDeleteInvoice}
+              onTogglePaymentStatus={handleTogglePaymentStatus}
             />
           )}
 
@@ -570,6 +866,9 @@ export default function Home() {
               salarySlips={salarySlips}
               company={company}
               onViewSlip={(slip) => setSelectedSlipForPrint(slip)}
+              onAddEmployee={handleAddEmployee}
+              onUpdateEmployee={handleUpdateEmployee}
+              onDeleteEmployee={handleDeleteEmployee}
             />
           )}
 

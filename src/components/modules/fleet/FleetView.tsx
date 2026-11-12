@@ -13,17 +13,27 @@ import {
   CheckCircle,
   Wrench,
   Navigation,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 interface FleetViewProps {
   vehicles: FleetVehicle[];
   onAddVehicle: (vehicle: FleetVehicle) => void;
+  onUpdateVehicle?: (vehicle: FleetVehicle) => void;
+  onDeleteVehicle?: (id: string) => void;
 }
 
-export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
+export function FleetView({
+  vehicles,
+  onAddVehicle,
+  onUpdateVehicle,
+  onDeleteVehicle,
+}: FleetViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [vehicleNo, setVehicleNo] = useState("");
@@ -51,11 +61,37 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
   const onDeliveryCount = vehicles.filter((v) => v.status === "On Delivery").length;
   const maintenanceCount = vehicles.filter((v) => v.status === "Under Maintenance").length;
 
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setVehicleNo("");
+    setModel("");
+    setDriverName("");
+    setDriverPhone("+91 ");
+    setStatus("Available");
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (v: FleetVehicle) => {
+    setEditingId(v.id);
+    setVehicleNo(v.vehicleNo);
+    setModel(v.model);
+    setType(v.type);
+    setDriverName(v.driverName);
+    setDriverPhone(v.driverPhone);
+    setFuelType(v.fuelType);
+    setOdometerKm(v.odometerKm);
+    setInsuranceValidUntil(v.insuranceValidUntil);
+    setPucValidUntil(v.pucValidUntil);
+    setFitnessValidUntil(v.fitnessValidUntil);
+    setStatus(v.status);
+    setShowModal(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!vehicleNo || !driverName) return;
-    const newVehicle: FleetVehicle = {
-      id: `FLT-${Date.now().toString().slice(-4)}`,
+    const record: FleetVehicle = {
+      id: editingId || `FLT-${Date.now().toString().slice(-4)}`,
       vehicleNo: vehicleNo.toUpperCase(),
       model,
       type,
@@ -68,11 +104,13 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
       fitnessValidUntil,
       status,
     };
-    onAddVehicle(newVehicle);
+
+    if (editingId && onUpdateVehicle) {
+      onUpdateVehicle(record);
+    } else {
+      onAddVehicle(record);
+    }
     setShowModal(false);
-    setVehicleNo("");
-    setModel("");
-    setDriverName("");
   };
 
   return (
@@ -94,7 +132,7 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
           </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenNew}
           className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-800 rounded-xl font-semibold shadow hover:bg-blue-50 transition"
         >
           <Plus className="w-5 h-5" />
@@ -193,17 +231,35 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
                   </div>
                   <div className="text-xs text-slate-500 font-medium">{v.model}</div>
                 </div>
-                <span
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    v.status === "Available"
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
-                      : v.status === "On Delivery"
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
-                      : "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
-                  }`}
-                >
-                  {v.status}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      v.status === "Available"
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                        : v.status === "On Delivery"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                    }`}
+                  >
+                    {v.status}
+                  </span>
+                  <button
+                    onClick={() => handleOpenEdit(v)}
+                    className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    title="Edit Vehicle"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  {onDeleteVehicle && (
+                    <button
+                      onClick={() => onDeleteVehicle(v.id)}
+                      className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                      title="Delete Vehicle"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-700">
@@ -246,7 +302,12 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
 
             <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500">
               <span>Ready for e-Way Bill trip sheet</span>
-              <button className="text-blue-600 font-semibold hover:underline">Log Trip →</button>
+              <button
+                onClick={() => handleOpenEdit(v)}
+                className="text-blue-600 font-semibold hover:underline"
+              >
+                Change Details →
+              </button>
             </div>
           </div>
         ))}
@@ -258,7 +319,7 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
               <Truck className="w-5 h-5 text-blue-600" />
-              Register Fleet Vehicle
+              {editingId ? "Edit Fleet Vehicle" : "Register Fleet Vehicle"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -333,7 +394,7 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
                     Fuel Type
@@ -341,7 +402,7 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
                   <select
                     value={fuelType}
                     onChange={(e) => setFuelType(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
                   >
                     <option value="Diesel">Diesel</option>
                     <option value="CNG">CNG</option>
@@ -356,8 +417,22 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
                     type="number"
                     value={odometerKm}
                     onChange={(e) => setOdometerKm(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as any)}
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold"
+                  >
+                    <option value="Available">Available</option>
+                    <option value="On Delivery">On Delivery</option>
+                    <option value="Under Maintenance">Under Maintenance</option>
+                  </select>
                 </div>
               </div>
 
@@ -409,7 +484,7 @@ export function FleetView({ vehicles, onAddVehicle }: FleetViewProps) {
                   type="submit"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  Save Vehicle
+                  {editingId ? "Update Vehicle" : "Save Vehicle"}
                 </button>
               </div>
             </form>

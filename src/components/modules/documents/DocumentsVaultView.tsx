@@ -14,17 +14,27 @@ import {
   Building,
   KeyRound,
   Download,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 interface DocumentsVaultViewProps {
   documents: VaultDocument[];
   onAddDocument: (doc: VaultDocument) => void;
+  onUpdateDocument?: (doc: VaultDocument) => void;
+  onDeleteDocument?: (id: string) => void;
 }
 
-export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultViewProps) {
+export function DocumentsVaultView({
+  documents,
+  onAddDocument,
+  onUpdateDocument,
+  onDeleteDocument,
+}: DocumentsVaultViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [documentTitle, setDocumentTitle] = useState("");
@@ -54,11 +64,33 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
   const verifiedCount = documents.filter((d) => d.verificationStatus === "Verified & Current" || d.verificationStatus === "Permanent").length;
   const renewalPending = documents.filter((d) => d.verificationStatus === "Renewal Pending").length;
 
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setDocumentTitle("");
+    setFileNumber("");
+    setAuthority("Government of India / MCA");
+    setExpiryDate("");
+    setVerificationStatus("Verified & Current");
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (doc: VaultDocument) => {
+    setEditingId(doc.id);
+    setDocumentTitle(doc.documentTitle);
+    setCategory(doc.category);
+    setFileNumber(doc.fileNumber);
+    setAuthority(doc.authority);
+    setIssueDate(doc.issueDate);
+    setExpiryDate(doc.expiryDate || "");
+    setVerificationStatus(doc.verificationStatus);
+    setShowModal(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!documentTitle || !fileNumber) return;
-    const newDoc: VaultDocument = {
-      id: `DOC-${Date.now().toString().slice(-4)}`,
+    const record: VaultDocument = {
+      id: editingId || `DOC-${Date.now().toString().slice(-4)}`,
       documentTitle,
       category,
       fileNumber,
@@ -67,10 +99,13 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
       authority,
       verificationStatus,
     };
-    onAddDocument(newDoc);
+
+    if (editingId && onUpdateDocument) {
+      onUpdateDocument(record);
+    } else {
+      onAddDocument(record);
+    }
     setShowModal(false);
-    setDocumentTitle("");
-    setFileNumber("");
   };
 
   return (
@@ -95,7 +130,7 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
           </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenNew}
           className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold shadow hover:bg-emerald-500 transition"
         >
           <Plus className="w-5 h-5" />
@@ -191,7 +226,7 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
                 <th className="py-3 px-4">Issue Date</th>
                 <th className="py-3 px-4">Statutory Expiry</th>
                 <th className="py-3 px-4 text-center">Verification Status</th>
-                <th className="py-3 px-4 text-center">Action</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -237,10 +272,25 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
                       {doc.verificationStatus}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center">
-                    <button className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
-                      <Download className="w-4 h-4" />
-                    </button>
+                  <td className="py-3 px-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => handleOpenEdit(doc)}
+                        className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
+                        title="Edit Document"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      {onDeleteDocument && (
+                        <button
+                          onClick={() => onDeleteDocument(doc.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition"
+                          title="Delete Document"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -262,7 +312,7 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
               <Lock className="w-5 h-5 text-emerald-600" />
-              Deposit Document into Legal Vault
+              {editingId ? "Edit Vault Document Record" : "Deposit Document into Legal Vault"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
@@ -376,7 +426,7 @@ export function DocumentsVaultView({ documents, onAddDocument }: DocumentsVaultV
                   type="submit"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700"
                 >
-                  Encrypt & Save to Vault
+                  {editingId ? "Update Document" : "Encrypt & Save to Vault"}
                 </button>
               </div>
             </form>

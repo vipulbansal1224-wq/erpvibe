@@ -11,18 +11,27 @@ import {
   CheckCircle,
   FileText,
   Clock,
-  ArrowRightLeft,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 interface JobWorkViewProps {
   orders: JobWorkOrder[];
   onAddOrder: (order: JobWorkOrder) => void;
+  onUpdateOrder?: (order: JobWorkOrder) => void;
+  onDeleteOrder?: (id: string) => void;
 }
 
-export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
+export function JobWorkView({
+  orders,
+  onAddOrder,
+  onUpdateOrder,
+  onDeleteOrder,
+}: JobWorkViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [challanNo, setChallanNo] = useState(`JW/ITC04/26-${Date.now().toString().slice(-3)}`);
@@ -33,6 +42,8 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
   const [inputQuantity, setInputQuantity] = useState(100);
   const [expectedOutputItem, setExpectedOutputItem] = useState("");
   const [statutoryDueDate, setStatutoryDueDate] = useState("2027-11-12");
+  const [receivedQuantity, setReceivedQuantity] = useState(0);
+  const [status, setStatus] = useState<JobWorkOrder["status"]>("Material Sent");
 
   const filtered = orders.filter((o) => {
     const matchSearch =
@@ -47,11 +58,38 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
   const totalReceived = orders.reduce((sum, o) => sum + o.receivedQuantity, 0);
   const pendingRecovery = totalDispatched - totalReceived;
 
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setChallanNo(`JW/ITC04/26-${Date.now().toString().slice(-3)}`);
+    setJobWorkerName("");
+    setJobWorkerGstin("");
+    setInputItemName("");
+    setInputQuantity(100);
+    setReceivedQuantity(0);
+    setStatus("Material Sent");
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (order: JobWorkOrder) => {
+    setEditingId(order.id);
+    setChallanNo(order.challanNo);
+    setJobWorkerName(order.jobWorkerName);
+    setJobWorkerGstin(order.jobWorkerGstin);
+    setNatureOfProcessing(order.natureOfProcessing);
+    setInputItemName(order.inputItemName);
+    setInputQuantity(order.inputQuantity);
+    setExpectedOutputItem(order.expectedOutputItem);
+    setStatutoryDueDate(order.statutoryDueDate);
+    setReceivedQuantity(order.receivedQuantity);
+    setStatus(order.status);
+    setShowModal(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!jobWorkerName || !inputItemName) return;
-    const newOrder: JobWorkOrder = {
-      id: `JW-${Date.now()}`,
+    const record: JobWorkOrder = {
+      id: editingId || `JW-${Date.now()}`,
       challanNo,
       jobWorkerName,
       jobWorkerGstin: jobWorkerGstin || "27AAAPL0000A1Z5",
@@ -61,15 +99,17 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
       inputItemName,
       inputQuantity: Number(inputQuantity) || 1,
       expectedOutputItem: expectedOutputItem || inputItemName,
-      receivedQuantity: 0,
+      receivedQuantity: Number(receivedQuantity) || 0,
       scrapGenerated: 0,
-      status: "Material Sent",
+      status: Number(receivedQuantity) >= Number(inputQuantity) ? "Closed / Completed" : Number(receivedQuantity) > 0 ? "Partially Received" : status,
     };
-    onAddOrder(newOrder);
+
+    if (editingId && onUpdateOrder) {
+      onUpdateOrder(record);
+    } else {
+      onAddOrder(record);
+    }
     setShowModal(false);
-    setJobWorkerName("");
-    setInputItemName("");
-    setExpectedOutputItem("");
   };
 
   return (
@@ -91,7 +131,7 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
           </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenNew}
           className="flex items-center gap-2 px-5 py-2.5 bg-white text-amber-800 rounded-xl font-semibold shadow hover:bg-amber-50 transition"
         >
           <Plus className="w-5 h-5" />
@@ -188,6 +228,7 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
                 <th className="py-3 px-4">Received / Scrap</th>
                 <th className="py-3 px-4">1-Yr Statutory Deadline</th>
                 <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -240,11 +281,31 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
                       {o.status}
                     </span>
                   </td>
+                  <td className="py-3 px-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => handleOpenEdit(o)}
+                        className="p-1.5 rounded text-slate-400 hover:text-amber-600 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        title="Update Received Goods / Challan"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      {onDeleteOrder && (
+                        <button
+                          onClick={() => onDeleteOrder(o.id)}
+                          className="p-1.5 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          title="Delete Challan"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-500 text-sm">
+                  <td colSpan={8} className="text-center py-8 text-slate-500 text-sm">
                     No subcontracting / job work challans found.
                   </td>
                 </tr>
@@ -260,7 +321,7 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-amber-600" />
-              Issue GST ITC-04 Delivery Challan
+              {editingId ? "Update Job Work Challan & Stock Receipt" : "Issue GST ITC-04 Delivery Challan"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -332,7 +393,7 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Quantity Sent
+                    Quantity Sent (Units)
                   </label>
                   <input
                     type="number"
@@ -347,26 +408,28 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Expected Output Item
+                    Received Back (Units)
                   </label>
                   <input
-                    type="text"
-                    placeholder="Hardened Pinion Shafts"
-                    value={expectedOutputItem}
-                    onChange={(e) => setExpectedOutputItem(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    type="number"
+                    value={receivedQuantity}
+                    onChange={(e) => setReceivedQuantity(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-bold text-emerald-600"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Statutory Due Date (1-Year)
+                    Challan Status
                   </label>
-                  <input
-                    type="date"
-                    value={statutoryDueDate}
-                    onChange={(e) => setStatutoryDueDate(e.target.value)}
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as any)}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                  />
+                  >
+                    <option value="Material Sent">Material Sent</option>
+                    <option value="Partially Received">Partially Received</option>
+                    <option value="Closed / Completed">Closed / Completed</option>
+                  </select>
                 </div>
               </div>
 
@@ -382,7 +445,7 @@ export function JobWorkView({ orders, onAddOrder }: JobWorkViewProps) {
                   type="submit"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-amber-600 text-white hover:bg-amber-700"
                 >
-                  Generate Challan
+                  {editingId ? "Update Challan" : "Generate Challan"}
                 </button>
               </div>
             </form>
