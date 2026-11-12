@@ -21,6 +21,23 @@ export type ModuleType =
 
 export type GSTType = "CGST+SGST" | "IGST" | "NIL" | "EXEMPT";
 
+export interface ModuleSettings {
+  gstCompliance: boolean;
+  invoices: boolean;
+  pos: boolean;
+  inventory: boolean;
+  manufacturing: boolean;
+  projects: boolean;
+  banking: boolean;
+  assets: boolean;
+  helpdesk: boolean;
+  payroll: boolean;
+  customers: boolean;
+  suppliers: boolean;
+  financialReports: boolean;
+  auditTrail: boolean;
+}
+
 export interface CompanyInfo {
   legalName: string;
   tradeName: string;

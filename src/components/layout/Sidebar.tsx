@@ -23,14 +23,16 @@ import {
   LifeBuoy,
   BarChart3,
   CreditCard,
+  SlidersHorizontal,
 } from "lucide-react";
-import { ModuleType } from "@/types/erp";
+import { ModuleType, ModuleSettings } from "@/types/erp";
 
 interface SidebarProps {
   activeModule: ModuleType;
   setActiveModule: (module: ModuleType) => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  moduleSettings: ModuleSettings;
 }
 
 export function Sidebar({
@@ -38,13 +40,14 @@ export function Sidebar({
   setActiveModule,
   isOpen,
   setIsOpen,
+  moduleSettings,
 }: SidebarProps) {
-  const navSections = [
+  const allNavSections = [
     {
       title: "OVERVIEW",
       items: [
-        { id: "dashboard" as ModuleType, label: "Dashboard", icon: LayoutDashboard },
-        { id: "financial-reports" as ModuleType, label: "Financial Reports & P&L", icon: BarChart3, badge: "Schedule III" },
+        { id: "dashboard" as ModuleType, label: "Dashboard", icon: LayoutDashboard, enabled: true },
+        { id: "financial-reports" as ModuleType, label: "Financial Reports & P&L", icon: BarChart3, badge: "Schedule III", enabled: moduleSettings.financialReports },
       ],
     },
     {
@@ -55,56 +58,66 @@ export function Sidebar({
           label: "India GST & Compliance",
           icon: ShieldCheck,
           badge: "e-Inv / e-Way",
+          enabled: moduleSettings.gstCompliance,
         },
         {
           id: "invoices" as ModuleType,
           label: "Tax Invoices",
           icon: Receipt,
           badge: "B2B/B2C",
+          enabled: moduleSettings.invoices,
         },
       ],
     },
     {
       title: "RETAIL & SALES",
       items: [
-        { id: "pos" as ModuleType, label: "Point of Sale (POS)", icon: ShoppingCart, badge: "UPI / Cash" },
-        { id: "customers" as ModuleType, label: "Customers", icon: Users },
-        { id: "quotations" as ModuleType, label: "Quotations & Estimates", icon: FileSpreadsheet },
+        { id: "pos" as ModuleType, label: "Point of Sale (POS)", icon: ShoppingCart, badge: "UPI / Cash", enabled: moduleSettings.pos },
+        { id: "customers" as ModuleType, label: "Customers", icon: Users, enabled: moduleSettings.customers },
+        { id: "quotations" as ModuleType, label: "Quotations & Estimates", icon: FileSpreadsheet, enabled: moduleSettings.customers },
       ],
     },
     {
       title: "PRODUCTION & SUPPLY CHAIN",
       items: [
-        { id: "manufacturing" as ModuleType, label: "Manufacturing & BOM", icon: Factory, badge: "Work Orders" },
-        { id: "inventory" as ModuleType, label: "Stock & Item Master", icon: Package },
-        { id: "suppliers" as ModuleType, label: "Suppliers & MSME", icon: Truck },
-        { id: "purchase-orders" as ModuleType, label: "Purchase Orders", icon: FileText },
+        { id: "manufacturing" as ModuleType, label: "Manufacturing & BOM", icon: Factory, badge: "Work Orders", enabled: moduleSettings.manufacturing },
+        { id: "inventory" as ModuleType, label: "Stock & Item Master", icon: Package, enabled: moduleSettings.inventory },
+        { id: "suppliers" as ModuleType, label: "Suppliers & MSME", icon: Truck, enabled: moduleSettings.suppliers },
+        { id: "purchase-orders" as ModuleType, label: "Purchase Orders", icon: FileText, enabled: moduleSettings.suppliers },
       ],
     },
     {
       title: "PROJECTS & SERVICES",
       items: [
-        { id: "projects" as ModuleType, label: "Projects & Timesheets", icon: FolderKanban, badge: "Billing" },
-        { id: "helpdesk" as ModuleType, label: "Helpdesk & SLA Tickets", icon: LifeBuoy, badge: "Support" },
+        { id: "projects" as ModuleType, label: "Projects & Timesheets", icon: FolderKanban, badge: "Billing", enabled: moduleSettings.projects },
+        { id: "helpdesk" as ModuleType, label: "Helpdesk & SLA Tickets", icon: LifeBuoy, badge: "Support", enabled: moduleSettings.helpdesk },
       ],
     },
     {
       title: "FINANCE & HUMAN RESOURCES",
       items: [
-        { id: "banking" as ModuleType, label: "Banking & Reconciliation", icon: CreditCard, badge: "1-Click" },
-        { id: "assets" as ModuleType, label: "Fixed Assets & Depr.", icon: Boxes, badge: "SLM/WDV" },
-        { id: "accounts" as ModuleType, label: "Chart of Accounts", icon: Landmark },
-        { id: "payroll" as ModuleType, label: "Payroll & Payslips", icon: BadgeDollarSign, badge: "PF/ESIC" },
+        { id: "banking" as ModuleType, label: "Banking & Reconciliation", icon: CreditCard, badge: "1-Click", enabled: moduleSettings.banking },
+        { id: "assets" as ModuleType, label: "Fixed Assets & Depr.", icon: Boxes, badge: "SLM/WDV", enabled: moduleSettings.assets },
+        { id: "accounts" as ModuleType, label: "Chart of Accounts", icon: Landmark, enabled: true },
+        { id: "payroll" as ModuleType, label: "Payroll & Payslips", icon: BadgeDollarSign, badge: "PF/ESIC", enabled: moduleSettings.payroll },
       ],
     },
     {
       title: "COMPLIANCE & SYSTEM",
       items: [
-        { id: "audit-trail" as ModuleType, label: "MCA Audit Trail", icon: History, badge: "MCA Log" },
-        { id: "settings" as ModuleType, label: "Company Settings", icon: Settings },
+        { id: "audit-trail" as ModuleType, label: "MCA Audit Trail", icon: History, badge: "MCA Log", enabled: moduleSettings.auditTrail },
+        { id: "settings" as ModuleType, label: "Settings & Module Toggles", icon: Settings, enabled: true },
       ],
     },
   ];
+
+  // Filter sections that have enabled items
+  const visibleNavSections = allNavSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => item.enabled),
+    }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <>
@@ -142,7 +155,7 @@ export function Sidebar({
 
         {/* Navigation */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
-          {navSections.map((section) => (
+          {visibleNavSections.map((section) => (
             <div key={section.title}>
               <h3 className="mb-2 px-3 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 {section.title}
@@ -196,15 +209,21 @@ export function Sidebar({
 
         {/* Bottom Banner */}
         <div className="border-t border-slate-800 p-4">
-          <div className="rounded-xl bg-gradient-to-r from-blue-950/60 to-indigo-950/60 border border-blue-800/40 p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span className="text-xs font-medium text-blue-200">MCA & GST Ready</span>
+          <button
+            onClick={() => setActiveModule("settings")}
+            className="w-full text-left rounded-xl bg-gradient-to-r from-blue-950/60 to-indigo-950/60 border border-blue-800/40 p-3 hover:border-blue-500/60 transition-all"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <SlidersHorizontal className="h-4 w-4 text-blue-400" />
+                <span className="text-xs font-medium text-blue-200">Configure Modules</span>
+              </div>
+              <ChevronRight className="h-3.5 w-3.5 text-blue-400" />
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Companies Act 2013 audit trail and e-Invoice IRN API live.
+              Enable / disable features to fit your exact business needs.
             </p>
-          </div>
+          </button>
         </div>
       </aside>
     </>

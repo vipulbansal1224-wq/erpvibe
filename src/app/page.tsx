@@ -52,6 +52,7 @@ import {
   BankTransaction,
   FixedAsset,
   SupportTicket,
+  ModuleSettings,
 } from "@/types/erp";
 import {
   defaultCompany,
@@ -92,7 +93,53 @@ export default function Home() {
   const [salarySlips, setSalarySlips] = useState<SalarySlip[]>(initialSalarySlips);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(initialAuditLogs);
 
-  // Enterprise Extensions State
+  // Module Configuration (Feature Toggles)
+  const [moduleSettings, setModuleSettings] = useState<ModuleSettings>({
+    manufacturing: true,
+    projects: true,
+    pos: true,
+    banking: true,
+    assets: true,
+    helpdesk: true,
+    gstCompliance: true,
+    payroll: true,
+    customers: true,
+    suppliers: true,
+    financialReports: true,
+    auditTrail: true,
+    invoices: true,
+    inventory: true,
+  });
+
+  // Switch to clean slate (Clear dummy data)
+  const handleResetToCleanSlate = () => {
+    setInvoices([]);
+    setEwayBills([]);
+    setWorkOrders([]);
+    setPosTransactions([]);
+    appendAuditLog(
+      "UPDATE",
+      "System Settings",
+      "SYS-001",
+      "Database Reset",
+      "Switched to Clean Slate: Demo transactions cleared for production business entry."
+    );
+  };
+
+  // Restore demo showcase data
+  const handleRestoreDemoData = () => {
+    setInvoices(initialInvoices);
+    setEwayBills(initialEWayBills);
+    setWorkOrders(initialWorkOrders);
+    setPosTransactions(initialPOSTransactions);
+    appendAuditLog(
+      "UPDATE",
+      "System Settings",
+      "SYS-002",
+      "Demo Data Restored",
+      "Restored showcase sample data for presentations."
+    );
+  };
   const [boms, setBoms] = useState<BillOfMaterial[]>(initialBOMs);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>(initialWorkOrders);
   const [projects, setProjects] = useState<Project[]>(initialProjects);
@@ -281,6 +328,7 @@ export default function Home() {
         setActiveModule={setActiveModule}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
+        moduleSettings={moduleSettings}
       />
 
       {/* Main Workspace Area */}
@@ -292,6 +340,7 @@ export default function Home() {
           setIsOpen={setSidebarOpen}
           onNewInvoice={() => setIsNewInvoiceOpen(true)}
           onOpenSearch={() => setIsSearchOpen(true)}
+          onOpenSettings={() => setActiveModule("settings")}
         />
 
         {/* Content Container */}
@@ -424,7 +473,11 @@ export default function Home() {
           {activeModule === "settings" && (
             <CompanySettingsView
               company={company}
+              moduleSettings={moduleSettings}
               onUpdateCompany={handleUpdateCompany}
+              onUpdateModuleSettings={setModuleSettings}
+              onResetToCleanSlate={handleResetToCleanSlate}
+              onRestoreDemoData={handleRestoreDemoData}
             />
           )}
         </main>

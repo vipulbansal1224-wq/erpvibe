@@ -18,6 +18,7 @@ interface HeaderProps {
   setIsOpen: (open: boolean) => void;
   onNewInvoice: () => void;
   onOpenSearch: () => void;
+  onOpenSettings?: () => void;
 }
 
 const moduleTitles: Record<ModuleType, { title: string; subtitle: string }> = {
@@ -48,6 +49,7 @@ export function Header({
   setIsOpen,
   onNewInvoice,
   onOpenSearch,
+  onOpenSettings,
 }: HeaderProps) {
   const currentInfo = moduleTitles[activeModule] || { title: "ERPVibe India", subtitle: "" };
 
@@ -103,13 +105,17 @@ export function Header({
         </button>
 
         {/* Company Pill */}
-        <div className="hidden xl:flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5">
+        <button
+          onClick={onOpenSettings}
+          title="Click to change Company Profile or GSTIN"
+          className="hidden xl:flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/60 px-3 py-1.5 transition-colors cursor-pointer text-left"
+        >
           <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <div className="text-left text-xs">
             <p className="font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">{company.tradeName}</p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">GSTIN: {company.gstin}</p>
           </div>
-        </div>
+        </button>
 
         {/* User Avatar */}
         <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
