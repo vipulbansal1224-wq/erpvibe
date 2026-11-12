@@ -33,6 +33,7 @@ import {
   Lock,
 } from "lucide-react";
 import { ModuleType, ModuleSettings } from "@/types/erp";
+import { moduleGuides } from "@/data/moduleGuides";
 
 interface SidebarProps {
   activeModule: ModuleType;
@@ -51,7 +52,7 @@ export function Sidebar({
 }: SidebarProps) {
   const allNavSections = [
     {
-      title: "OVERVIEW",
+      title: "OVERVIEW & FINANCIALS",
       items: [
         { id: "dashboard" as ModuleType, label: "Dashboard", icon: LayoutDashboard, enabled: true },
         { id: "financial-reports" as ModuleType, label: "Financial Reports & P&L", icon: BarChart3, badge: "Schedule III", enabled: moduleSettings.financialReports },
@@ -82,7 +83,7 @@ export function Sidebar({
       items: [
         { id: "pos" as ModuleType, label: "Point of Sale (POS)", icon: ShoppingCart, badge: "UPI / Cash", enabled: moduleSettings.pos },
         { id: "subscriptions" as ModuleType, label: "Subscriptions & AMC", icon: Repeat, badge: "MRR", enabled: moduleSettings.subscriptions },
-        { id: "customers" as ModuleType, label: "Customers", icon: Users, enabled: moduleSettings.customers },
+        { id: "customers" as ModuleType, label: "Customers (CRM)", icon: Users, enabled: moduleSettings.customers },
         { id: "quotations" as ModuleType, label: "Quotations & Estimates", icon: FileSpreadsheet, enabled: moduleSettings.customers },
       ],
     },
@@ -136,6 +137,9 @@ export function Sidebar({
   const totalModulesCount = allNavSections.reduce((sum, sec) => sum + sec.items.length, 0);
   const activeModulesCount = visibleNavSections.reduce((sum, sec) => sum + sec.items.length, 0);
 
+  // Running sequential counter for auto-numbering (1. Dashboard, 2. Financial reports...)
+  let autoNumberCounter = 0;
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -153,22 +157,24 @@ export function Sidebar({
         }`}
       >
         {/* Brand Header */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-800 px-6">
+        <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-600 to-blue-600 shadow-lg shadow-indigo-500/25 font-bold text-white tracking-wider text-lg">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-600 to-blue-600 shadow-lg shadow-indigo-500/25 font-black text-white tracking-wider text-xl">
               V
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold tracking-tight text-white">ERPVibe</span>
-                <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/30">
+                <span className="text-xl font-black tracking-tight text-white">ERPVibe</span>
+                <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
                   INDIA
                 </span>
-                <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 border border-blue-500/30">
-                  {activeModulesCount} Modules
-                </span>
               </div>
-              <p className="text-[11px] text-slate-400">Enterprise Suite ({activeModulesCount}/{totalModulesCount} Active)</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 border border-blue-500/30">
+                  {activeModulesCount} Modules Active
+                </span>
+                <span className="text-[10px] text-slate-400">Total {totalModulesCount}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -177,11 +183,13 @@ export function Sidebar({
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
           {visibleNavSections.map((section) => (
             <div key={section.title}>
-              <h3 className="mb-2 px-3 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              <h3 className="mb-2 px-3 text-xs font-black tracking-wider text-slate-400 uppercase">
                 {section.title}
               </h3>
               <div className="space-y-1">
                 {section.items.map((item) => {
+                  autoNumberCounter++;
+                  const currentNumber = autoNumberCounter;
                   const Icon = item.icon;
                   const isActive = activeModule === item.id;
                   return (
@@ -191,24 +199,31 @@ export function Sidebar({
                         setActiveModule(item.id);
                         setIsOpen(false);
                       }}
-                      className={`group flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                      className={`group flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
                         isActive
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 font-bold"
                           : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-mono text-xs font-black shrink-0 ${
+                            isActive ? "text-amber-300 font-extrabold" : "text-slate-400 group-hover:text-slate-200"
+                          }`}
+                        >
+                          {currentNumber}.
+                        </span>
                         <Icon
-                          className={`h-4 w-4 transition-transform group-hover:scale-110 ${
+                          className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
                             isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200"
                           }`}
                         />
                         <span className="truncate">{item.label}</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         {item.badge && (
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[9px] font-medium whitespace-nowrap ${
+                            className={`rounded px-1.5 py-0.5 text-[9px] font-semibold whitespace-nowrap ${
                               isActive
                                 ? "bg-white/20 text-white"
                                 : "bg-slate-800 text-slate-400 group-hover:text-slate-200 border border-slate-700/60"
@@ -236,14 +251,14 @@ export function Sidebar({
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5">
                 <SlidersHorizontal className="h-4 w-4 text-blue-400" />
-                <span className="text-xs font-medium text-blue-200">Configure Modules</span>
+                <span className="text-xs font-bold text-blue-200">Module Switchboard</span>
               </div>
-              <span className="text-[10px] bg-blue-500/30 text-blue-200 px-1.5 py-0.5 rounded font-bold font-mono">
+              <span className="text-[10px] bg-blue-500/30 text-blue-200 px-1.5 py-0.5 rounded font-black font-mono">
                 {activeModulesCount}/{totalModulesCount}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              {activeModulesCount} of {totalModulesCount} enterprise modules active (Click to toggle)
+              Auto-numbered 1 to {activeModulesCount} (Click to enable/disable)
             </p>
           </button>
         </div>

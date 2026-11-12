@@ -40,6 +40,7 @@ import { GSTINLookupModal } from "@/components/modules/gst/GSTINLookupModal";
 import { EWayBillModal } from "@/components/modules/gst/EWayBillModal";
 import { PayslipModal } from "@/components/modules/payroll/PayslipModal";
 import { GlobalSearchModal } from "@/components/layout/GlobalSearchModal";
+import { ModuleHelpModal } from "@/components/common/ModuleHelpModal";
 
 // Data & Types
 import {
@@ -202,6 +203,7 @@ export default function Home() {
   const [isGSTINModalOpen, setIsGSTINModalOpen] = useState(false);
   const [isEWayModalOpen, setIsEWayModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Keyboard shortcut Ctrl+K
   useEffect(() => {
@@ -629,6 +631,7 @@ export default function Home() {
           onNewInvoice={() => setIsNewInvoiceOpen(true)}
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenSettings={() => setActiveModule("settings")}
+          onOpenHelp={() => setIsHelpOpen(true)}
         />
 
         {/* Content Container */}
@@ -943,6 +946,25 @@ export default function Home() {
         customers={customers}
         items={items}
         onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
+      />
+
+      {/* Floating Module Help Button */}
+      <button
+        onClick={() => setIsHelpOpen(true)}
+        className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-4 py-2.5 shadow-2xl shadow-amber-500/40 transition-all hover:scale-105 border-2 border-white/60 dark:border-slate-800"
+        title="Open Interactive Guide & Help for this Module / सहायता"
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-950 text-amber-300 text-xs font-black">
+          ?
+        </span>
+        <span className="text-xs tracking-wide">Module Help / सहायता</span>
+      </button>
+
+      {/* Interactive Bilingual Help Modal */}
+      <ModuleHelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        activeModule={activeModule}
       />
     </div>
   );

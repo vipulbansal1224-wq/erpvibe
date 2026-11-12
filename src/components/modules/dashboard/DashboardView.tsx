@@ -77,7 +77,7 @@ export function DashboardView({
                 22 Enterprise Modules Embedded
               </div>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
               Apex Technovations - India Enterprise Hub
             </h2>
             <p className="text-sm text-slate-300 mt-1 max-w-2xl">

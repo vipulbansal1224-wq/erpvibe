@@ -127,7 +127,7 @@ export function QualityView({
               Zero Defect Framework
             </span>
           </div>
-          <h1 className="text-2xl font-bold">Quality Management & Inspection (QM)</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Quality Management & Inspection (QM)</h1>
           <p className="text-emerald-100 text-sm mt-1">
             Incoming Material GRN Inspection, In-Process QC Checks, Pre-Dispatch Certificates & Non-Conformance Log
           </p>

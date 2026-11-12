@@ -125,7 +125,7 @@ export function JobWorkView({
               Form GST ITC-04 Ready
             </span>
           </div>
-          <h1 className="text-2xl font-bold">Subcontracting & Job Work (ITC-04)</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Subcontracting & Job Work (ITC-04)</h1>
           <p className="text-amber-100 text-sm mt-1">
             Track Raw Materials Sent to Job Workers, Return of Processed Goods, Scrap Accounting & Statutory 1-Year Time Limits
           </p>

@@ -109,7 +109,7 @@ export function ChartOfAccountsView({ tree }: ChartOfAccountsViewProps) {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <Landmark className="h-5 w-5" />
             </span>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Indian Standard Chart of Accounts (COA)
             </h2>
           </div>

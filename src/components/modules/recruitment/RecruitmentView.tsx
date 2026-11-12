@@ -125,7 +125,7 @@ export function RecruitmentView({
               Hiring Pipeline
             </span>
           </div>
-          <h1 className="text-2xl font-bold">Recruitment & Applicant Tracking (ATS)</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Recruitment & Applicant Tracking (ATS)</h1>
           <p className="text-sky-100 text-sm mt-1">
             Job Openings, Candidate Pipeline Stages, Interview Feedback & Seamless Onboarding to Payroll
           </p>

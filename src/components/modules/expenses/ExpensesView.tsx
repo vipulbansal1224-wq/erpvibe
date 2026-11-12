@@ -131,7 +131,7 @@ export function ExpensesView({
               GST ITC Expense Claims
             </span>
           </div>
-          <h1 className="text-2xl font-bold">Employee Expenses & Claims</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Employee Expenses & Claims</h1>
           <p className="text-rose-100 text-sm mt-1">
             Staff Travel, Fuel, Client Entertainment, Out-of-Pocket Claims & Automated Payroll Reconciliations
           </p>

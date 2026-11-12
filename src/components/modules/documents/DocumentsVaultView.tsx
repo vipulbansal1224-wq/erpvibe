@@ -121,7 +121,7 @@ export function DocumentsVaultView({
               Statutory Compliance Dossier
             </span>
           </div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2">
             <Lock className="w-6 h-6 text-emerald-400" />
             Document Management & Legal Compliance Vault (DMS)
           </h1>

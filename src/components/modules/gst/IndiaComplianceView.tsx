@@ -161,7 +161,7 @@ export function IndiaComplianceView({
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <ShieldCheck className="h-5 w-5" />
             </span>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               India Statutory Compliance & GST Hub
             </h2>
           </div>

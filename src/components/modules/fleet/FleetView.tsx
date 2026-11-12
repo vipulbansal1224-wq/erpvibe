@@ -126,7 +126,7 @@ export function FleetView({
               Vahan & Sarathi Compliance
             </span>
           </div>
-          <h1 className="text-2xl font-bold">Fleet & Logistics Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Fleet & Logistics Management</h1>
           <p className="text-blue-100 text-sm mt-1">
             Commercial Vehicles, Driver Logs, e-Way Bill Linked Dispatches, Fuel & Statutory Fitness Tracking
           </p>

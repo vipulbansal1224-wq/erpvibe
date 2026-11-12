@@ -128,7 +128,7 @@ export function SubscriptionsView({
               Automated Invoicing Engine
             </span>
           </div>
-          <h1 className="text-2xl font-bold">Subscriptions & AMC Contracts</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Subscriptions & AMC Contracts</h1>
           <p className="text-purple-100 text-sm mt-1">
             Manage Software SaaS Subscriptions, Hardware Annual Maintenance Contracts (AMC), MRR & Auto GST Billing
           </p>

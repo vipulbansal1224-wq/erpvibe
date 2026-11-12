@@ -56,7 +56,7 @@ export function SuppliersView({
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
               <Truck className="h-5 w-5" />
             </span>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Suppliers & MSME Vendor Management
             </h2>
           </div>
