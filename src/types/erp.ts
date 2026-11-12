@@ -4,11 +4,18 @@ export type ModuleType =
   | "gst-compliance"
   | "inventory"
   | "manufacturing"
+  | "quality"
+  | "fleet"
+  | "jobwork"
+  | "subscriptions"
   | "projects"
   | "pos"
   | "banking"
+  | "expenses"
   | "assets"
   | "helpdesk"
+  | "recruitment"
+  | "documents"
   | "financial-reports"
   | "customers"
   | "suppliers"
@@ -27,10 +34,17 @@ export interface ModuleSettings {
   pos: boolean;
   inventory: boolean;
   manufacturing: boolean;
+  quality: boolean;
+  fleet: boolean;
+  jobwork: boolean;
+  subscriptions: boolean;
   projects: boolean;
   banking: boolean;
+  expenses: boolean;
   assets: boolean;
   helpdesk: boolean;
+  recruitment: boolean;
+  documents: boolean;
   payroll: boolean;
   customers: boolean;
   suppliers: boolean;
@@ -252,11 +266,7 @@ export interface HsnSacItem {
   category: string;
 }
 
-// ==========================================
-// ENTERPRISE EXTENSIONS (SAP / Odoo / Netsuite Class)
-// ==========================================
-
-// 1. Manufacturing & Production (BOM & Work Orders)
+// 1. Manufacturing & Production
 export interface BOMItem {
   itemId: string;
   itemName: string;
@@ -401,4 +411,116 @@ export interface SupportTicket {
   assignedAgent: string;
   createdAt: string;
   slaHoursLeft: number;
+}
+
+// ==========================================
+// 7 NEW ENTERPRISE EXTENSIONS (SAP / Odoo / NetSuite)
+// ==========================================
+
+// 7. Quality Management & Inspection (QM)
+export interface QualityParameter {
+  name: string;
+  standardValue: string;
+  measuredValue: string;
+  passed: boolean;
+}
+
+export interface QualityInspection {
+  id: string;
+  inspectionNo: string;
+  inspectionType: "Incoming (GRN)" | "In-Process" | "Dispatch QC";
+  itemName: string;
+  lotBatchNo: string;
+  inspectedBy: string;
+  date: string;
+  sampleSize: number;
+  status: "Accepted" | "Rejected" | "Conditional Pass";
+  parameters: QualityParameter[];
+}
+
+// 8. Fleet & Logistics Management (TMS)
+export interface FleetVehicle {
+  id: string;
+  vehicleNo: string;
+  model: string;
+  type: "Heavy Commercial Truck" | "Medium Delivery Van" | "Pickup Container" | "Staff Fleet";
+  driverName: string;
+  driverPhone: string;
+  fuelType: "Diesel" | "CNG" | "Electric";
+  odometerKm: number;
+  insuranceValidUntil: string;
+  pucValidUntil: string;
+  fitnessValidUntil: string;
+  status: "Available" | "On Delivery" | "Under Maintenance";
+}
+
+// 9. Subcontracting & Job Work (Indian GST Sec 143 / ITC-04)
+export interface JobWorkOrder {
+  id: string;
+  challanNo: string; // Form GST ITC-04 delivery challan
+  jobWorkerName: string;
+  jobWorkerGstin: string;
+  natureOfProcessing: string;
+  dispatchedDate: string;
+  statutoryDueDate: string; // 1 year for inputs, 3 years for capital goods
+  inputItemName: string;
+  inputQuantity: number;
+  expectedOutputItem: string;
+  receivedQuantity: number;
+  scrapGenerated: number;
+  status: "Material Sent" | "Partially Received" | "Closed / Completed";
+}
+
+// 10. Subscriptions & Recurring AMC Invoicing
+export interface SubscriptionRecord {
+  id: string;
+  contractNo: string;
+  clientName: string;
+  planName: string;
+  billingFrequency: "Monthly" | "Quarterly" | "Annual";
+  recurringAmount: number;
+  gstRate: number;
+  startDate: string;
+  nextInvoiceDate: string;
+  autoRenew: boolean;
+  status: "Active" | "Paused" | "Cancelled";
+}
+
+// 11. Employee Expenses & Reimbursements
+export interface ExpenseClaim {
+  id: string;
+  claimNo: string;
+  employeeName: string;
+  category: "Travel & Fuel" | "Client Hospitality" | "Lodging & Food" | "Office Supplies";
+  expenseDate: string;
+  amount: number;
+  merchantName: string;
+  taxInvoiceAvailable: boolean;
+  approvedBy?: string;
+  paymentStatus: "Pending Approval" | "Approved" | "Reimbursed / Paid";
+}
+
+// 12. Recruitment & Applicant Tracking System (ATS)
+export interface JobCandidate {
+  id: string;
+  candidateName: string;
+  jobRole: string;
+  email: string;
+  phone: string;
+  experienceYears: number;
+  appliedDate: string;
+  stage: "Applied" | "Screening" | "Technical Interview" | "HR Round" | "Hired" | "Rejected";
+  rating: 1 | 2 | 3 | 4 | 5;
+}
+
+// 13. Document Management & Legal Compliance Vault (DMS)
+export interface VaultDocument {
+  id: string;
+  documentTitle: string;
+  category: "Statutory & Tax" | "Company Legal" | "Vendor Contracts" | "Leases & Property";
+  fileNumber: string;
+  issueDate: string;
+  expiryDate?: string;
+  authority: string;
+  verificationStatus: "Verified & Current" | "Renewal Pending" | "Permanent";
 }

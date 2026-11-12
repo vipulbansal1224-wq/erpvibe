@@ -24,6 +24,13 @@ import {
   BarChart3,
   CreditCard,
   SlidersHorizontal,
+  ClipboardCheck,
+  Navigation,
+  Cog,
+  Repeat,
+  Wallet,
+  UserCheck,
+  Lock,
 } from "lucide-react";
 import { ModuleType, ModuleSettings } from "@/types/erp";
 
@@ -48,6 +55,7 @@ export function Sidebar({
       items: [
         { id: "dashboard" as ModuleType, label: "Dashboard", icon: LayoutDashboard, enabled: true },
         { id: "financial-reports" as ModuleType, label: "Financial Reports & P&L", icon: BarChart3, badge: "Schedule III", enabled: moduleSettings.financialReports },
+        { id: "documents" as ModuleType, label: "Legal Document Vault", icon: Lock, badge: "DMS", enabled: moduleSettings.documents },
       ],
     },
     {
@@ -70,9 +78,10 @@ export function Sidebar({
       ],
     },
     {
-      title: "RETAIL & SALES",
+      title: "RETAIL & SUBSCRIPTIONS",
       items: [
         { id: "pos" as ModuleType, label: "Point of Sale (POS)", icon: ShoppingCart, badge: "UPI / Cash", enabled: moduleSettings.pos },
+        { id: "subscriptions" as ModuleType, label: "Subscriptions & AMC", icon: Repeat, badge: "MRR", enabled: moduleSettings.subscriptions },
         { id: "customers" as ModuleType, label: "Customers", icon: Users, enabled: moduleSettings.customers },
         { id: "quotations" as ModuleType, label: "Quotations & Estimates", icon: FileSpreadsheet, enabled: moduleSettings.customers },
       ],
@@ -81,7 +90,10 @@ export function Sidebar({
       title: "PRODUCTION & SUPPLY CHAIN",
       items: [
         { id: "manufacturing" as ModuleType, label: "Manufacturing & BOM", icon: Factory, badge: "Work Orders", enabled: moduleSettings.manufacturing },
+        { id: "quality" as ModuleType, label: "Quality Inspection (QM)", icon: ClipboardCheck, badge: "TQM", enabled: moduleSettings.quality },
+        { id: "jobwork" as ModuleType, label: "Subcontracting / ITC-04", icon: Cog, badge: "Sec 143", enabled: moduleSettings.jobwork },
         { id: "inventory" as ModuleType, label: "Stock & Item Master", icon: Package, enabled: moduleSettings.inventory },
+        { id: "fleet" as ModuleType, label: "Fleet & Logistics (TMS)", icon: Navigation, badge: "Vahan", enabled: moduleSettings.fleet },
         { id: "suppliers" as ModuleType, label: "Suppliers & MSME", icon: Truck, enabled: moduleSettings.suppliers },
         { id: "purchase-orders" as ModuleType, label: "Purchase Orders", icon: FileText, enabled: moduleSettings.suppliers },
       ],
@@ -97,8 +109,10 @@ export function Sidebar({
       title: "FINANCE & HUMAN RESOURCES",
       items: [
         { id: "banking" as ModuleType, label: "Banking & Reconciliation", icon: CreditCard, badge: "1-Click", enabled: moduleSettings.banking },
+        { id: "expenses" as ModuleType, label: "Employee Expenses", icon: Wallet, badge: "Claims", enabled: moduleSettings.expenses },
         { id: "assets" as ModuleType, label: "Fixed Assets & Depr.", icon: Boxes, badge: "SLM/WDV", enabled: moduleSettings.assets },
         { id: "accounts" as ModuleType, label: "Chart of Accounts", icon: Landmark, enabled: true },
+        { id: "recruitment" as ModuleType, label: "Recruitment & ATS", icon: UserCheck, badge: "Hiring", enabled: moduleSettings.recruitment },
         { id: "payroll" as ModuleType, label: "Payroll & Payslips", icon: BadgeDollarSign, badge: "PF/ESIC", enabled: moduleSettings.payroll },
       ],
     },

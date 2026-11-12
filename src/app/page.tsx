@@ -18,11 +18,18 @@ import { CompanySettingsView } from "@/components/modules/settings/CompanySettin
 
 // Enterprise Modules
 import { ManufacturingView } from "@/components/modules/manufacturing/ManufacturingView";
+import { QualityView } from "@/components/modules/quality/QualityView";
+import { FleetView } from "@/components/modules/fleet/FleetView";
+import { JobWorkView } from "@/components/modules/jobwork/JobWorkView";
+import { SubscriptionsView } from "@/components/modules/subscriptions/SubscriptionsView";
 import { ProjectsView } from "@/components/modules/projects/ProjectsView";
 import { PointOfSaleView } from "@/components/modules/pos/PointOfSaleView";
 import { BankingView } from "@/components/modules/banking/BankingView";
+import { ExpensesView } from "@/components/modules/expenses/ExpensesView";
 import { AssetsView } from "@/components/modules/assets/AssetsView";
 import { HelpdeskView } from "@/components/modules/helpdesk/HelpdeskView";
+import { RecruitmentView } from "@/components/modules/recruitment/RecruitmentView";
+import { DocumentsVaultView } from "@/components/modules/documents/DocumentsVaultView";
 import { FinancialReportsView } from "@/components/modules/reports/FinancialReportsView";
 
 // Modals
@@ -52,6 +59,13 @@ import {
   BankTransaction,
   FixedAsset,
   SupportTicket,
+  QualityInspection,
+  FleetVehicle,
+  JobWorkOrder,
+  SubscriptionRecord,
+  ExpenseClaim,
+  JobCandidate,
+  VaultDocument,
   ModuleSettings,
 } from "@/types/erp";
 import {
@@ -75,6 +89,13 @@ import {
   initialBankTransactions,
   initialFixedAssets,
   initialSupportTickets,
+  initialQualityInspections,
+  initialFleetVehicles,
+  initialJobWorkOrders,
+  initialSubscriptions,
+  initialExpenseClaims,
+  initialJobCandidates,
+  initialVaultDocuments,
 } from "@/data/mockData";
 import { generateMockIRN, formatINR } from "@/lib/utils";
 
@@ -96,11 +117,18 @@ export default function Home() {
   // Module Configuration (Feature Toggles)
   const [moduleSettings, setModuleSettings] = useState<ModuleSettings>({
     manufacturing: true,
+    quality: true,
+    fleet: true,
+    jobwork: true,
+    subscriptions: true,
     projects: true,
     pos: true,
     banking: true,
+    expenses: true,
     assets: true,
     helpdesk: true,
+    recruitment: true,
+    documents: true,
     gstCompliance: true,
     payroll: true,
     customers: true,
@@ -117,6 +145,9 @@ export default function Home() {
     setEwayBills([]);
     setWorkOrders([]);
     setPosTransactions([]);
+    setQualityInspections([]);
+    setJobWorkOrders([]);
+    setExpenseClaims([]);
     appendAuditLog(
       "UPDATE",
       "System Settings",
@@ -132,6 +163,9 @@ export default function Home() {
     setEwayBills(initialEWayBills);
     setWorkOrders(initialWorkOrders);
     setPosTransactions(initialPOSTransactions);
+    setQualityInspections(initialQualityInspections);
+    setJobWorkOrders(initialJobWorkOrders);
+    setExpenseClaims(initialExpenseClaims);
     appendAuditLog(
       "UPDATE",
       "System Settings",
@@ -149,6 +183,13 @@ export default function Home() {
   const [bankTransactions, setBankTransactions] = useState<BankTransaction[]>(initialBankTransactions);
   const [fixedAssets, setFixedAssets] = useState<FixedAsset[]>(initialFixedAssets);
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(initialSupportTickets);
+  const [qualityInspections, setQualityInspections] = useState<QualityInspection[]>(initialQualityInspections);
+  const [fleetVehicles, setFleetVehicles] = useState<FleetVehicle[]>(initialFleetVehicles);
+  const [jobWorkOrders, setJobWorkOrders] = useState<JobWorkOrder[]>(initialJobWorkOrders);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionRecord[]>(initialSubscriptions);
+  const [expenseClaims, setExpenseClaims] = useState<ExpenseClaim[]>(initialExpenseClaims);
+  const [jobCandidates, setJobCandidates] = useState<JobCandidate[]>(initialJobCandidates);
+  const [vaultDocuments, setVaultDocuments] = useState<VaultDocument[]>(initialVaultDocuments);
 
   // Modals state
   const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<SalesInvoice | null>(null);
@@ -395,6 +436,46 @@ export default function Home() {
             />
           )}
 
+          {activeModule === "quality" && (
+            <QualityView
+              inspections={qualityInspections}
+              onAddInspection={(q) => {
+                setQualityInspections((prev) => [q, ...prev]);
+                appendAuditLog("CREATE", "Quality Inspection", q.id, q.inspectionNo, `Logged QC test for ${q.itemName}`);
+              }}
+            />
+          )}
+
+          {activeModule === "fleet" && (
+            <FleetView
+              vehicles={fleetVehicles}
+              onAddVehicle={(v) => {
+                setFleetVehicles((prev) => [v, ...prev]);
+                appendAuditLog("CREATE", "Fleet Logistics", v.id, v.vehicleNo, `Registered commercial vehicle ${v.model}`);
+              }}
+            />
+          )}
+
+          {activeModule === "jobwork" && (
+            <JobWorkView
+              orders={jobWorkOrders}
+              onAddOrder={(jw) => {
+                setJobWorkOrders((prev) => [jw, ...prev]);
+                appendAuditLog("CREATE", "Subcontracting", jw.id, jw.challanNo, `Issued GST ITC-04 delivery challan to ${jw.jobWorkerName}`);
+              }}
+            />
+          )}
+
+          {activeModule === "subscriptions" && (
+            <SubscriptionsView
+              subscriptions={subscriptions}
+              onAddSubscription={(s) => {
+                setSubscriptions((prev) => [s, ...prev]);
+                appendAuditLog("CREATE", "Subscriptions", s.id, s.contractNo, `Activated recurring contract for ${s.clientName}`);
+              }}
+            />
+          )}
+
           {activeModule === "projects" && (
             <ProjectsView
               projects={projects}
@@ -409,6 +490,16 @@ export default function Home() {
             />
           )}
 
+          {activeModule === "expenses" && (
+            <ExpensesView
+              claims={expenseClaims}
+              onAddClaim={(c) => {
+                setExpenseClaims((prev) => [c, ...prev]);
+                appendAuditLog("CREATE", "Employee Expenses", c.id, c.claimNo, `Claim filed by ${c.employeeName} for ₹${c.amount}`);
+              }}
+            />
+          )}
+
           {activeModule === "assets" && (
             <AssetsView
               assets={fixedAssets}
@@ -418,6 +509,26 @@ export default function Home() {
           {activeModule === "helpdesk" && (
             <HelpdeskView
               tickets={supportTickets}
+            />
+          )}
+
+          {activeModule === "recruitment" && (
+            <RecruitmentView
+              candidates={jobCandidates}
+              onAddCandidate={(cand) => {
+                setJobCandidates((prev) => [cand, ...prev]);
+                appendAuditLog("CREATE", "Recruitment ATS", cand.id, cand.candidateName, `Candidate applied for ${cand.jobRole}`);
+              }}
+            />
+          )}
+
+          {activeModule === "documents" && (
+            <DocumentsVaultView
+              documents={vaultDocuments}
+              onAddDocument={(doc) => {
+                setVaultDocuments((prev) => [doc, ...prev]);
+                appendAuditLog("CREATE", "Document Vault", doc.id, doc.fileNumber, `Deposited ${doc.documentTitle}`);
+              }}
             />
           )}
 
