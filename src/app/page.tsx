@@ -1,69 +1,389 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
+import { DashboardView } from "@/components/modules/dashboard/DashboardView";
+import { InvoicesView } from "@/components/modules/invoicing/InvoicesView";
+import { IndiaComplianceView } from "@/components/modules/gst/IndiaComplianceView";
+import { InventoryView } from "@/components/modules/inventory/InventoryView";
+import { CustomersView } from "@/components/modules/crm/CustomersView";
+import { SuppliersView } from "@/components/modules/buying/SuppliersView";
+import { PayrollView } from "@/components/modules/payroll/PayrollView";
+import { ChartOfAccountsView } from "@/components/modules/accounts/ChartOfAccountsView";
+import { AuditTrailView } from "@/components/modules/settings/AuditTrailView";
+import { CompanySettingsView } from "@/components/modules/settings/CompanySettingsView";
+
+// Modals
+import { TaxInvoicePrintModal } from "@/components/modules/invoicing/TaxInvoicePrintModal";
+import { NewInvoiceModal } from "@/components/modules/invoicing/NewInvoiceModal";
+import { NewItemModal } from "@/components/modules/inventory/NewItemModal";
+import { GSTINLookupModal } from "@/components/modules/gst/GSTINLookupModal";
+import { EWayBillModal } from "@/components/modules/gst/EWayBillModal";
+import { PayslipModal } from "@/components/modules/payroll/PayslipModal";
+import { GlobalSearchModal } from "@/components/layout/GlobalSearchModal";
+
+// Data & Types
+import {
+  ModuleType,
+  SalesInvoice,
+  InventoryItem,
+  EWayBill,
+  SalarySlip,
+  AuditLogEntry,
+  CompanyInfo,
+} from "@/types/erp";
+import {
+  defaultCompany,
+  initialCustomers,
+  initialSuppliers,
+  initialItems,
+  initialInvoices,
+  initialEWayBills,
+  initialEmployees,
+  initialSalarySlips,
+  initialAuditLogs,
+  hsnSacDirectory,
+  chartOfAccountsTree,
+} from "@/data/mockData";
+import { generateMockIRN, formatINR } from "@/lib/utils";
 
 export default function Home() {
+  const [activeModule, setActiveModule] = useState<ModuleType>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Core App State
+  const [company, setCompany] = useState<CompanyInfo>(defaultCompany);
+  const [customers, setCustomers] = useState(initialCustomers);
+  const [suppliers, setSuppliers] = useState(initialSuppliers);
+  const [items, setItems] = useState<InventoryItem[]>(initialItems);
+  const [invoices, setInvoices] = useState<SalesInvoice[]>(initialInvoices);
+  const [ewayBills, setEwayBills] = useState<EWayBill[]>(initialEWayBills);
+  const [employees, setEmployees] = useState(initialEmployees);
+  const [salarySlips, setSalarySlips] = useState<SalarySlip[]>(initialSalarySlips);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(initialAuditLogs);
+
+  // Modals state
+  const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<SalesInvoice | null>(null);
+  const [selectedSlipForPrint, setSelectedSlipForPrint] = useState<SalarySlip | null>(null);
+  const [isNewInvoiceOpen, setIsNewInvoiceOpen] = useState(false);
+  const [isNewItemOpen, setIsNewItemOpen] = useState(false);
+  const [isGSTINModalOpen, setIsGSTINModalOpen] = useState(false);
+  const [isEWayModalOpen, setIsEWayModalOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Keyboard shortcut Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Helper to append to immutable MCA audit trail
+  const appendAuditLog = (
+    action: AuditLogEntry["action"],
+    module: string,
+    recordId: string,
+    recordIdentifier: string,
+    remarks: string,
+    previousData?: string,
+    newData?: string
+  ) => {
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString().replace("T", " ").substring(0, 19),
+      action,
+      module,
+      recordId,
+      recordIdentifier,
+      userName: "admin.user",
+      userRole: "Statutory Administrator",
+      ipAddress: "103.21.144.10",
+      previousData,
+      newData,
+      remarks,
+    };
+    setAuditLogs((prev) => [newLog, ...prev]);
+  };
+
+  // e-Invoice IRN Generator
+  const handleGenerateIRN = (invoiceId: string) => {
+    const inv = invoices.find((i) => i.id === invoiceId);
+    if (!inv) return;
+
+    const irn = generateMockIRN(company.gstin, inv.invoiceNumber);
+    const ackNo = `1126${Math.floor(10000000 + Math.random() * 90000000)}`;
+    const ackDate = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+    const updated = invoices.map((i) =>
+      i.id === invoiceId
+        ? {
+            ...i,
+            eInvoiceStatus: "Generated" as const,
+            irn,
+            ackNo,
+            ackDate,
+          }
+        : i
+    );
+
+    setInvoices(updated);
+    appendAuditLog(
+      "IRN_GENERATED",
+      "e-Invoicing",
+      inv.id,
+      inv.invoiceNumber,
+      `Signed IRN generated from IRP Portal for ${inv.customerName} (${formatINR(inv.grandTotal)})`
+    );
+  };
+
+  // Cancel IRN
+  const handleCancelIRN = (invoiceId: string) => {
+    const inv = invoices.find((i) => i.id === invoiceId);
+    if (!inv) return;
+
+    const updated = invoices.map((i) =>
+      i.id === invoiceId
+        ? {
+            ...i,
+            eInvoiceStatus: "Cancelled" as const,
+          }
+        : i
+    );
+    setInvoices(updated);
+    appendAuditLog(
+      "UPDATE",
+      "e-Invoicing",
+      inv.id,
+      inv.invoiceNumber,
+      `IRN cancelled for ${inv.customerName}. Reason: 2-Data Entry Correction`
+    );
+  };
+
+  // Save new invoice
+  const handleSaveInvoice = (newInvoice: SalesInvoice) => {
+    setInvoices([newInvoice, ...invoices]);
+    appendAuditLog(
+      "CREATE",
+      "Sales Invoice",
+      newInvoice.id,
+      newInvoice.invoiceNumber,
+      `New Tax Invoice created for ${newInvoice.customerName} (${formatINR(newInvoice.grandTotal)})`
+    );
+  };
+
+  // Save new item
+  const handleSaveItem = (newItem: InventoryItem) => {
+    setItems([newItem, ...items]);
+    appendAuditLog(
+      "CREATE",
+      "Inventory Master",
+      newItem.id,
+      newItem.sku,
+      `Item master created: ${newItem.name} (HSN: ${newItem.hsnSacCode}, GST: ${newItem.gstRate}%)`
+    );
+  };
+
+  // Save new e-Way Bill
+  const handleSaveEWayBill = (newEwb: EWayBill) => {
+    setEwayBills([newEwb, ...ewayBills]);
+    // Link to invoice
+    setInvoices(
+      invoices.map((inv) =>
+        inv.invoiceNumber === newEwb.invoiceNo
+          ? { ...inv, eWayBillNo: newEwb.ewayBillNo }
+          : inv
+      )
+    );
+    appendAuditLog(
+      "EWAYBILL_CREATED",
+      "e-Way Bill",
+      newEwb.id,
+      newEwb.ewayBillNo,
+      `e-Way bill generated for Vehicle ${newEwb.vehicleNo} against Invoice ${newEwb.invoiceNo}`
+    );
+  };
+
+  // Update company profile
+  const handleUpdateCompany = (updatedCompany: CompanyInfo) => {
+    setCompany(updatedCompany);
+    appendAuditLog(
+      "UPDATE",
+      "Company Profile",
+      "COMP-001",
+      updatedCompany.legalName,
+      `Statutory credentials updated. GSTIN: ${updatedCompany.gstin}`
+    );
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex h-screen bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden text-slate-900 dark:text-slate-100">
+      {/* Sidebar */}
+      <Sidebar
+        activeModule={activeModule}
+        setActiveModule={setActiveModule}
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+      />
+
+      {/* Main Workspace Area */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
+        <Header
+          company={company}
+          activeModule={activeModule}
+          setIsOpen={setSidebarOpen}
+          onNewInvoice={() => setIsNewInvoiceOpen(true)}
+          onOpenSearch={() => setIsSearchOpen(true)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        {/* Content Container */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          {activeModule === "dashboard" && (
+            <DashboardView
+              invoices={invoices}
+              items={items}
+              ewayBills={ewayBills}
+              auditLogs={auditLogs}
+              setActiveModule={setActiveModule}
+              onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
+              onOpenGSTINModal={() => setIsGSTINModalOpen(true)}
+              onOpenEWayModal={() => setIsEWayModalOpen(true)}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          )}
+
+          {activeModule === "invoices" && (
+            <InvoicesView
+              invoices={invoices}
+              onOpenNewInvoice={() => setIsNewInvoiceOpen(true)}
+              onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
+              onGenerateIRN={handleGenerateIRN}
+            />
+          )}
+
+          {activeModule === "gst-compliance" && (
+            <IndiaComplianceView
+              company={company}
+              invoices={invoices}
+              ewayBills={ewayBills}
+              hsnDirectory={hsnSacDirectory}
+              onGenerateIRN={handleGenerateIRN}
+              onCancelIRN={handleCancelIRN}
+              onNewEWayBill={handleSaveEWayBill}
+              onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
+            />
+          )}
+
+          {activeModule === "inventory" && (
+            <InventoryView
+              items={items}
+              onOpenNewItem={() => setIsNewItemOpen(true)}
+            />
+          )}
+
+          {activeModule === "customers" && (
+            <CustomersView customers={customers} />
+          )}
+
+          {activeModule === "suppliers" && (
+            <SuppliersView suppliers={suppliers} />
+          )}
+
+          {activeModule === "purchase-orders" && (
+            <SuppliersView suppliers={suppliers} />
+          )}
+
+          {activeModule === "quotations" && (
+            <InvoicesView
+              invoices={invoices}
+              onOpenNewInvoice={() => setIsNewInvoiceOpen(true)}
+              onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
+              onGenerateIRN={handleGenerateIRN}
+            />
+          )}
+
+          {activeModule === "payroll" && (
+            <PayrollView
+              employees={employees}
+              salarySlips={salarySlips}
+              company={company}
+              onViewSlip={(slip) => setSelectedSlipForPrint(slip)}
+            />
+          )}
+
+          {activeModule === "accounts" && (
+            <ChartOfAccountsView tree={chartOfAccountsTree} />
+          )}
+
+          {activeModule === "audit-trail" && (
+            <AuditTrailView logs={auditLogs} />
+          )}
+
+          {activeModule === "settings" && (
+            <CompanySettingsView
+              company={company}
+              onUpdateCompany={handleUpdateCompany}
+            />
+          )}
+        </main>
+      </div>
+
+      {/* MODALS */}
+      <TaxInvoicePrintModal
+        invoice={selectedInvoiceForPrint}
+        company={company}
+        onClose={() => setSelectedInvoiceForPrint(null)}
+      />
+
+      <NewInvoiceModal
+        isOpen={isNewInvoiceOpen}
+        onClose={() => setIsNewInvoiceOpen(false)}
+        customers={customers}
+        items={items}
+        company={company}
+        onSaveInvoice={handleSaveInvoice}
+      />
+
+      <NewItemModal
+        isOpen={isNewItemOpen}
+        onClose={() => setIsNewItemOpen(false)}
+        onSaveItem={handleSaveItem}
+      />
+
+      <GSTINLookupModal
+        isOpen={isGSTINModalOpen}
+        onClose={() => setIsGSTINModalOpen(false)}
+      />
+
+      <EWayBillModal
+        isOpen={isEWayModalOpen}
+        onClose={() => setIsEWayModalOpen(false)}
+        invoices={invoices}
+        company={company}
+        onSaveEWayBill={handleSaveEWayBill}
+      />
+
+      <PayslipModal
+        slip={selectedSlipForPrint}
+        employee={employees.find((e) => e.id === selectedSlipForPrint?.employeeId)}
+        company={company}
+        onClose={() => setSelectedSlipForPrint(null)}
+      />
+
+      <GlobalSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        setActiveModule={setActiveModule}
+        invoices={invoices}
+        customers={customers}
+        items={items}
+        onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
+      />
     </div>
   );
 }
