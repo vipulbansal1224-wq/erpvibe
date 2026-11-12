@@ -1,6 +1,6 @@
-# ERPNext India Enterprise Suite (Next.js 16 + React 19)
+# ERPVibe India Enterprise Suite (Next.js 16 + React 19)
 
-A comprehensive, production-grade Next.js enterprise ERP platform modeled on **Frappe ERPNext** with complete **India Localization & Statutory Compliance** features.
+A comprehensive, production-grade Next.js enterprise ERP platform — **ERPVibe** — with complete **India Localization & Statutory Compliance** features.
 
 ---
 
@@ -78,7 +78,7 @@ Keyboard shortcut: Press **Ctrl+K** (or **Cmd+K**) anytime to open the global co
 
 1. Open PowerShell or Command Prompt:
    ```powershell
-   Set-Location "C:\Users\adfmin\Downloads\erpnext"
+   Set-Location "C:\Users\adfmin\Downloads\erpvibe"
    ```
 2. Run:
    ```powershell
@@ -86,7 +86,7 @@ Keyboard shortcut: Press **Ctrl+K** (or **Cmd+K**) anytime to open the global co
    ```
 3. Follow the quick prompts:
    - Link to existing project? **No (N)**
-   - Project name? **erpnext** (or your choice)
+   - Project name? **erpvibe** (or your choice)
    - In which directory? **./**
    - Override settings? **No (N)**
 
@@ -97,12 +97,11 @@ npx vercel --prod
 
 ### Option 2: Deploying via GitHub / GitLab
 
-1. Create a new repository on GitHub (e.g. `erpnext-india`).
-2. Push your code:
+1. Push your code to your GitHub repo:
    ```bash
-   git remote add origin https://github.com/<your-username>/erpnext-india.git
+   git remote add origin https://github.com/vipulbansal1224-wq/erpvibe.git
    git branch -M main
    git push -u origin main
    ```
-3. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
-4. Click **Deploy**. Vercel will automatically build and deploy the Next.js application!
+2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
+3. Click **Deploy**. Vercel will automatically build and deploy the Next.js application!

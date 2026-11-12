@@ -42,7 +42,7 @@ export function Header({
   onNewInvoice,
   onOpenSearch,
 }: HeaderProps) {
-  const currentInfo = moduleTitles[activeModule] || { title: "ERPNext India", subtitle: "" };
+  const currentInfo = moduleTitles[activeModule] || { title: "ERPVibe India", subtitle: "" };
 
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 sm:px-8">

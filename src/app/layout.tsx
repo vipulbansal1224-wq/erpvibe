@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ERPNext India | Enterprise Statutory & GST Compliance Suite",
+  title: "ERPVibe India | Enterprise Statutory & GST Compliance Suite",
   description:
-    "Next.js ERP platform with Indian statutory compliance: e-Invoicing (IRN), e-Way Bills, GSTR-1/3B JSON export, MCA Audit Trail, and EPF/ESIC payroll.",
+    "Next.js ERPVibe enterprise suite with Indian statutory compliance: e-Invoicing (IRN), e-Way Bills, GSTR-1/3B JSON export, MCA Audit Trail, and EPF/ESIC payroll.",
 };
 
 export default function RootLayout({

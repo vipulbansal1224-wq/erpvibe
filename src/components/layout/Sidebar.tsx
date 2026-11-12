@@ -106,12 +106,12 @@ export function Sidebar({
         {/* Brand Header */}
         <div className="flex h-16 items-center justify-between border-b border-slate-800 px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20 font-bold text-white tracking-wider text-lg">
-              E
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-600 to-blue-600 shadow-lg shadow-indigo-500/25 font-bold text-white tracking-wider text-lg">
+              V
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold tracking-tight text-white">ERPNext</span>
+                <span className="font-bold tracking-tight text-white">ERPVibe</span>
                 <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/30">
                   INDIA
                 </span>
