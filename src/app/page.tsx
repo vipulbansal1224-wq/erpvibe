@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+
+// Existing Modules
 import { DashboardView } from "@/components/modules/dashboard/DashboardView";
 import { InvoicesView } from "@/components/modules/invoicing/InvoicesView";
 import { IndiaComplianceView } from "@/components/modules/gst/IndiaComplianceView";
@@ -13,6 +15,15 @@ import { PayrollView } from "@/components/modules/payroll/PayrollView";
 import { ChartOfAccountsView } from "@/components/modules/accounts/ChartOfAccountsView";
 import { AuditTrailView } from "@/components/modules/settings/AuditTrailView";
 import { CompanySettingsView } from "@/components/modules/settings/CompanySettingsView";
+
+// Enterprise Modules
+import { ManufacturingView } from "@/components/modules/manufacturing/ManufacturingView";
+import { ProjectsView } from "@/components/modules/projects/ProjectsView";
+import { PointOfSaleView } from "@/components/modules/pos/PointOfSaleView";
+import { BankingView } from "@/components/modules/banking/BankingView";
+import { AssetsView } from "@/components/modules/assets/AssetsView";
+import { HelpdeskView } from "@/components/modules/helpdesk/HelpdeskView";
+import { FinancialReportsView } from "@/components/modules/reports/FinancialReportsView";
 
 // Modals
 import { TaxInvoicePrintModal } from "@/components/modules/invoicing/TaxInvoicePrintModal";
@@ -32,6 +43,15 @@ import {
   SalarySlip,
   AuditLogEntry,
   CompanyInfo,
+  BillOfMaterial,
+  WorkOrder,
+  Project,
+  TimesheetEntry,
+  POSTransaction,
+  BankAccount,
+  BankTransaction,
+  FixedAsset,
+  SupportTicket,
 } from "@/types/erp";
 import {
   defaultCompany,
@@ -45,6 +65,15 @@ import {
   initialAuditLogs,
   hsnSacDirectory,
   chartOfAccountsTree,
+  initialBOMs,
+  initialWorkOrders,
+  initialProjects,
+  initialTimesheets,
+  initialPOSTransactions,
+  initialBankAccounts,
+  initialBankTransactions,
+  initialFixedAssets,
+  initialSupportTickets,
 } from "@/data/mockData";
 import { generateMockIRN, formatINR } from "@/lib/utils";
 
@@ -62,6 +91,17 @@ export default function Home() {
   const [employees, setEmployees] = useState(initialEmployees);
   const [salarySlips, setSalarySlips] = useState<SalarySlip[]>(initialSalarySlips);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(initialAuditLogs);
+
+  // Enterprise Extensions State
+  const [boms, setBoms] = useState<BillOfMaterial[]>(initialBOMs);
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>(initialWorkOrders);
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [timesheets, setTimesheets] = useState<TimesheetEntry[]>(initialTimesheets);
+  const [posTransactions, setPosTransactions] = useState<POSTransaction[]>(initialPOSTransactions);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(initialBankAccounts);
+  const [bankTransactions, setBankTransactions] = useState<BankTransaction[]>(initialBankTransactions);
+  const [fixedAssets, setFixedAssets] = useState<FixedAsset[]>(initialFixedAssets);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(initialSupportTickets);
 
   // Modals state
   const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<SalesInvoice | null>(null);
@@ -209,6 +249,18 @@ export default function Home() {
     );
   };
 
+  // Save POS Transaction
+  const handleCompletePOSTransaction = (txn: POSTransaction) => {
+    setPosTransactions([txn, ...posTransactions]);
+    appendAuditLog(
+      "CREATE",
+      "Point of Sale",
+      txn.id,
+      txn.receiptNumber,
+      `POS Sale completed: ${txn.receiptNumber} (${formatINR(txn.grandTotal)} via ${txn.paymentMode})`
+    );
+  };
+
   // Update company profile
   const handleUpdateCompany = (updatedCompany: CompanyInfo) => {
     setCompany(updatedCompany);
@@ -277,6 +329,51 @@ export default function Home() {
               onNewEWayBill={handleSaveEWayBill}
               onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
             />
+          )}
+
+          {activeModule === "pos" && (
+            <PointOfSaleView
+              items={items}
+              recentTransactions={posTransactions}
+              onCompleteTransaction={handleCompletePOSTransaction}
+            />
+          )}
+
+          {activeModule === "manufacturing" && (
+            <ManufacturingView
+              boms={boms}
+              workOrders={workOrders}
+            />
+          )}
+
+          {activeModule === "projects" && (
+            <ProjectsView
+              projects={projects}
+              timesheets={timesheets}
+            />
+          )}
+
+          {activeModule === "banking" && (
+            <BankingView
+              accounts={bankAccounts}
+              transactions={bankTransactions}
+            />
+          )}
+
+          {activeModule === "assets" && (
+            <AssetsView
+              assets={fixedAssets}
+            />
+          )}
+
+          {activeModule === "helpdesk" && (
+            <HelpdeskView
+              tickets={supportTickets}
+            />
+          )}
+
+          {activeModule === "financial-reports" && (
+            <FinancialReportsView />
           )}
 
           {activeModule === "inventory" && (

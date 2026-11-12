@@ -13,6 +13,13 @@ import {
   History,
   Settings,
   ChevronRight,
+  Factory,
+  FolderKanban,
+  ShoppingCart,
+  Boxes,
+  LifeBuoy,
+  BarChart3,
+  CreditCard,
 } from "lucide-react";
 import { ModuleType, SalesInvoice, Customer, InventoryItem } from "@/types/erp";
 import { formatINR } from "@/lib/utils";
@@ -42,7 +49,6 @@ export function GlobalSearchModal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
-        // Toggle search
       }
       if (e.key === "Escape" && isOpen) {
         onClose();
@@ -56,13 +62,20 @@ export function GlobalSearchModal({
 
   const quickNav: { module: ModuleType; label: string; icon: any; category: string }[] = [
     { module: "dashboard", label: "Executive Dashboard", icon: Landmark, category: "Navigation" },
-    { module: "gst-compliance", label: "India Compliance & GST Hub (IRN/e-Way)", icon: ShieldCheck, category: "Statutory" },
+    { module: "financial-reports", label: "Financial Statements & Analytics (P&L / Balance Sheet)", icon: BarChart3, category: "Finance" },
+    { module: "gst-compliance", label: "India Compliance & GST Hub (IRN / e-Way / GSTR)", icon: ShieldCheck, category: "Statutory" },
     { module: "invoices", label: "Sales Tax Invoices (B2B/B2C)", icon: Receipt, category: "Sales" },
+    { module: "pos", label: "Point of Sale (POS) Cashier Register", icon: ShoppingCart, category: "Retail" },
+    { module: "manufacturing", label: "Manufacturing & Bill of Materials (BOM)", icon: Factory, category: "Production" },
+    { module: "projects", label: "Projects & Timesheet Tracking", icon: FolderKanban, category: "Services" },
+    { module: "banking", label: "Banking & Bank Reconciliation", icon: CreditCard, category: "Finance" },
+    { module: "assets", label: "Fixed Assets & Depreciation (Schedule II)", icon: Boxes, category: "Finance" },
+    { module: "helpdesk", label: "Helpdesk & Customer Support SLA", icon: LifeBuoy, category: "Support" },
     { module: "inventory", label: "Stock & Item Master", icon: Package, category: "Inventory" },
     { module: "customers", label: "Customer Master & Ledgers", icon: Users, category: "CRM" },
     { module: "payroll", label: "Payroll & Payslips (EPF/ESIC/PT)", icon: BadgeDollarSign, category: "HR" },
     { module: "accounts", label: "Chart of Accounts (Schedule III)", icon: Landmark, category: "Accounts" },
-    { module: "audit-trail", label: "MCA Mandatory Audit Trail", icon: History, category: "MCA Compliance" },
+    { module: "audit-trail", label: "MCA Mandatory Audit Trail & Edit Log", icon: History, category: "MCA Compliance" },
     { module: "settings", label: "Company Statutory Profile & GSTIN", icon: Settings, category: "Settings" },
   ];
 
@@ -101,7 +114,7 @@ export function GlobalSearchModal({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type to search modules, invoices, items, GSTIN, HSN..."
+            placeholder="Type to search any module, invoice, item, project, bank..."
             className="flex-1 bg-transparent text-sm text-slate-900 dark:text-white focus:outline-none"
           />
           <button
@@ -181,7 +194,7 @@ export function GlobalSearchModal({
           {/* Navigation Items */}
           <div>
             <p className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Modules & Statutory Features
+              Enterprise Modules & Statutory Features
             </p>
             <div className="space-y-1">
               {filteredNav.map((n) => {

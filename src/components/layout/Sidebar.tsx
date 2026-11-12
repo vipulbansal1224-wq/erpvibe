@@ -16,6 +16,13 @@ import {
   Settings,
   ChevronRight,
   Sparkles,
+  Factory,
+  FolderKanban,
+  ShoppingCart,
+  Boxes,
+  LifeBuoy,
+  BarChart3,
+  CreditCard,
 } from "lucide-react";
 import { ModuleType } from "@/types/erp";
 
@@ -37,6 +44,7 @@ export function Sidebar({
       title: "OVERVIEW",
       items: [
         { id: "dashboard" as ModuleType, label: "Dashboard", icon: LayoutDashboard },
+        { id: "financial-reports" as ModuleType, label: "Financial Reports & P&L", icon: BarChart3, badge: "Schedule III" },
       ],
     },
     {
@@ -57,23 +65,34 @@ export function Sidebar({
       ],
     },
     {
-      title: "SALES & CRM",
+      title: "RETAIL & SALES",
       items: [
+        { id: "pos" as ModuleType, label: "Point of Sale (POS)", icon: ShoppingCart, badge: "UPI / Cash" },
         { id: "customers" as ModuleType, label: "Customers", icon: Users },
         { id: "quotations" as ModuleType, label: "Quotations & Estimates", icon: FileSpreadsheet },
       ],
     },
     {
-      title: "INVENTORY & PURCHASES",
+      title: "PRODUCTION & SUPPLY CHAIN",
       items: [
+        { id: "manufacturing" as ModuleType, label: "Manufacturing & BOM", icon: Factory, badge: "Work Orders" },
         { id: "inventory" as ModuleType, label: "Stock & Item Master", icon: Package },
-        { id: "suppliers" as ModuleType, label: "Suppliers & Vendors", icon: Truck },
+        { id: "suppliers" as ModuleType, label: "Suppliers & MSME", icon: Truck },
         { id: "purchase-orders" as ModuleType, label: "Purchase Orders", icon: FileText },
+      ],
+    },
+    {
+      title: "PROJECTS & SERVICES",
+      items: [
+        { id: "projects" as ModuleType, label: "Projects & Timesheets", icon: FolderKanban, badge: "Billing" },
+        { id: "helpdesk" as ModuleType, label: "Helpdesk & SLA Tickets", icon: LifeBuoy, badge: "Support" },
       ],
     },
     {
       title: "FINANCE & HUMAN RESOURCES",
       items: [
+        { id: "banking" as ModuleType, label: "Banking & Reconciliation", icon: CreditCard, badge: "1-Click" },
+        { id: "assets" as ModuleType, label: "Fixed Assets & Depr.", icon: Boxes, badge: "SLM/WDV" },
         { id: "accounts" as ModuleType, label: "Chart of Accounts", icon: Landmark },
         { id: "payroll" as ModuleType, label: "Payroll & Payslips", icon: BadgeDollarSign, badge: "PF/ESIC" },
       ],
@@ -139,24 +158,24 @@ export function Sidebar({
                         setActiveModule(item.id);
                         setIsOpen(false);
                       }}
-                      className={`group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-xs font-medium transition-all ${
+                      className={`group flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                         isActive
                           ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
                           : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         <Icon
                           className={`h-4 w-4 transition-transform group-hover:scale-110 ${
                             isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200"
                           }`}
                         />
-                        <span>{item.label}</span>
+                        <span className="truncate">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         {item.badge && (
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                            className={`rounded px-1.5 py-0.5 text-[9px] font-medium whitespace-nowrap ${
                               isActive
                                 ? "bg-white/20 text-white"
                                 : "bg-slate-800 text-slate-400 group-hover:text-slate-200 border border-slate-700/60"

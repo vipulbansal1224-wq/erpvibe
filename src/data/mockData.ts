@@ -10,6 +10,15 @@ import {
   AuditLogEntry,
   ChartOfAccountNode,
   HsnSacItem,
+  BillOfMaterial,
+  WorkOrder,
+  Project,
+  TimesheetEntry,
+  POSTransaction,
+  BankAccount,
+  BankTransaction,
+  FixedAsset,
+  SupportTicket,
 } from "@/types/erp";
 
 export const defaultCompany: CompanyInfo = {
@@ -742,3 +751,269 @@ export const chartOfAccountsTree: ChartOfAccountNode[] = [
     ],
   },
 ];
+
+// ==========================================
+// ENTERPRISE DATA SEEDS (Manufacturing, Projects, POS, Banking, Assets, Helpdesk)
+// ==========================================
+
+export const initialBOMs: BillOfMaterial[] = [
+  {
+    id: "BOM-001",
+    bomCode: "BOM-SRV-XEON-2U",
+    finishedGoodId: "ITEM-101",
+    finishedGoodName: "Enterprise Rack Server 2U Dual Xeon 64GB",
+    quantityOutput: 1,
+    uom: "NOS",
+    operationsCost: 15000,
+    totalProductionCost: 148500,
+    status: "Active",
+    items: [
+      { itemId: "RM-01", itemName: "Intel Xeon Silver 4314 16-Core Processor", sku: "CPU-XEON-4314", quantityRequired: 2, uom: "NOS", unitCost: 38000, totalCost: 76000 },
+      { itemId: "RM-02", itemName: "DDR4 32GB 3200MHz ECC Registered RAM", sku: "RAM-ECC-32G", quantityRequired: 2, uom: "NOS", unitCost: 9500, totalCost: 19000 },
+      { itemId: "RM-03", itemName: "Enterprise 1.92TB NVMe U.2 SSD Read-Intensive", sku: "SSD-NVME-1.92T", quantityRequired: 2, uom: "NOS", unitCost: 14000, totalCost: 28000 },
+      { itemId: "RM-04", itemName: "Redundant 800W Titanium Hot-Plug Power Supply", sku: "PSU-800W-TIT", quantityRequired: 2, uom: "NOS", unitCost: 5250, totalCost: 10500 },
+    ],
+  },
+  {
+    id: "BOM-002",
+    bomCode: "BOM-NET-RACK-42U",
+    finishedGoodId: "ITEM-102",
+    finishedGoodName: "Pre-Configured 42U Server Rack Cabinet",
+    quantityOutput: 1,
+    uom: "SET",
+    operationsCost: 8000,
+    totalProductionCost: 64000,
+    status: "Active",
+    items: [
+      { itemId: "RM-05", itemName: "Cold Rolled Steel 42U Frame Assembly", sku: "RACK-FRM-42", quantityRequired: 1, uom: "SET", unitCost: 32000, totalCost: 32000 },
+      { itemId: "RM-06", itemName: "PDU 32A Metered Zero-U Vertical Strip", sku: "PDU-32A-VER", quantityRequired: 2, uom: "NOS", unitCost: 8500, totalCost: 17000 },
+      { itemId: "RM-07", itemName: "Thermostat Controlled Fan Tray 4-Fan Unit", sku: "FAN-TRAY-4", quantityRequired: 1, uom: "SET", unitCost: 7000, totalCost: 7000 },
+    ],
+  },
+];
+
+export const initialWorkOrders: WorkOrder[] = [
+  {
+    id: "WO-2026-001",
+    orderNumber: "MFG/WO/26-27/041",
+    bomId: "BOM-001",
+    finishedGoodName: "Enterprise Rack Server 2U Dual Xeon 64GB",
+    quantityToProduce: 10,
+    quantityProduced: 6,
+    startDate: "2026-11-01",
+    targetDate: "2026-11-18",
+    warehouse: "Mumbai Central Warehouse",
+    status: "In Progress",
+  },
+  {
+    id: "WO-2026-002",
+    orderNumber: "MFG/WO/26-27/042",
+    bomId: "BOM-002",
+    finishedGoodName: "Pre-Configured 42U Server Rack Cabinet",
+    quantityToProduce: 4,
+    quantityProduced: 4,
+    startDate: "2026-10-20",
+    targetDate: "2026-11-05",
+    warehouse: "Bhiwandi Storage Depot",
+    status: "Completed",
+  },
+  {
+    id: "WO-2026-003",
+    orderNumber: "MFG/WO/26-27/043",
+    bomId: "BOM-001",
+    finishedGoodName: "Enterprise Rack Server 2U Dual Xeon 64GB",
+    quantityToProduce: 15,
+    quantityProduced: 0,
+    startDate: "2026-11-20",
+    targetDate: "2026-12-10",
+    warehouse: "Delhi Hub Warehouse",
+    status: "Planned",
+  },
+];
+
+export const initialProjects: Project[] = [
+  {
+    id: "PRJ-001",
+    code: "PRJ-TCS-ERP",
+    name: "TCS Enterprise Cloud ERP & GST Rollout",
+    clientName: "Tata Consultancy Enterprises Ltd",
+    budget: 4500000,
+    spentAmount: 2840000,
+    startDate: "2026-06-01",
+    deadline: "2026-12-31",
+    status: "In Progress",
+    tasks: [
+      { id: "TSK-01", title: "NIC IRP e-Invoice API Gateway integration", assignedTo: "Rajesh Sharma", status: "Done", priority: "High", estimatedHours: 40, loggedHours: 42 },
+      { id: "TSK-02", title: "SAP Legacy Data Migration & Validation", assignedTo: "Pooja Deshmukh", status: "Done", priority: "High", estimatedHours: 60, loggedHours: 58 },
+      { id: "TSK-03", title: "Custom Indian Payroll (EPF/ESIC/PT) Rule Engine", assignedTo: "Ananya Iyer", status: "In Progress", priority: "Medium", estimatedHours: 35, loggedHours: 24 },
+      { id: "TSK-04", title: "User Acceptance Testing & Auditor Signoff", assignedTo: "Rajesh Sharma", status: "Review", priority: "High", estimatedHours: 30, loggedHours: 12 },
+    ],
+  },
+  {
+    id: "PRJ-002",
+    code: "PRJ-RETAIL-POS",
+    name: "Reliance Retail Point of Sale Terminal Synchronization",
+    clientName: "Reliance Retail Logistics Ltd",
+    budget: 6800000,
+    spentAmount: 1950000,
+    startDate: "2026-09-15",
+    deadline: "2027-03-31",
+    status: "In Progress",
+    tasks: [
+      { id: "TSK-05", title: "Offline Barcode Cache Architecture", assignedTo: "Ananya Iyer", status: "Done", priority: "High", estimatedHours: 50, loggedHours: 48 },
+      { id: "TSK-06", title: "UPI Dynamic QR Display & Webhook Hookup", assignedTo: "Rajesh Sharma", status: "In Progress", priority: "High", estimatedHours: 25, loggedHours: 18 },
+      { id: "TSK-07", title: "Store Inventory Rebalancing Automations", assignedTo: "Vikram Malhotra", status: "Todo", priority: "Medium", estimatedHours: 40, loggedHours: 0 },
+    ],
+  },
+];
+
+export const initialTimesheets: TimesheetEntry[] = [
+  { id: "TS-101", employeeName: "Rajesh Sharma", projectName: "TCS Enterprise Cloud ERP", taskTitle: "NIC IRP e-Invoice Gateway Testing", date: "2026-11-10", hours: 8, billable: true, remarks: "Completed sandbox load test with 5,000 mock B2B invoices." },
+  { id: "TS-102", employeeName: "Pooja Deshmukh", projectName: "TCS Enterprise Cloud ERP", taskTitle: "GSTR-3B Reconciliation Mapping", date: "2026-11-10", hours: 7.5, billable: true, remarks: "Verified Table 4 eligible ITC vs GSTR-2B statement." },
+  { id: "TS-103", employeeName: "Ananya Iyer", projectName: "Reliance Retail POS", taskTitle: "UPI Dynamic QR Frontend Component", date: "2026-11-11", hours: 8, billable: true, remarks: "Added real-time polling for webhook payment acknowledgement." },
+  { id: "TS-104", employeeName: "Vikram Malhotra", projectName: "Reliance Retail POS", taskTitle: "Warehouse Dispatch Planning", date: "2026-11-11", hours: 6, billable: false, remarks: "Internal logistics review for Navi Mumbai depot." },
+];
+
+export const initialPOSTransactions: POSTransaction[] = [
+  {
+    id: "POS-9001",
+    receiptNumber: "POS/2026/0891",
+    timestamp: "2026-11-12 13:45",
+    cashierName: "Sanjay Verma",
+    items: [
+      { itemId: "ITEM-101", name: "Dell Latitude 7440 Laptop", price: 118000, quantity: 1, gstRate: 18 },
+      { itemId: "ITEM-106", name: "Security Packaging Box", price: 95, quantity: 4, gstRate: 12 },
+    ],
+    subtotal: 100339,
+    taxAmount: 18041,
+    grandTotal: 118380,
+    paymentMode: "UPI / QR",
+    status: "Completed",
+  },
+  {
+    id: "POS-9002",
+    receiptNumber: "POS/2026/0892",
+    timestamp: "2026-11-12 14:10",
+    cashierName: "Sanjay Verma",
+    items: [
+      { itemId: "ITEM-105", name: "APC Smart-UPS 3000VA", price: 104000, quantity: 1, gstRate: 28 },
+    ],
+    subtotal: 81250,
+    taxAmount: 22750,
+    grandTotal: 104000,
+    paymentMode: "Card",
+    status: "Completed",
+  },
+];
+
+export const initialBankAccounts: BankAccount[] = [
+  {
+    id: "BANK-01",
+    bankName: "HDFC Bank Ltd",
+    accountNumber: "50200048912389",
+    ifscCode: "HDFC0000240",
+    branch: "Goregaon East, Mumbai",
+    currentBalance: 4890000,
+    unreconciledBalance: 320000,
+    type: "Current",
+  },
+  {
+    id: "BANK-02",
+    bankName: "ICICI Bank Ltd",
+    accountNumber: "001105024192",
+    ifscCode: "ICIC0000011",
+    branch: "Bandra Kurla Complex, Mumbai",
+    currentBalance: 2450000,
+    unreconciledBalance: 0,
+    type: "OD / CC",
+  },
+];
+
+export const initialBankTransactions: BankTransaction[] = [
+  { id: "TXN-801", date: "2026-11-05", referenceNo: "NEFT-TCS-90241", description: "Inward Remittance - Tata Consultancy Enterprises", debit: 0, credit: 1535180, balance: 4890000, reconciled: true, matchedInvoiceNo: "APX/26-27/0089" },
+  { id: "TXN-802", date: "2026-11-07", referenceNo: "RTGS-DELL-1189", description: "Vendor Payment - Dell Technologies India Pvt Ltd", debit: 950000, credit: 0, balance: 3354820, reconciled: true, matchedInvoiceNo: "BILL-DELL-094" },
+  { id: "TXN-803", date: "2026-11-10", referenceNo: "UPI-DELHIVERY-44", description: "Inward Advance - Delhivery Express", debit: 0, credit: 320000, balance: 3674820, reconciled: false, matchedInvoiceNo: "APX/26-27/0091" },
+  { id: "TXN-804", date: "2026-11-11", referenceNo: "CHQ-RENT-GOREGAON", description: "Office Lease Rent - Nesco Park Towers", debit: 285000, credit: 0, balance: 3389820, reconciled: true },
+];
+
+export const initialFixedAssets: FixedAsset[] = [
+  {
+    id: "AST-001",
+    assetCode: "AST-SRV-2023-01",
+    name: "Dell PowerEdge R750 Enterprise Server",
+    category: "Computer Hardware",
+    purchaseDate: "2023-04-10",
+    purchaseCost: 950000,
+    salvageValue: 50000,
+    usefulLifeYears: 5,
+    depreciationMethod: "Straight Line (SLM)",
+    accumulatedDepreciation: 540000,
+    currentBookValue: 410000,
+    status: "Active",
+  },
+  {
+    id: "AST-002",
+    assetCode: "AST-RTR-2024-04",
+    name: "Cisco Core Router Backbone Switch ASR 1001-X",
+    category: "Computer Hardware",
+    purchaseDate: "2024-02-15",
+    purchaseCost: 1450000,
+    salvageValue: 100000,
+    usefulLifeYears: 6,
+    depreciationMethod: "Written Down Value (WDV)",
+    accumulatedDepreciation: 420000,
+    currentBookValue: 1030000,
+    status: "Active",
+  },
+  {
+    id: "AST-003",
+    assetCode: "AST-FUR-2022-09",
+    name: "Executive Ergonomic Steelcase Workstations (Set of 20)",
+    category: "Office Furniture",
+    purchaseDate: "2022-09-01",
+    purchaseCost: 650000,
+    salvageValue: 30000,
+    usefulLifeYears: 10,
+    depreciationMethod: "Straight Line (SLM)",
+    accumulatedDepreciation: 260000,
+    currentBookValue: 390000,
+    status: "Active",
+  },
+];
+
+export const initialSupportTickets: SupportTicket[] = [
+  {
+    id: "TCK-1001",
+    ticketNumber: "HD-2026-089",
+    customerName: "Tata Consultancy Enterprises Ltd",
+    subject: "IRP e-Invoice QR verification timeout during peak billing",
+    priority: "High",
+    status: "In Progress",
+    assignedAgent: "Rajesh Sharma",
+    createdAt: "2026-11-12 10:30",
+    slaHoursLeft: 3.5,
+  },
+  {
+    id: "TCK-1002",
+    ticketNumber: "HD-2026-090",
+    customerName: "Delhivery Express Solutions",
+    subject: "e-Way bill distance threshold validation for NCR boundary",
+    priority: "Medium",
+    status: "Open",
+    assignedAgent: "Pooja Deshmukh",
+    createdAt: "2026-11-12 11:45",
+    slaHoursLeft: 7.2,
+  },
+  {
+    id: "TCK-1003",
+    ticketNumber: "HD-2026-091",
+    customerName: "Infosys Digital Solutions Ltd",
+    subject: "Quarterly TDS Certificate (Form 16A) automated dispatch request",
+    priority: "Low",
+    status: "Resolved",
+    assignedAgent: "Pooja Deshmukh",
+    createdAt: "2026-11-10 16:00",
+    slaHoursLeft: 0,
+  },
+];
+

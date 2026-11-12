@@ -3,6 +3,13 @@ export type ModuleType =
   | "invoices"
   | "gst-compliance"
   | "inventory"
+  | "manufacturing"
+  | "projects"
+  | "pos"
+  | "banking"
+  | "assets"
+  | "helpdesk"
+  | "financial-reports"
   | "customers"
   | "suppliers"
   | "purchase-orders"
@@ -226,4 +233,155 @@ export interface HsnSacItem {
   type: "HSN" | "SAC";
   rate: number;
   category: string;
+}
+
+// ==========================================
+// ENTERPRISE EXTENSIONS (SAP / Odoo / Netsuite Class)
+// ==========================================
+
+// 1. Manufacturing & Production (BOM & Work Orders)
+export interface BOMItem {
+  itemId: string;
+  itemName: string;
+  sku: string;
+  quantityRequired: number;
+  uom: string;
+  unitCost: number;
+  totalCost: number;
+}
+
+export interface BillOfMaterial {
+  id: string;
+  bomCode: string;
+  finishedGoodId: string;
+  finishedGoodName: string;
+  quantityOutput: number;
+  uom: string;
+  items: BOMItem[];
+  operationsCost: number;
+  totalProductionCost: number;
+  status: "Active" | "Draft" | "Archived";
+}
+
+export interface WorkOrder {
+  id: string;
+  orderNumber: string;
+  bomId: string;
+  finishedGoodName: string;
+  quantityToProduce: number;
+  quantityProduced: number;
+  startDate: string;
+  targetDate: string;
+  warehouse: string;
+  status: "Planned" | "In Progress" | "Completed" | "Cancelled";
+}
+
+// 2. Projects & Timesheets
+export interface ProjectTask {
+  id: string;
+  title: string;
+  assignedTo: string;
+  status: "Todo" | "In Progress" | "Review" | "Done";
+  priority: "Low" | "Medium" | "High";
+  estimatedHours: number;
+  loggedHours: number;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  code: string;
+  clientName: string;
+  budget: number;
+  spentAmount: number;
+  startDate: string;
+  deadline: string;
+  status: "Open" | "In Progress" | "Completed" | "On Hold";
+  tasks: ProjectTask[];
+}
+
+export interface TimesheetEntry {
+  id: string;
+  employeeName: string;
+  projectName: string;
+  taskTitle: string;
+  date: string;
+  hours: number;
+  billable: boolean;
+  remarks: string;
+}
+
+// 3. Point of Sale (POS)
+export interface POSCartItem {
+  itemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  gstRate: number;
+}
+
+export interface POSTransaction {
+  id: string;
+  receiptNumber: string;
+  timestamp: string;
+  cashierName: string;
+  items: POSCartItem[];
+  subtotal: number;
+  taxAmount: number;
+  grandTotal: number;
+  paymentMode: "UPI / QR" | "Cash" | "Card" | "NetBanking";
+  status: "Completed";
+}
+
+// 4. Banking & Reconciliation
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  branch: string;
+  currentBalance: number;
+  unreconciledBalance: number;
+  type: "Current" | "OD / CC" | "Escrow";
+}
+
+export interface BankTransaction {
+  id: string;
+  date: string;
+  referenceNo: string;
+  description: string;
+  debit: number;
+  credit: number;
+  balance: number;
+  reconciled: boolean;
+  matchedInvoiceNo?: string;
+}
+
+// 5. Assets & Depreciation
+export interface FixedAsset {
+  id: string;
+  assetCode: string;
+  name: string;
+  category: "Computer Hardware" | "Plant & Machinery" | "Office Furniture" | "Vehicles";
+  purchaseDate: string;
+  purchaseCost: number;
+  salvageValue: number;
+  usefulLifeYears: number;
+  depreciationMethod: "Straight Line (SLM)" | "Written Down Value (WDV)";
+  accumulatedDepreciation: number;
+  currentBookValue: number;
+  status: "Active" | "Disposed" | "Written Off";
+}
+
+// 6. Helpdesk & Support Tickets
+export interface SupportTicket {
+  id: string;
+  ticketNumber: string;
+  customerName: string;
+  subject: string;
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  status: "Open" | "In Progress" | "Waiting on Client" | "Resolved";
+  assignedAgent: string;
+  createdAt: string;
+  slaHoursLeft: number;
 }

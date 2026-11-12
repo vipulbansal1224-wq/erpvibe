@@ -24,6 +24,13 @@ const moduleTitles: Record<ModuleType, { title: string; subtitle: string }> = {
   dashboard: { title: "Executive Dashboard", subtitle: "Real-time operations, GST liabilities and financial metrics" },
   invoices: { title: "Sales Invoices", subtitle: "GST-compliant B2B & B2C tax invoices with IRN and e-Way link" },
   "gst-compliance": { title: "India Compliance & GST Hub", subtitle: "GSTIN verification, e-Invoicing, e-Way bill & GSTR reports" },
+  pos: { title: "Point of Sale (POS) Terminal", subtitle: "Counter cashier billing with instant UPI QR & receipt printing" },
+  manufacturing: { title: "Manufacturing & Production", subtitle: "Multi-level Bill of Materials (BOM) and Work Orders execution" },
+  projects: { title: "Projects & Timesheets", subtitle: "Client milestone tracking, team tasks and billable time logs" },
+  banking: { title: "Banking & Bank Reconciliation", subtitle: "Multi-bank feeds and automated invoice matching" },
+  assets: { title: "Fixed Assets & Depreciation", subtitle: "Schedule II Companies Act SLM/WDV automated schedules" },
+  helpdesk: { title: "Customer Support & SLA Helpdesk", subtitle: "Client ticketing system with SLA timers and status resolution" },
+  "financial-reports": { title: "Financial Statements & Analytics", subtitle: "Schedule III Balance Sheet, Profit & Loss and Cash Flow statements" },
   inventory: { title: "Stock & Item Master", subtitle: "Multi-warehouse inventory, HSN mapping, and reorder levels" },
   customers: { title: "Customer Master", subtitle: "GSTIN-verified enterprise and retail clients" },
   suppliers: { title: "Suppliers & Vendors", subtitle: "MSME-tagged vendor records and payable ledgers" },
@@ -106,8 +113,8 @@ export function Header({
 
         {/* User Avatar */}
         <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-semibold text-xs shadow-sm">
-            AD
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white font-semibold text-xs shadow-sm">
+            EV
           </div>
         </div>
       </div>
