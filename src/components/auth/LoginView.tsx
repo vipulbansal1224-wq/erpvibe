@@ -8,12 +8,7 @@ import {
   Eye,
   EyeOff,
   LogIn,
-  Sparkles,
-  CheckCircle2,
   AlertCircle,
-  KeyRound,
-  Building2,
-  FileCheck2,
 } from "lucide-react";
 import { AppUser } from "@/types/erp";
 
@@ -44,16 +39,15 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
     );
 
     if (!matchedUser) {
-      setError("Invalid username or password. Please verify your credentials and try again.");
+      setError("Invalid username or password. Please try again.");
       return;
     }
 
     if (matchedUser.status !== "Active") {
-      setError(`This user account is currently ${matchedUser.status}. Please contact your system administrator.`);
+      setError(`This account is currently ${matchedUser.status}. Please contact the administrator.`);
       return;
     }
 
-    // Update last login
     const updatedUser = {
       ...matchedUser,
       lastLoginAt: new Date().toISOString().replace("T", " ").substring(0, 16),
@@ -62,31 +56,20 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
     onLogin(updatedUser);
   };
 
-  const handleQuickLogin = (u: AppUser) => {
-    setError(null);
-    const updatedUser = {
-      ...u,
-      lastLoginAt: new Date().toISOString().replace("T", " ").substring(0, 16),
-    };
-    onLogin(updatedUser);
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden select-none">
-      {/* Background Glows */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Background Subtle Ambient Glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header */}
-      <header className="relative z-10 px-6 sm:px-12 py-6 flex items-center justify-between border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
+      <header className="relative z-10 px-6 sm:px-12 py-5 flex items-center justify-between border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-600 to-blue-600 shadow-lg shadow-indigo-500/25 font-black text-white text-xl">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-600 to-blue-600 shadow-md shadow-indigo-500/25 font-black text-white text-lg">
             V
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tight text-white">ERPVibe</span>
+              <span className="text-lg font-black tracking-tight text-white">ERPVibe</span>
               <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
                 INDIA
               </span>
@@ -95,261 +78,109 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-300">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            MCA Section 134(5) & Rule 3(1) Compliant
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 px-3 py-1 text-xs font-semibold text-purple-300">
-            <Lock className="h-3.5 w-3.5 text-purple-400" />
-            AES-256 Auth Gateway
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 px-3 py-1 text-xs text-slate-300">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+            MCA Rule 3(1) Compliant
           </span>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 py-10">
-        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
-          {/* Left Promo / Information Column */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 px-3 py-1 text-xs font-bold text-indigo-300">
-              <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-              Role-Based Access Control (RBAC) System
-            </div>
-
-            <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                Enterprise Portal <br />
-                <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-                  Secure Access Control
-                </span>
-              </h1>
-              <p className="mt-3 text-sm text-slate-300 leading-relaxed max-w-lg">
-                Sign in with your authorized corporate credentials. Access is restricted to designated personnel with strict MCA Section 134(5) statutory edit-logging on all transactions.
+      {/* Centered Sign In Form */}
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
+            {/* Form Title & Icon */}
+            <div className="text-center mb-7">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/30 mb-3">
+                <LogIn className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-black text-white tracking-tight">Sign In</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Enter your corporate credentials to continue
               </p>
             </div>
 
-            {/* Quick 1-Click Persona Logins */}
-            <div className="space-y-2.5 pt-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <KeyRound className="h-3.5 w-3.5 text-blue-400" />
-                  Quick Sign-In Accounts (Username & Password)
-                </p>
-                <span className="text-[10px] text-indigo-400 font-medium">Click any card to auto-fill & login</span>
+            {error && (
+              <div className="mb-5 rounded-xl border border-red-500/40 bg-red-950/50 p-3.5 flex items-start gap-2.5 text-xs text-red-200">
+                <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {users.map((u) => (
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Username or Email
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Enter your username or email"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 pl-10 pr-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
+                    required
+                    autoComplete="username"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
+                    required
+                    autoComplete="current-password"
+                  />
                   <button
-                    key={u.id}
                     type="button"
-                    onClick={() => handleQuickLogin(u)}
-                    className="text-left p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 hover:border-indigo-500/60 transition-all group shadow-sm flex flex-col justify-between"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-white"
                   >
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <span className="text-xs font-bold text-white group-hover:text-blue-300 truncate">
-                          {u.username}
-                        </span>
-                        {u.allAccess ? (
-                          <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold border border-amber-500/30 shrink-0">
-                            All Access
-                          </span>
-                        ) : (
-                          <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono border border-slate-700 shrink-0">
-                            RBAC
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-400 truncate mb-2">{u.role}</p>
-                    </div>
-
-                    <div className="bg-slate-950/70 rounded-lg p-1.5 border border-slate-800 text-[10px] font-mono space-y-0.5">
-                      <div className="flex items-center justify-between text-slate-300">
-                        <span className="text-slate-500">User:</span>
-                        <span className="text-blue-400 font-bold">{u.username}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-slate-300">
-                        <span className="text-slate-500">Pass:</span>
-                        <span className="text-emerald-400 font-bold">{u.password}</span>
-                      </div>
-                    </div>
-
-                    <p className="text-[10px] text-indigo-400 group-hover:text-indigo-300 mt-2 font-semibold text-center flex items-center justify-center gap-1">
-                      1-Click Login →
-                    </p>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
 
-            {/* Feature Highlights */}
-            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-800/80">
-              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <p className="text-base font-bold text-white">27 Modules</p>
-                <p className="text-[11px] text-slate-400">Integrated Enterprise</p>
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                  />
+                  <span className="text-xs text-slate-400">Remember session</span>
+                </label>
+                <span className="text-[11px] text-slate-500">AES-256 Encrypted</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <p className="text-base font-bold text-emerald-400">100% MCA</p>
-                <p className="text-[11px] text-slate-400">Immutable Audit Trail</p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <p className="text-base font-bold text-blue-400">₹ INR Ready</p>
-                <p className="text-[11px] text-slate-400">GST, TDS, EPF, PT</p>
-              </div>
-            </div>
+
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 mt-2"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </button>
+            </form>
           </div>
-
-          {/* Right Login Form Card */}
-          <div className="lg:col-span-6">
-            <div className="w-full max-w-md mx-auto rounded-3xl border border-slate-800 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl relative">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">Sign In</h2>
-                  <p className="text-xs text-slate-400 mt-1">Enter your ERPVibe login credentials</p>
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
-                  <LogIn className="h-5 w-5" />
-                </div>
-              </div>
-
-              {/* Login Credentials Reference Box */}
-              <div className="mb-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
-                <p className="font-semibold text-slate-300 text-[11px] mb-1.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <KeyRound className="h-3 w-3 text-blue-400" />
-                    Available User Accounts & Passwords:
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono">6 Pre-Configured</span>
-                </p>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-mono">
-                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
-                    <span className="text-slate-400">admin : </span>
-                    <span className="text-emerald-400 font-bold">admin</span>
-                    <span className="text-slate-500 block text-[9px]">Super Admin</span>
-                  </div>
-                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
-                    <span className="text-slate-400">finance : </span>
-                    <span className="text-emerald-400 font-bold">finance</span>
-                    <span className="text-slate-500 block text-[9px]">Accounts & CA</span>
-                  </div>
-                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
-                    <span className="text-slate-400">sales : </span>
-                    <span className="text-emerald-400 font-bold">sales</span>
-                    <span className="text-slate-500 block text-[9px]">Billing & POS</span>
-                  </div>
-                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
-                    <span className="text-slate-400">warehouse : </span>
-                    <span className="text-emerald-400 font-bold">warehouse</span>
-                    <span className="text-slate-500 block text-[9px]">Store & Supply</span>
-                  </div>
-                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
-                    <span className="text-slate-400">hr : </span>
-                    <span className="text-emerald-400 font-bold">hr</span>
-                    <span className="text-slate-500 block text-[9px]">Payroll & Staff</span>
-                  </div>
-                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
-                    <span className="text-slate-400">auditor : </span>
-                    <span className="text-emerald-400 font-bold">auditor</span>
-                    <span className="text-slate-500 block text-[9px]">Statutory Audit</span>
-                  </div>
-                </div>
-              </div>
-
-              {error && (
-                <div className="mb-4 rounded-xl border border-red-500/40 bg-red-950/50 p-3.5 flex items-start gap-2.5 text-xs text-red-200">
-                  <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Username or Official Email Address
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="admin / finance / user@company.in"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 pl-10 pr-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
-                      required
-                      autoComplete="username"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-slate-300">
-                      Password
-                    </label>
-                    <span className="text-[11px] text-slate-400">
-                      Default: <code className="text-blue-300 font-mono">admin</code>
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
-                      required
-                      autoComplete="current-password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-3 text-slate-400 hover:text-white"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                    />
-                    <span className="text-xs text-slate-400">Remember session on this device</span>
-                  </label>
-                  <span className="text-xs text-slate-400 font-medium">Session: Encrypted</span>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 mt-2"
-                >
-                  <LogIn className="h-4 w-4" />
-                  Sign In to ERP Console
-                </button>
-              </form>
-
-              <div className="mt-6 pt-5 border-t border-slate-800 text-center">
-                <p className="text-[11px] text-slate-400">
-                  New users and permission roles can be created inside{" "}
-                  <strong className="text-slate-200">Module 27 (Settings)</strong> by an authorized Super Admin.
-                </p>
-              </div>
-            </div>
-          </div>
-
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-4 text-center border-t border-slate-800/60 bg-slate-900/30 text-xs text-slate-400">
-        ERPVibe India Platform © 2026-27 • ApexTech ERP Solutions • Government of India GSTN & MCA Compliant
+      <footer className="relative z-10 px-6 py-4 text-center border-t border-slate-800/60 bg-slate-900/30 text-xs text-slate-500">
+        ERPVibe India Platform © 2026-27 • ApexTech ERP Solutions • All Rights Reserved
       </footer>
     </div>
   );
