@@ -1438,14 +1438,14 @@ export const moduleGuides: Record<string, ModuleGuide> = {
   "busy-accounting": {
     id: "busy-accounting",
     number: 27,
-    titleEn: "BUSY Accounting & Voucher Master Engine",
-    titleHi: "BUSY अकाउंटिंग एवं वाउचर मास्टर इंजन",
+    titleEn: "Enterprise Accounting & Voucher Master Engine",
+    titleHi: "उन्नत अकाउंटिंग एवं वाउचर मास्टर इंजन",
     categoryEn: "Accounting & Finance",
     categoryHi: "लेखा एवं वित्तीय प्रबंधन",
     taglineEn: "F1-F9 daily voucher entry, state GST bifurcation, bill sundries, and Alt+L account ledger books.",
     taglineHi: "F1-F9 दैनिक वाउचर प्रविष्टि, स्वचालित बिल संड्रीज, जीएसटी राज्य विभाजन और ऑल्ट+L खाताबही।",
-    descriptionEn: "Complete BUSY Accounting Software integration based on the Achievers Institute of Computer Education (AICE) course curriculum. Covers Company Setup, Account Masters (Debtors/Creditors/Banks), Item Masters with packaging UOM conversions, F1-F9 daily transactions, Multi-Tax GST billing, Bill Sundries (Trade Discount, Freight, Insurance, Round-off), and Alt+L running ledger statements.",
-    descriptionHi: "BUSY अकाउंटिंग सॉफ्टवेयर का सम्पूर्ण प्रैक्टिकल एकीकरण। इसमें कंपनी निर्माण, खाता मास्टर्स, आइटम मास्टर्स, F1-F9 दैनिक वाउचर एंट्री, मल्टी-टैक्स जीएसटी बिलिंग, बिल संड्रीज और ऑल्ट+L रनिंग लेजर बुक शामिल है।",
+    descriptionEn: "Complete Enterprise Accounting Software integration. Covers Company Setup, Account Masters (Debtors/Creditors/Banks), Item Masters with packaging UOM conversions, F1-F9 daily transactions, Multi-Tax GST billing, Bill Sundries (Trade Discount, Freight, Insurance, Round-off), and Alt+L running ledger statements.",
+    descriptionHi: "उन्नत एंटरप्राइज अकाउंटिंग सॉफ्टवेयर का सम्पूर्ण प्रैक्टिकल एकीकरण। इसमें कंपनी निर्माण, खाता मास्टर्स, आइटम मास्टर्स, F1-F9 दैनिक वाउचर एंट्री, मल्टी-टैक्स जीएसटी बिलिंग, बिल संड्रीज और ऑल्ट+L रनिंग लेजर बुक शामिल है।",
     workflowSteps: [
       {
         step: 1,

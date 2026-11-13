@@ -432,7 +432,7 @@ export default function Home() {
     // Append to MCA statutory audit trail
     appendAuditLog(
       "CREATE",
-      "BUSY Accounting",
+      "Enterprise Accounting",
       v.id,
       v.voucherNo,
       `Voucher ${v.voucherNo} posted (${v.voucherType.toUpperCase()}) for ${v.partyName}. Amount: ${formatINR(v.totalAmount)}`
@@ -444,7 +444,7 @@ export default function Home() {
     setBusyVouchers((prev) => prev.filter((v) => v.id !== id));
     appendAuditLog(
       "DELETE",
-      "BUSY Accounting",
+      "Enterprise Accounting",
       id,
       item?.voucherNo || id,
       `Voucher ${item?.voucherNo || id} cancelled and removed from general ledger sequence.`
@@ -457,12 +457,12 @@ export default function Home() {
     setBusyVouchers(initialBusyVouchers);
     appendAuditLog(
       "UPDATE",
-      "BUSY Accounting",
-      "BUSY-INIT",
+      "Enterprise Accounting",
+      "ACC-INIT",
       "Auto-Setup Masters",
-      "Auto-initialized all 28 Account Masters, Item Masters, Bill Sundries and standard voucher sequences from course manual."
+      "Auto-initialized all 28 Account Masters, Item Masters, Bill Sundries and standard voucher sequences from statutory manual."
     );
-    alert("BUSY Accounting Engine auto-initialized with 28 Master Ledgers, Stock Items, and Vouchers!");
+    alert("Enterprise Accounting Engine auto-initialized with 28 Master Ledgers, Stock Items, and Vouchers!");
   };
 
   const handleBackupData = () => {
@@ -482,13 +482,13 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `BUSY_Complete_Accounting_Backup_${new Date()
+    a.download = `Enterprise_Accounting_Backup_${new Date()
       .toISOString()
       .substring(0, 10)}.json`;
     a.click();
     appendAuditLog(
       "EXPORT",
-      "BUSY Housekeeping",
+      "Accounting Housekeeping",
       "BACKUP-01",
       "JSON Backup",
       "Generated and downloaded statutory financial database backup."
@@ -1218,10 +1218,10 @@ export default function Home() {
         onClose={() => setIsBusyHelpOpen(false)}
       />
 
-      {/* Persistent BUSY Accounting Shortcut Floating Dock (Bottom Left) */}
+      {/* Persistent Accounting Shortcut Floating Dock (Bottom Left) */}
       <div className="fixed bottom-5 left-5 z-40 hidden sm:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-700/80 shadow-2xl text-[11px] text-white">
-        <span className="px-2 font-black text-blue-400 border-r border-slate-700 mr-0.5">
-          BUSY
+        <span className="px-2 font-black text-blue-400 border-r border-slate-700 mr-0.5 tracking-wider">
+          ACCOUNTS
         </span>
         <button
           onClick={() => {

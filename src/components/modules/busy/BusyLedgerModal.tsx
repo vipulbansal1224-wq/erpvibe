@@ -131,7 +131,7 @@ export function BusyLedgerModal({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `BUSY_Ledger_${currentAccount?.name.replace(/\s+/g, "_")}.csv`;
+    a.download = `Account_Ledger_${currentAccount?.name.replace(/\s+/g, "_")}.csv`;
     a.click();
   };
 
@@ -150,7 +150,7 @@ export function BusyLedgerModal({
                   Account Ledger Book (खाताबही)
                 </h3>
                 <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-bold">
-                  BUSY Display Menu Standard
+                  Statutory Statement Standard
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">

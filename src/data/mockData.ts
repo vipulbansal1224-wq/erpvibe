@@ -29,6 +29,11 @@ import {
   BusyAccountMaster,
   BusyItemMaster,
   BusyVoucher,
+  MaterialCenterMaster,
+  ItemBatchRecord,
+  BankReconciliationRecord,
+  PdcRecord,
+  InterestCalculationItem,
 } from "@/types/erp";
 
 export const defaultCompany: CompanyInfo = {
@@ -1382,7 +1387,7 @@ export const initialVaultDocuments: VaultDocument[] = [
 ];
 
 // ==========================================
-// BUSY ACCOUNTING SOFTWARE MASTERS & VOUCHERS
+// ENTERPRISE ACCOUNTING MASTERS & VOUCHERS
 // ==========================================
 
 export const initialBusyAccountMasters: BusyAccountMaster[] = [
@@ -2100,6 +2105,229 @@ export const initialBusyVouchers: BusyVoucher[] = [
     billRef: "INV-INFY-4890",
     narration: "Credit Note issued for returned patch cords. Reverses output GST liability and adjusts customer outstanding receivables balance.",
     status: "Posted",
+  },
+];
+
+// MATERIAL CENTERS (MULTI-GODOWN INVENTORY)
+export const initialMaterialCenters: MaterialCenterMaster[] = [
+  {
+    id: "MC-001",
+    name: "Main Central Warehouse (Godown A)",
+    code: "WH-MAIN",
+    address: "Plot 42, Nesco Industrial Area, Goregaon East, Mumbai, Maharashtra - 400063",
+    isDefault: true,
+    managerName: "Ramesh Sharma",
+  },
+  {
+    id: "MC-002",
+    name: "Factory / Plant Shop Floor (Godown B)",
+    code: "PLANT-B",
+    address: "Shed 12, TTC Industrial Area, Mahape, Navi Mumbai, Maharashtra - 400710",
+    isDefault: false,
+    managerName: "Sanjay Patil",
+  },
+  {
+    id: "MC-003",
+    name: "Retail Showroom & Depot (Godown C)",
+    code: "RETAIL-C",
+    address: "Shop 14, Borivali West Commercial Complex, Mumbai, Maharashtra - 400092",
+    isDefault: false,
+    managerName: "Pooja Varma",
+  },
+  {
+    id: "MC-004",
+    name: "Consignment Depot - Bengaluru",
+    code: "DEPOT-BLR",
+    address: "Whitefield Logistics Hub, Bengaluru, Karnataka - 560066",
+    isDefault: false,
+    managerName: "Karthik Rao",
+  },
+];
+
+// ITEM BATCHES & EXPIRY TRACKING
+export const initialItemBatches: ItemBatchRecord[] = [
+  {
+    id: "BT-REC-01",
+    itemId: "ITEM-MTR-001",
+    itemName: "Samsung 24\" LED IPS Commercial Display",
+    batchNo: "BT-2026-X01",
+    mfgDate: "2026-08-01",
+    expDate: "2029-07-31",
+    mrp: 14999,
+    purchaseRate: 9200,
+    currentQty: 45,
+    uom: "Pcs",
+    materialCenter: "Main Central Warehouse (Godown A)",
+    status: "Active",
+  },
+  {
+    id: "BT-REC-02",
+    itemId: "ITEM-MTR-002",
+    itemName: "Fiber Optic Single-Mode Patch Cord 5m",
+    batchNo: "BT-2026-X02",
+    mfgDate: "2026-09-15",
+    expDate: "2031-09-14",
+    mrp: 750,
+    purchaseRate: 320,
+    currentQty: 180,
+    uom: "Pcs",
+    materialCenter: "Main Central Warehouse (Godown A)",
+    status: "Active",
+  },
+  {
+    id: "BT-REC-03",
+    itemId: "ITEM-MTR-003",
+    itemName: "Industrial IoT Edge Gateway Pro v4",
+    batchNo: "BT-2026-F04",
+    mfgDate: "2026-07-10",
+    expDate: "2028-07-09",
+    mrp: 52000,
+    purchaseRate: 36000,
+    currentQty: 12,
+    uom: "Box",
+    materialCenter: "Factory / Plant Shop Floor (Godown B)",
+    status: "Active",
+  },
+  {
+    id: "BT-REC-04",
+    itemId: "ITEM-MTR-004",
+    itemName: "Precision CNC Machined Brass Terminal Pins",
+    batchNo: "BT-2026-M09",
+    mfgDate: "2026-10-01",
+    expDate: "2036-09-30",
+    mrp: 650,
+    purchaseRate: 480,
+    currentQty: 450,
+    uom: "Kgs",
+    materialCenter: "Factory / Plant Shop Floor (Godown B)",
+    status: "Active",
+  },
+  {
+    id: "BT-REC-05",
+    itemId: "ITEM-MTR-005",
+    itemName: "Thermal Conductive Adhesive Paste 50g",
+    batchNo: "BT-2026-R02",
+    mfgDate: "2026-05-10",
+    expDate: "2027-01-15",
+    mrp: 450,
+    purchaseRate: 210,
+    currentQty: 75,
+    uom: "Pcs",
+    materialCenter: "Retail Showroom & Depot (Godown C)",
+    status: "Expiring Soon",
+  },
+];
+
+// BANK RECONCILIATION STATEMENT (BRS) RECORDS
+export const initialBankReconciliations: BankReconciliationRecord[] = [
+  {
+    id: "BRS-001",
+    voucherNo: "PYMT-2026-001",
+    date: "2026-11-08",
+    bankAccount: "HDFC Bank Current Account",
+    partyName: "Larsen & Toubro Electrical & Automation",
+    chequeNo: "RTGS-HDFC88290192",
+    debitAmount: 0,
+    creditAmount: 400000,
+    clearanceDate: "2026-11-08",
+    isCleared: true,
+  },
+  {
+    id: "BRS-002",
+    voucherNo: "RCPT-2026-001",
+    date: "2026-11-09",
+    bankAccount: "SBI Current Account",
+    partyName: "Reliance Digital Retail Hub",
+    chequeNo: "NEFT-SBI99120481",
+    debitAmount: 650000,
+    creditAmount: 0,
+    clearanceDate: "2026-11-09",
+    isCleared: true,
+  },
+  {
+    id: "BRS-003",
+    voucherNo: "PYMT-2026-002",
+    date: "2026-11-10",
+    bankAccount: "HDFC Bank Current Account",
+    partyName: "Jindal Steel & Power Ltd",
+    chequeNo: "CHQ-654120",
+    debitAmount: 0,
+    creditAmount: 85000,
+    clearanceDate: undefined,
+    isCleared: false,
+  },
+  {
+    id: "BRS-004",
+    voucherNo: "RCPT-2026-002",
+    date: "2026-11-11",
+    bankAccount: "HDFC Bank Current Account",
+    partyName: "Tata Consultancy Enterprises Ltd",
+    chequeNo: "CHQ-890123",
+    debitAmount: 159260,
+    creditAmount: 0,
+    clearanceDate: undefined,
+    isCleared: false,
+  },
+];
+
+// POST-DATED CHEQUES (PDC) REGISTER
+export const initialPdcEntries: PdcRecord[] = [
+  {
+    id: "PDC-001",
+    voucherNo: "PDC-REC-001",
+    partyName: "Tata Consultancy Enterprises Ltd",
+    type: "Received",
+    chequeNo: "CHQ-445109",
+    bankName: "ICICI Bank",
+    chequeDate: "2026-11-25",
+    amount: 250000,
+    status: "Pending",
+  },
+  {
+    id: "PDC-002",
+    voucherNo: "PDC-ISS-001",
+    partyName: "Jindal Steel & Power Ltd",
+    type: "Issued",
+    chequeNo: "CHQ-882103",
+    bankName: "HDFC Bank Current Account",
+    chequeDate: "2026-11-30",
+    amount: 180000,
+    status: "Pending",
+  },
+  {
+    id: "PDC-003",
+    voucherNo: "PDC-REC-002",
+    partyName: "Wipro Technologies Infopark",
+    type: "Received",
+    chequeNo: "CHQ-771920",
+    bankName: "Axis Bank",
+    chequeDate: "2026-12-05",
+    amount: 320000,
+    status: "Pending",
+  },
+];
+
+// OVERDUE INTEREST CALCULATION RECORDS
+export const initialOverdueInterestItems: InterestCalculationItem[] = [
+  {
+    partyName: "Infosys Digital Solutions Ltd",
+    billNo: "INV-INFY-4890",
+    billDate: "2026-09-15",
+    dueDate: "2026-10-15",
+    overdueDays: 29,
+    billAmount: 214800,
+    interestRate: 18,
+    accruedInterest: 3072,
+  },
+  {
+    partyName: "Tech Mahindra Systems Ltd",
+    billNo: "INV-TECH-2210",
+    billDate: "2026-08-20",
+    dueDate: "2026-09-20",
+    overdueDays: 54,
+    billAmount: 485000,
+    interestRate: 18,
+    accruedInterest: 12908,
   },
 ];
 

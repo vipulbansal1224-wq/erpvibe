@@ -111,7 +111,7 @@ export function Sidebar({
       title: "FINANCE & HUMAN RESOURCES",
       items: [
         { id: "banking" as ModuleType, label: "Banking & Reconciliation", icon: CreditCard, badge: "1-Click", enabled: moduleSettings.banking },
-        { id: "busy-accounting" as ModuleType, label: "BUSY Accounting & Vouchers", icon: Calculator, badge: "F1-F9", enabled: true },
+        { id: "busy-accounting" as ModuleType, label: "Advanced Accounting & Vouchers", icon: Calculator, badge: "F1-F9", enabled: true },
         { id: "expenses" as ModuleType, label: "Employee Expenses", icon: Wallet, badge: "Claims", enabled: moduleSettings.expenses },
         { id: "assets" as ModuleType, label: "Fixed Assets & Depr.", icon: Boxes, badge: "SLM/WDV", enabled: moduleSettings.assets },
         { id: "accounts" as ModuleType, label: "Chart of Accounts", icon: Landmark, enabled: true },

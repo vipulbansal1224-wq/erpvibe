@@ -25,6 +25,7 @@ import {
   HelpCircle,
   FileText,
   CreditCard,
+  Zap,
 } from "lucide-react";
 import {
   SalesInvoice,
@@ -80,7 +81,7 @@ export function DashboardView({
 
   return (
     <div className="space-y-6">
-      {/* BUSY Accounting Rapid Operation Console (F1-F9, Alt+L, Alt+I) */}
+      {/* Enterprise Accounting Rapid Operation Console (F1-F9, Alt+L, Alt+I) */}
       <div className="rounded-2xl border-2 border-blue-500/30 dark:border-blue-600/30 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 p-5 text-white shadow-2xl relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-8 -mr-8 h-48 w-48 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
 
@@ -88,14 +89,14 @@ export function DashboardView({
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-black text-lg shadow-lg">
-                B
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg ring-1 ring-blue-400/40">
+                <Zap className="h-5 w-5 text-amber-300" />
               </span>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
                     <Keyboard className="h-5 w-5 text-blue-400" />
-                    BUSY Rapid Operations Console (त्वरित संचालन कंसोल)
+                    Rapid Operations & Voucher Console
                   </h3>
                   <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
                     Live Operations
@@ -278,8 +279,8 @@ export function DashboardView({
                 </span>
                 <HelpCircle className="h-4 w-4 text-sky-300 group-hover:rotate-12 transition-transform" />
               </div>
-              <span className="text-xs font-bold text-white leading-tight">BUSY Guide</span>
-              <span className="text-[10px] text-sky-300 mt-0.5">सम्पूर्ण गाइड</span>
+              <span className="text-xs font-bold text-white leading-tight">Voucher Guide</span>
+              <span className="text-[10px] text-sky-300 mt-0.5">मास्टर गाइड (F1)</span>
             </button>
 
             {/* F2 Save Indicator */}

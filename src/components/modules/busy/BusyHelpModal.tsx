@@ -27,7 +27,7 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
   if (!isOpen) return null;
 
   const shortcuts = [
-    { key: "F1", desc: "Help & Complete BUSY Documentation (मदद एवं गाइड)", context: "Anywhere in software" },
+    { key: "F1", desc: "Help & Complete Accounting Documentation (मदद एवं गाइड)", context: "Anywhere in software" },
     { key: "F2", desc: "Save current Voucher / Master entry (वाउचर सुरक्षित करें)", context: "Transaction / Master screen" },
     { key: "F3", desc: "Add new Master (Account / Item) on-the-fly (नया खाता/आइटम बनाएं)", context: "During voucher entry" },
     { key: "F4", desc: "Open Contra Voucher (बैंक-कैश ट्रांसफर)", context: "Transaction menu" },
@@ -58,7 +58,7 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  BUSY Accounting Software — Complete Practical Guide
+                  Enterprise Accounting Software — Complete Practical Guide
                 </h3>
                 <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-bold">
                   AICE Course Standard
@@ -109,7 +109,7 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
               <div className="bg-blue-50/50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm">
                   <Keyboard className="h-4 w-4 text-blue-600" />
-                  Essential BUSY Shortcut Keys (Quick Reference Sheet)
+                  Essential Accounting Shortcut Keys (Quick Reference Sheet)
                 </div>
                 <p className="text-slate-500 mt-1">
                   Mastering keyboard shortcuts is essential for lightning-fast daily voucher entry.
@@ -121,7 +121,7 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
                   <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
                     <tr>
                       <th className="p-3 w-32">Shortcut Key</th>
-                      <th className="p-3">Function / Action in BUSY</th>
+                      <th className="p-3">Function / Action in Software</th>
                       <th className="p-3 w-48">Context / Screen</th>
                     </tr>
                   </thead>
@@ -150,10 +150,10 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
             <div className="space-y-4 text-slate-700 dark:text-slate-300">
               <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                  What is BUSY Accounting Software?
+                  What is Enterprise Accounting & Statutory Software?
                 </h4>
                 <p>
-                  BUSY is one of India&apos;s leading business accounting and ERP software applications, widely used by Micro, Small, and Medium Enterprises (MSMEs). Unlike generic bookkeeping tools, BUSY specializes in integrated inventory management, Indian statutory GST compliance, multi-location stock tracking, and automated bill sundries.
+                  This is an advanced business accounting and statutory ERP solution designed specifically for Indian MSMEs, manufacturers, traders, and distributors. Unlike generic bookkeeping tools, it specializes in integrated inventory management, Indian statutory GST compliance, multi-location stock tracking, batch/expiry control, and automated bill sundries.
                 </p>
               </div>
 
@@ -264,7 +264,7 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
                       <th className="p-3 w-28">Voucher Type</th>
                       <th className="p-3 w-20">Key</th>
                       <th className="p-3">Purpose & Nature of Entry</th>
-                      <th className="p-3">Key Fields / Mechanics in BUSY</th>
+                      <th className="p-3">Key Fields & Transaction Rules</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
@@ -333,13 +333,13 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
                   </h4>
                   <ul className="space-y-2 text-slate-600 dark:text-slate-400">
                     <li>
-                      <strong>Local Supplies (Intra-State):</strong> When Supplier and Buyer are in the same state (e.g. Maharashtra to Maharashtra), BUSY bifurcates tax equally into <strong>CGST (50%)</strong> and <strong>SGST (50%)</strong>.
+                      <strong>Local Supplies (Intra-State):</strong> When Supplier and Buyer are in the same state (e.g. Maharashtra to Maharashtra), the system bifurcates tax equally into <strong>CGST (50%)</strong> and <strong>SGST (50%)</strong>.
                     </li>
                     <li>
                       <strong>Inter-State Supplies:</strong> When goods move across state boundaries (e.g. Maharashtra to Karnataka), single <strong>IGST (100%)</strong> is charged.
                     </li>
                     <li>
-                      <strong>Multi-Tax Invoicing:</strong> Bill items with different tax rates (e.g. 5%, 12%, 18%) in a single invoice without errors using BUSY&apos;s &apos;Item-wise&apos; or &apos;Multi-Tax&apos; sale types.
+                      <strong>Multi-Tax Invoicing:</strong> Bill items with different tax rates (e.g. 5%, 12%, 18%) in a single invoice without errors using the integrated &apos;Item-wise&apos; or &apos;Multi-Tax&apos; sale types.
                     </li>
                   </ul>
                 </div>
@@ -372,7 +372,7 @@ export function BusyHelpModal({ isOpen, onClose }: BusyHelpModalProps) {
         {/* Footer */}
         <div className="border-t border-slate-200 dark:border-slate-800 p-4 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between text-xs">
           <span className="text-slate-500">
-            Based on Achievers Institute of Computer Education (AICE) BUSY Accounting Course.
+            Based on Indian Statutory Accounting & Practical MSME Curriculum Standards.
           </span>
           <button
             onClick={onClose}

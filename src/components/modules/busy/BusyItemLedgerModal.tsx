@@ -95,7 +95,7 @@ export function BusyItemLedgerModal({
                   Item Stock Ledger (स्टॉक बही)
                 </h3>
                 <span className="rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-0.5 text-[10px] font-bold">
-                  BUSY Display Menu Standard
+                  Statutory Stock Book Standard
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">

@@ -36,7 +36,7 @@ const moduleTitles: Record<ModuleType, { title: string; subtitle: string }> = {
   subscriptions: { title: "Subscriptions & Recurring AMC", subtitle: "SaaS subscriptions, maintenance contracts and MRR revenue automation" },
   projects: { title: "Projects & Timesheets", subtitle: "Client milestone tracking, team tasks and billable time logs" },
   banking: { title: "Banking & Bank Reconciliation", subtitle: "Multi-bank feeds and automated invoice matching" },
-  "busy-accounting": { title: "BUSY Accounting & Voucher Master Engine", subtitle: "Indian MSME daily vouchers F1-F9, bill sundries, and Alt+L account ledger books" },
+  "busy-accounting": { title: "Enterprise Accounting & Voucher Master Engine", subtitle: "Indian statutory daily vouchers F1-F9, multi-godown stock, bill sundries, and Alt+L account ledger books" },
   expenses: { title: "Employee Expenses & Claims", subtitle: "Staff reimbursement claims, receipt attachments and payroll disbursement" },
   assets: { title: "Fixed Assets & Depreciation", subtitle: "Schedule II Companies Act SLM/WDV automated schedules" },
   helpdesk: { title: "Customer Support & SLA Helpdesk", subtitle: "Client ticketing system with SLA timers and status resolution" },

@@ -527,7 +527,7 @@ export interface VaultDocument {
   verificationStatus: "Verified & Current" | "Renewal Pending" | "Permanent";
 }
 
-// 14. BUSY Accounting & Vouchers System (Indian MSME ERP Master Engine)
+// 14. Enterprise Accounting & Vouchers System (Indian Statutory ERP Master Engine)
 export type BusyVoucherType =
   | "sales" // F8
   | "purchase" // F9
@@ -536,13 +536,15 @@ export type BusyVoucherType =
   | "contra" // F4
   | "journal" // F7
   | "debit_note" // Ctrl+F9
-  | "credit_note"; // Ctrl+F8
+  | "credit_note" // Ctrl+F8
+  | "stock_transfer"; // Stock Transfer between Material Centers
 
 export interface BusyBillSundry {
   id: string;
-  type: "discount" | "freight" | "insurance" | "roundoff";
+  type: "discount" | "freight" | "insurance" | "packaging" | "tds" | "tcs" | "roundoff";
   name: string;
   rate?: number;
+  section?: string;
   amount: number;
 }
 
@@ -561,6 +563,11 @@ export interface BusyVoucherItem {
   sgst: number;
   igst: number;
   total: number;
+  batchNo?: string;
+  mfgDate?: string;
+  expDate?: string;
+  mrp?: number;
+  materialCenter?: string;
 }
 
 export interface BusyVoucher {
@@ -584,9 +591,78 @@ export interface BusyVoucher {
   igstAmount: number;
   totalAmount: number;
   billRef?: string; // Bill-by-bill reference matching
+  billRefType?: "New Ref" | "Agst Ref" | "Advance" | "On Account";
+  materialCenter?: string;
+  destMaterialCenter?: string;
+  chequeNo?: string;
+  chequeDate?: string;
+  clearanceDate?: string;
+  isReconciled?: boolean;
+  isPDC?: boolean;
+  dueDate?: string;
   narration: string;
   status: "Draft" | "Posted" | "Cancelled";
   irnStatus?: "Generated" | "Pending" | "Not Applicable";
+}
+
+export interface MaterialCenterMaster {
+  id: string;
+  name: string;
+  code: string;
+  address: string;
+  isDefault: boolean;
+  managerName?: string;
+}
+
+export interface ItemBatchRecord {
+  id: string;
+  itemId: string;
+  itemName: string;
+  batchNo: string;
+  mfgDate: string;
+  expDate: string;
+  mrp: number;
+  purchaseRate: number;
+  currentQty: number;
+  uom: string;
+  materialCenter: string;
+  status: "Active" | "Expiring Soon" | "Expired";
+}
+
+export interface BankReconciliationRecord {
+  id: string;
+  voucherNo: string;
+  date: string;
+  bankAccount: string;
+  partyName: string;
+  chequeNo: string;
+  debitAmount: number;
+  creditAmount: number;
+  clearanceDate?: string;
+  isCleared: boolean;
+}
+
+export interface PdcRecord {
+  id: string;
+  voucherNo: string;
+  partyName: string;
+  type: "Received" | "Issued";
+  chequeNo: string;
+  bankName: string;
+  chequeDate: string;
+  amount: number;
+  status: "Pending" | "Cleared" | "Bounced" | "Discounted";
+}
+
+export interface InterestCalculationItem {
+  partyName: string;
+  billNo: string;
+  billDate: string;
+  dueDate: string;
+  overdueDays: number;
+  billAmount: number;
+  interestRate: number; // e.g. 18% p.a.
+  accruedInterest: number;
 }
 
 export interface BusyAccountMaster {
