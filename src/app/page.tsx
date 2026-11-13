@@ -831,6 +831,13 @@ export default function Home() {
               onViewInvoice={(inv) => setSelectedInvoiceForPrint(inv)}
               onOpenGSTINModal={() => setIsGSTINModalOpen(true)}
               onOpenEWayModal={() => setIsEWayModalOpen(true)}
+              onOpenBusyVoucher={(type) => {
+                setBusyVoucherType(type);
+                setIsBusyVoucherOpen(true);
+              }}
+              onOpenBusyLedger={() => setIsBusyLedgerOpen(true)}
+              onOpenBusyItemLedger={() => setIsBusyItemLedgerOpen(true)}
+              onOpenBusyHelp={() => setIsBusyHelpOpen(true)}
             />
           )}
 

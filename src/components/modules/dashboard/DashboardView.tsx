@@ -16,6 +16,15 @@ import {
   Eye,
   CheckCircle2,
   Sparkles,
+  Keyboard,
+  BookOpen,
+  Boxes,
+  ArrowRightLeft,
+  X,
+  Save,
+  HelpCircle,
+  FileText,
+  CreditCard,
 } from "lucide-react";
 import {
   SalesInvoice,
@@ -23,6 +32,7 @@ import {
   InventoryItem,
   AuditLogEntry,
   ModuleType,
+  BusyVoucherType,
 } from "@/types/erp";
 import { formatINR } from "@/lib/utils";
 
@@ -35,6 +45,10 @@ interface DashboardViewProps {
   onViewInvoice: (inv: SalesInvoice) => void;
   onOpenGSTINModal: () => void;
   onOpenEWayModal: () => void;
+  onOpenBusyVoucher?: (type: BusyVoucherType) => void;
+  onOpenBusyLedger?: () => void;
+  onOpenBusyItemLedger?: () => void;
+  onOpenBusyHelp?: () => void;
 }
 
 export function DashboardView({
@@ -46,6 +60,10 @@ export function DashboardView({
   onViewInvoice,
   onOpenGSTINModal,
   onOpenEWayModal,
+  onOpenBusyVoucher,
+  onOpenBusyLedger,
+  onOpenBusyItemLedger,
+  onOpenBusyHelp,
 }: DashboardViewProps) {
   // Aggregate stats
   const totalRevenue = invoices.reduce((sum, inv) => sum + inv.grandTotal, 0);
@@ -62,6 +80,235 @@ export function DashboardView({
 
   return (
     <div className="space-y-6">
+      {/* BUSY Accounting Rapid Operation Console (F1-F9, Alt+L, Alt+I) */}
+      <div className="rounded-2xl border-2 border-blue-500/30 dark:border-blue-600/30 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 p-5 text-white shadow-2xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 -mt-8 -mr-8 h-48 w-48 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 space-y-4">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-black text-lg shadow-lg">
+                B
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
+                    <Keyboard className="h-5 w-5 text-blue-400" />
+                    BUSY Rapid Operations Console (त्वरित संचालन कंसोल)
+                  </h3>
+                  <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                    Live Operations
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Dashboard se direct 1-click ya physical keyboard shortcut se pura business operate karein.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-slate-300 font-medium bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                Press key on keyboard or click button below
+              </span>
+            </div>
+          </div>
+
+          {/* All 13 Keys Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
+            {/* F8 Sales */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("sales")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 hover:border-emerald-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-emerald-500 text-slate-950 shadow">
+                  F8
+                </span>
+                <Receipt className="h-4 w-4 text-emerald-400 group-hover:rotate-12 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Sales Voucher</span>
+              <span className="text-[10px] text-emerald-300 mt-0.5">बिक्री बिलिंग / GST Tax</span>
+            </button>
+
+            {/* F9 Purchase */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("purchase")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-blue-950/60 hover:bg-blue-900/80 border border-blue-500/40 hover:border-blue-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-blue-500 text-slate-950 shadow">
+                  F9
+                </span>
+                <Truck className="h-4 w-4 text-blue-400 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Purchase Voucher</span>
+              <span className="text-[10px] text-blue-300 mt-0.5">खरीद प्रविष्टि / ITC</span>
+            </button>
+
+            {/* F5 Payment */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("payment")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-purple-950/60 hover:bg-purple-900/80 border border-purple-500/40 hover:border-purple-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-purple-500 text-slate-950 shadow">
+                  F5
+                </span>
+                <CreditCard className="h-4 w-4 text-purple-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Payment Voucher</span>
+              <span className="text-[10px] text-purple-300 mt-0.5">भुगतान / Expenses</span>
+            </button>
+
+            {/* F6 Receipt */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("receipt")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-amber-950/60 hover:bg-amber-900/80 border border-amber-500/40 hover:border-amber-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-amber-500 text-slate-950 shadow">
+                  F6
+                </span>
+                <DollarSign className="h-4 w-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Receipt Voucher</span>
+              <span className="text-[10px] text-amber-300 mt-0.5">रसीद / Collections</span>
+            </button>
+
+            {/* F4 Contra */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("contra")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/40 hover:border-cyan-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-cyan-500 text-slate-950 shadow">
+                  F4
+                </span>
+                <ArrowRightLeft className="h-4 w-4 text-cyan-400 group-hover:rotate-180 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Contra Voucher</span>
+              <span className="text-[10px] text-cyan-300 mt-0.5">बैंक-कैश ट्रांसफर</span>
+            </button>
+
+            {/* F7 Journal */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("journal")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-500/40 hover:border-indigo-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-indigo-500 text-slate-950 shadow">
+                  F7
+                </span>
+                <FileText className="h-4 w-4 text-indigo-400 group-hover:translate-y-0.5 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Journal Voucher</span>
+              <span className="text-[10px] text-indigo-300 mt-0.5">जर्नल / Depreciation</span>
+            </button>
+
+            {/* Ctrl + F9 Debit Note */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("debit_note")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/40 hover:border-rose-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-[11px] px-1.5 py-0.5 rounded bg-rose-500 text-slate-950 shadow">
+                  ^F9
+                </span>
+                <AlertTriangle className="h-4 w-4 text-rose-400" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Debit Note</span>
+              <span className="text-[10px] text-rose-300 mt-0.5">खरीद वापसी / Ret.</span>
+            </button>
+
+            {/* Ctrl + F8 Credit Note */}
+            <button
+              onClick={() => onOpenBusyVoucher && onOpenBusyVoucher("credit_note")}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-orange-950/60 hover:bg-orange-900/80 border border-orange-500/40 hover:border-orange-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-[11px] px-1.5 py-0.5 rounded bg-orange-500 text-slate-950 shadow">
+                  ^F8
+                </span>
+                <CheckCircle2 className="h-4 w-4 text-orange-400" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Credit Note</span>
+              <span className="text-[10px] text-orange-300 mt-0.5">बिक्री वापसी / Ret.</span>
+            </button>
+
+            {/* Alt + L Account Ledger Book */}
+            <button
+              onClick={onOpenBusyLedger}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-teal-950/60 hover:bg-teal-900/80 border border-teal-500/40 hover:border-teal-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-[11px] px-1.5 py-0.5 rounded bg-teal-400 text-slate-950 shadow">
+                  Alt+L
+                </span>
+                <BookOpen className="h-4 w-4 text-teal-300 group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Ledger Book</span>
+              <span className="text-[10px] text-teal-300 mt-0.5">खाताबही / Statement</span>
+            </button>
+
+            {/* Alt + I Item Stock Ledger */}
+            <button
+              onClick={onOpenBusyItemLedger}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/80 border border-violet-500/40 hover:border-violet-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-[11px] px-1.5 py-0.5 rounded bg-violet-400 text-slate-950 shadow">
+                  Alt+I
+                </span>
+                <Boxes className="h-4 w-4 text-violet-300 group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">Stock Ledger</span>
+              <span className="text-[10px] text-violet-300 mt-0.5">स्टॉक बही / Valuation</span>
+            </button>
+
+            {/* F1 Complete Guide */}
+            <button
+              onClick={onOpenBusyHelp}
+              className="flex flex-col items-start p-2.5 rounded-xl bg-sky-950/60 hover:bg-sky-900/80 border border-sky-500/40 hover:border-sky-400 text-left transition-all hover:scale-[1.02] shadow-sm group"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-sky-400 text-slate-950 shadow">
+                  F1
+                </span>
+                <HelpCircle className="h-4 w-4 text-sky-300 group-hover:rotate-12 transition-transform" />
+              </div>
+              <span className="text-xs font-bold text-white leading-tight">BUSY Guide</span>
+              <span className="text-[10px] text-sky-300 mt-0.5">सम्पूर्ण गाइड</span>
+            </button>
+
+            {/* F2 Save Indicator */}
+            <div className="flex flex-col items-start p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-left">
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-slate-300 text-slate-950 shadow">
+                  F2
+                </span>
+                <Save className="h-4 w-4 text-slate-400" />
+              </div>
+              <span className="text-xs font-bold text-slate-200 leading-tight">Save Voucher</span>
+              <span className="text-[10px] text-slate-400 mt-0.5">वाउचर सुरक्षित करें</span>
+            </div>
+
+            {/* Esc Exit Indicator */}
+            <div className="flex flex-col items-start p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-left">
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-slate-300 text-slate-950 shadow">
+                  Esc
+                </span>
+                <X className="h-4 w-4 text-slate-400" />
+              </div>
+              <span className="text-xs font-bold text-slate-200 leading-tight">Cancel / Close</span>
+              <span className="text-[10px] text-slate-400 mt-0.5">बाहर निकलें</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* India Statutory Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-6 text-white shadow-xl">
         <div className="absolute right-0 top-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
