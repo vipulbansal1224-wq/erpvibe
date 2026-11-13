@@ -1217,67 +1217,6 @@ export default function Home() {
         isOpen={isBusyHelpOpen}
         onClose={() => setIsBusyHelpOpen(false)}
       />
-
-      {/* Persistent Accounting Shortcut Floating Dock (Bottom Left) */}
-      <div className="fixed bottom-5 left-5 z-40 hidden sm:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-700/80 shadow-2xl text-[11px] text-white">
-        <span className="px-2 font-black text-blue-400 border-r border-slate-700 mr-0.5 tracking-wider">
-          ACCOUNTS
-        </span>
-        <button
-          onClick={() => {
-            setBusyVoucherType("sales");
-            setIsBusyVoucherOpen(true);
-          }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600/80 hover:bg-emerald-500 font-bold transition-all"
-        >
-          <span>Sales</span>
-          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F8</kbd>
-        </button>
-        <button
-          onClick={() => {
-            setBusyVoucherType("purchase");
-            setIsBusyVoucherOpen(true);
-          }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600/80 hover:bg-blue-500 font-bold transition-all"
-        >
-          <span>Purchase</span>
-          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F9</kbd>
-        </button>
-        <button
-          onClick={() => {
-            setBusyVoucherType("payment");
-            setIsBusyVoucherOpen(true);
-          }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-600/80 hover:bg-purple-500 font-bold transition-all"
-        >
-          <span>Payment</span>
-          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F5</kbd>
-        </button>
-        <button
-          onClick={() => {
-            setBusyVoucherType("receipt");
-            setIsBusyVoucherOpen(true);
-          }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-600/80 hover:bg-amber-500 font-bold transition-all"
-        >
-          <span>Receipt</span>
-          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F6</kbd>
-        </button>
-        <button
-          onClick={() => setIsBusyLedgerOpen(true)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-600/80 hover:bg-rose-500 font-bold transition-all"
-        >
-          <span>Ledger</span>
-          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">Alt+L</kbd>
-        </button>
-        <button
-          onClick={() => setIsBusyHelpOpen(true)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-700 hover:bg-slate-600 font-bold transition-all"
-        >
-          <span>Help</span>
-          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F1</kbd>
-        </button>
-      </div>
     </div>
   );
 }
