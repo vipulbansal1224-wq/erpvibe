@@ -131,15 +131,53 @@ export default function Home() {
     try {
       const savedUsers = localStorage.getItem("erpvibe_users");
       if (savedUsers) {
-        setUsers(JSON.parse(savedUsers));
+        try {
+          const parsed: AppUser[] = JSON.parse(savedUsers);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const initialMap = new Map(initialUsers.map((u) => [u.username.toLowerCase(), u]));
+            // Merge defaults and saved users
+            const merged: AppUser[] = parsed.map((u) => {
+              const def = initialMap.get((u.username || "").toLowerCase());
+              return {
+                ...def,
+                ...u,
+                password: u.password || def?.password || u.username,
+                status: u.status || "Active",
+              };
+            });
+            // Ensure all initialUsers are present
+            initialUsers.forEach((iu) => {
+              if (!merged.some((m) => m.username.toLowerCase() === iu.username.toLowerCase())) {
+                merged.push(iu);
+              }
+            });
+            setUsers(merged);
+            localStorage.setItem("erpvibe_users", JSON.stringify(merged));
+          } else {
+            setUsers(initialUsers);
+            localStorage.setItem("erpvibe_users", JSON.stringify(initialUsers));
+          }
+        } catch (e) {
+          setUsers(initialUsers);
+          localStorage.setItem("erpvibe_users", JSON.stringify(initialUsers));
+        }
+      } else {
+        setUsers(initialUsers);
+        localStorage.setItem("erpvibe_users", JSON.stringify(initialUsers));
       }
+
       const savedSession = localStorage.getItem("erpvibe_session");
       if (savedSession) {
-        setCurrentUser(JSON.parse(savedSession));
+        try {
+          setCurrentUser(JSON.parse(savedSession));
+        } catch (e) {}
       }
+
       const savedModules = localStorage.getItem("erpvibe_module_settings");
       if (savedModules) {
-        setModuleSettings((prev) => ({ ...prev, ...JSON.parse(savedModules) }));
+        try {
+          setModuleSettings((prev) => ({ ...prev, ...JSON.parse(savedModules) }));
+        } catch (e) {}
       }
     } catch (e) {
       console.error(e);
@@ -167,20 +205,24 @@ export default function Home() {
   };
 
   const handleAddUser = (newUser: AppUser) => {
-    const updated = [...users, newUser];
-    setUsers(updated);
-    try {
-      localStorage.setItem("erpvibe_users", JSON.stringify(updated));
-    } catch (e) {}
+    setUsers((prev) => {
+      const updated = [...prev.filter((u) => u.id !== newUser.id), newUser];
+      try {
+        localStorage.setItem("erpvibe_users", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     appendAuditLog("CREATE", "Settings - Users", newUser.id, newUser.username, `Created new login account: ${newUser.fullName} (${newUser.role})`);
   };
 
   const handleUpdateUser = (updatedUser: AppUser) => {
-    const updated = users.map((u) => (u.id === updatedUser.id ? updatedUser : u));
-    setUsers(updated);
-    try {
-      localStorage.setItem("erpvibe_users", JSON.stringify(updated));
-    } catch (e) {}
+    setUsers((prev) => {
+      const updated = prev.map((u) => (u.id === updatedUser.id ? updatedUser : u));
+      try {
+        localStorage.setItem("erpvibe_users", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     if (currentUser?.id === updatedUser.id) {
       setCurrentUser(updatedUser);
       try {
@@ -192,11 +234,13 @@ export default function Home() {
 
   const handleDeleteUser = (userId: string) => {
     const userToDelete = users.find((u) => u.id === userId);
-    const updated = users.filter((u) => u.id !== userId);
-    setUsers(updated);
-    try {
-      localStorage.setItem("erpvibe_users", JSON.stringify(updated));
-    } catch (e) {}
+    setUsers((prev) => {
+      const updated = prev.filter((u) => u.id !== userId);
+      try {
+        localStorage.setItem("erpvibe_users", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     appendAuditLog("DELETE", "Settings - Users", userId, userToDelete?.username || userId, `Deleted login account`);
   };
 
@@ -884,7 +928,15 @@ export default function Home() {
   };
 
   // If session is loaded and no authenticated user, gate with LoginView
-  if (isAuthLoaded && !currentUser) {
+  if (!isAuthLoaded) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
     return <LoginView users={users} onLogin={handleLogin} />;
   }
 

@@ -88,6 +88,12 @@ export function CompanySettingsView({
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState("all");
 
+  React.useEffect(() => {
+    if (propUsers && propUsers.length > 0) {
+      setUserList(propUsers);
+    }
+  }, [propUsers]);
+
   // User Modal State
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
