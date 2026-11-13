@@ -3,6 +3,7 @@ export type ModuleType =
   | "invoices"
   | "gst-compliance"
   | "inventory"
+  | "busy-accounting"
   | "manufacturing"
   | "quality"
   | "fleet"
@@ -29,6 +30,7 @@ export type ModuleType =
 export type GSTType = "CGST+SGST" | "IGST" | "NIL" | "EXEMPT";
 
 export interface ModuleSettings {
+  busyAccounting: boolean;
   gstCompliance: boolean;
   invoices: boolean;
   pos: boolean;
@@ -524,3 +526,118 @@ export interface VaultDocument {
   authority: string;
   verificationStatus: "Verified & Current" | "Renewal Pending" | "Permanent";
 }
+
+// 14. BUSY Accounting & Vouchers System (Indian MSME ERP Master Engine)
+export type BusyVoucherType =
+  | "sales" // F8
+  | "purchase" // F9
+  | "payment" // F5
+  | "receipt" // F6
+  | "contra" // F4
+  | "journal" // F7
+  | "debit_note" // Ctrl+F9
+  | "credit_note"; // Ctrl+F8
+
+export interface BusyBillSundry {
+  id: string;
+  type: "discount" | "freight" | "insurance" | "roundoff";
+  name: string;
+  rate?: number;
+  amount: number;
+}
+
+export interface BusyVoucherItem {
+  id: string;
+  itemId?: string;
+  itemName: string;
+  itemGroup?: string;
+  hsnCode: string;
+  qty: number;
+  uom: string;
+  rate: number;
+  gstRate: number; // 0, 5, 12, 18, 28
+  taxableAmount: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  total: number;
+}
+
+export interface BusyVoucher {
+  id: string;
+  voucherNo: string;
+  voucherType: BusyVoucherType;
+  date: string;
+  series: string; // e.g. "Main"
+  partyId?: string;
+  partyName: string;
+  partyState: string;
+  partyGstin?: string;
+  isInterState: boolean;
+  debitAccount?: string; // For Payment, Contra, Journal
+  creditAccount?: string; // For Receipt, Contra, Journal
+  items: BusyVoucherItem[];
+  sundries: BusyBillSundry[];
+  taxableAmount: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  igstAmount: number;
+  totalAmount: number;
+  billRef?: string; // Bill-by-bill reference matching
+  narration: string;
+  status: "Draft" | "Posted" | "Cancelled";
+  irnStatus?: "Generated" | "Pending" | "Not Applicable";
+}
+
+export interface BusyAccountMaster {
+  id: string;
+  name: string;
+  printName: string;
+  group:
+    | "Sundry Debtors"
+    | "Sundry Creditors"
+    | "Bank Accounts"
+    | "Cash-in-hand"
+    | "Direct Expenses"
+    | "Indirect Expenses"
+    | "Direct Incomes"
+    | "Indirect Incomes"
+    | "Duties & Taxes"
+    | "Capital Account"
+    | "Loans (Liability)"
+    | "Fixed Assets"
+    | "Current Assets"
+    | "Current Liabilities";
+  state: string;
+  stateCode: string;
+  gstin?: string;
+  pan?: string;
+  creditLimit?: number;
+  openingBalance: number;
+  balanceType: "Dr" | "Cr";
+  currentBalance: number;
+  billByBill: boolean;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface BusyItemMaster {
+  id: string;
+  name: string;
+  printName: string;
+  group: string;
+  uom: string;
+  altUom?: string;
+  conversionFactor?: number;
+  taxCategory: "Exempt" | "GST 5%" | "GST 12%" | "GST 18%" | "GST 28%";
+  gstRate: number;
+  hsnCode: string;
+  openingQty: number;
+  purchaseRate: number;
+  sellingPrice: number;
+  currentQty: number;
+  reorderLevel: number;
+  valuationMethod: "FIFO" | "Weighted Average";
+}
+

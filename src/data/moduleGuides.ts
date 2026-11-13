@@ -1434,4 +1434,58 @@ export const moduleGuides: Record<string, ModuleGuide> = {
       "जो मॉड्यूल आपके काम के न हों (जैसे फ्लीट या जॉबवर्क), उन्हें स्विचबोर्ड से बंद कर दें ताकि मेनू साफ-सुथरा रहे।",
     ],
   },
+
+  "busy-accounting": {
+    id: "busy-accounting",
+    number: 27,
+    titleEn: "BUSY Accounting & Voucher Master Engine",
+    titleHi: "BUSY अकाउंटिंग एवं वाउचर मास्टर इंजन",
+    categoryEn: "Accounting & Finance",
+    categoryHi: "लेखा एवं वित्तीय प्रबंधन",
+    taglineEn: "F1-F9 daily voucher entry, state GST bifurcation, bill sundries, and Alt+L account ledger books.",
+    taglineHi: "F1-F9 दैनिक वाउचर प्रविष्टि, स्वचालित बिल संड्रीज, जीएसटी राज्य विभाजन और ऑल्ट+L खाताबही।",
+    descriptionEn: "Complete BUSY Accounting Software integration based on the Achievers Institute of Computer Education (AICE) course curriculum. Covers Company Setup, Account Masters (Debtors/Creditors/Banks), Item Masters with packaging UOM conversions, F1-F9 daily transactions, Multi-Tax GST billing, Bill Sundries (Trade Discount, Freight, Insurance, Round-off), and Alt+L running ledger statements.",
+    descriptionHi: "BUSY अकाउंटिंग सॉफ्टवेयर का सम्पूर्ण प्रैक्टिकल एकीकरण। इसमें कंपनी निर्माण, खाता मास्टर्स, आइटम मास्टर्स, F1-F9 दैनिक वाउचर एंट्री, मल्टी-टैक्स जीएसटी बिलिंग, बिल संड्रीज और ऑल्ट+L रनिंग लेजर बुक शामिल है।",
+    workflowSteps: [
+      {
+        step: 1,
+        titleEn: "Create Company & Account Masters",
+        titleHi: "कंपनी और खाता मास्टर्स बनाएं",
+        descEn: "Establish trade name, registered state (for intra vs inter-state GST), GSTIN, and create Sundry Debtors, Creditors, Bank and Expense ledgers.",
+        descHi: "कंपनी का नाम, राज्य कोड, 15-अंकीय जीएसटी नंबर दर्ज करें और देनदार, लेनदार, बैंक और खर्चों के खाते बनाएं।",
+      },
+      {
+        step: 2,
+        titleEn: "Record Daily Vouchers (F4 to F9)",
+        titleHi: "दैनिक वाउचर दर्ज करें (F4 से F9)",
+        descEn: "Use F8 for Sales, F9 for Purchase, F5 for Payment, F6 for Receipt, F4 for Contra, F7 for Journal, and Ctrl+F8/F9 for Credit/Debit Notes.",
+        descHi: "बिक्री के लिए F8, खरीद के लिए F9, भुगतान के लिए F5, रसीद के लिए F6, बैंक ट्रांसफर हेतु F4 और समायोजन के लिए F7 दबाएं।",
+      },
+      {
+        step: 3,
+        titleEn: "View Running Ledger Book (Alt + L)",
+        titleHi: "खाताबही (लेजर) देखें (Alt + L)",
+        descEn: "Press Alt+L anywhere to inspect detailed chronological debit/credit statements, bill-by-bill references, and running closing balances.",
+        descHi: "कहीं से भी Alt+L दबाकर किसी भी पार्टी का पूरा खाता, बिल संदर्भ और रनिंग बैलेंस देखें।",
+      },
+    ],
+    crudGuide: {
+      addEn: "Press F8 (Sales), F9 (Purchase), F5 (Payment), F6 (Receipt), F4 (Contra), or F7 (Journal) to launch the instant voucher entry modal.",
+      addHi: "F8, F9, F5, F6, F4 या F7 दबाकर तुरंत नया वाउचर दर्ज करें।",
+      editEn: "Click Alt+L on any ledger to review voucher history and drill down into transaction details.",
+      editHi: "किसी भी खाते के सामने Alt+L दबाकर उसका विस्तृत विवरण और वाउचर इतिहास देखें।",
+      deleteEn: "Posted vouchers can be cancelled from the Transactions Register; reversals are permanently recorded in the MCA audit trail.",
+      deleteHi: "लेनदेन रजिस्टर से वाउचर को रद्द किया जा सकता है; इसका रिकॉर्ड एमसीए ऑडिट ट्रेल में सुरक्षित रहता है।",
+    },
+    statutoryComplianceEn: "Ensures 100% adherence to Section 7 of the IGST Act, Section 143 subcontracting, Section 12(3)(c) of Companies Act, and e-Invoicing.",
+    statutoryComplianceHi: "आईजीएसटी अधिनियम की धारा 7, सीजीएसटी/एसजीएसटी विभाजन और कंपनी अधिनियम के पूर्ण अनुपालन को सुनिश्चित करता है।",
+    proTipsEn: [
+      "Use keyboard shortcuts (F4-F9, Alt+L, Alt+I) for maximum data-entry speed without touching the mouse.",
+      "Always verify state codes: sales to your own state automatically split into CGST + SGST; sales to other states charge 100% IGST.",
+    ],
+    proTipsHi: [
+      "माउस छुए बिना केवल कीबोर्ड शॉर्टकट (F4-F9, Alt+L, Alt+I) का उपयोग करें ताकि बिलिंग सुपर-फास्ट हो सके।",
+      "अपने राज्य के ग्राहकों के लिए सीजीएसटी+एसजीएसटी और दूसरे राज्य के लिए आईजीएसटी अपने आप लग जाता है।",
+    ],
+  },
 };

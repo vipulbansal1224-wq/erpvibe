@@ -31,6 +31,7 @@ import { HelpdeskView } from "@/components/modules/helpdesk/HelpdeskView";
 import { RecruitmentView } from "@/components/modules/recruitment/RecruitmentView";
 import { DocumentsVaultView } from "@/components/modules/documents/DocumentsVaultView";
 import { FinancialReportsView } from "@/components/modules/reports/FinancialReportsView";
+import { BusyAccountingHub } from "@/components/modules/busy/BusyAccountingHub";
 
 // Modals
 import { TaxInvoicePrintModal } from "@/components/modules/invoicing/TaxInvoicePrintModal";
@@ -41,6 +42,10 @@ import { EWayBillModal } from "@/components/modules/gst/EWayBillModal";
 import { PayslipModal } from "@/components/modules/payroll/PayslipModal";
 import { GlobalSearchModal } from "@/components/layout/GlobalSearchModal";
 import { ModuleHelpModal } from "@/components/common/ModuleHelpModal";
+import { BusyVoucherModal } from "@/components/modules/busy/BusyVoucherModal";
+import { BusyLedgerModal } from "@/components/modules/busy/BusyLedgerModal";
+import { BusyItemLedgerModal } from "@/components/modules/busy/BusyItemLedgerModal";
+import { BusyHelpModal } from "@/components/modules/busy/BusyHelpModal";
 
 // Data & Types
 import {
@@ -71,6 +76,10 @@ import {
   Customer,
   Supplier,
   Employee,
+  BusyVoucher,
+  BusyVoucherType,
+  BusyAccountMaster,
+  BusyItemMaster,
 } from "@/types/erp";
 import {
   defaultCompany,
@@ -100,6 +109,9 @@ import {
   initialExpenseClaims,
   initialJobCandidates,
   initialVaultDocuments,
+  initialBusyAccountMasters,
+  initialBusyItemMasters,
+  initialBusyVouchers,
 } from "@/data/mockData";
 import { generateMockIRN, formatINR } from "@/lib/utils";
 
@@ -120,6 +132,7 @@ export default function Home() {
 
   // Module Configuration (Feature Toggles)
   const [moduleSettings, setModuleSettings] = useState<ModuleSettings>({
+    busyAccounting: true,
     manufacturing: true,
     quality: true,
     fleet: true,
@@ -205,12 +218,71 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  // Keyboard shortcut Ctrl+K
+  // BUSY Accounting State
+  const [busyVouchers, setBusyVouchers] = useState<BusyVoucher[]>(initialBusyVouchers);
+  const [busyAccounts, setBusyAccounts] = useState<BusyAccountMaster[]>(initialBusyAccountMasters);
+  const [busyItems, setBusyItems] = useState<BusyItemMaster[]>(initialBusyItemMasters);
+  const [isBusyVoucherOpen, setIsBusyVoucherOpen] = useState(false);
+  const [busyVoucherType, setBusyVoucherType] = useState<BusyVoucherType>("sales");
+  const [isBusyLedgerOpen, setIsBusyLedgerOpen] = useState(false);
+  const [selectedLedgerAccountId, setSelectedLedgerAccountId] = useState<string | undefined>();
+  const [isBusyItemLedgerOpen, setIsBusyItemLedgerOpen] = useState(false);
+  const [selectedItemLedgerId, setSelectedItemLedgerId] = useState<string | undefined>();
+  const [isBusyHelpOpen, setIsBusyHelpOpen] = useState(false);
+
+  // Global Keyboard Shortcuts for BUSY Accounting (F1 - F9, Alt+L, Alt+I, Ctrl+K)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept normal typing in inputs, except for F-keys and Alt-combos
+      const isInput =
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA";
+
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         setIsSearchOpen((prev) => !prev);
+      } else if (e.key === "F1") {
+        e.preventDefault();
+        setIsBusyHelpOpen((prev) => !prev);
+      } else if (e.key === "F4" && !isInput) {
+        e.preventDefault();
+        setBusyVoucherType("contra");
+        setIsBusyVoucherOpen(true);
+      } else if (e.key === "F5") {
+        // Prevent default browser refresh on F5!
+        e.preventDefault();
+        setBusyVoucherType("payment");
+        setIsBusyVoucherOpen(true);
+      } else if (e.key === "F6" && !isInput) {
+        e.preventDefault();
+        setBusyVoucherType("receipt");
+        setIsBusyVoucherOpen(true);
+      } else if (e.key === "F7" && !isInput) {
+        e.preventDefault();
+        setBusyVoucherType("journal");
+        setIsBusyVoucherOpen(true);
+      } else if (e.key === "F8" && !isInput) {
+        e.preventDefault();
+        setBusyVoucherType("sales");
+        setIsBusyVoucherOpen(true);
+      } else if (e.key === "F9" && !isInput) {
+        e.preventDefault();
+        setBusyVoucherType("purchase");
+        setIsBusyVoucherOpen(true);
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "F9" || e.code === "F9")) {
+        e.preventDefault();
+        setBusyVoucherType("debit_note");
+        setIsBusyVoucherOpen(true);
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "F8" || e.code === "F8")) {
+        e.preventDefault();
+        setBusyVoucherType("credit_note");
+        setIsBusyVoucherOpen(true);
+      } else if (e.altKey && (e.key === "l" || e.key === "L")) {
+        e.preventDefault();
+        setIsBusyLedgerOpen((prev) => !prev);
+      } else if (e.altKey && (e.key === "i" || e.key === "I")) {
+        e.preventDefault();
+        setIsBusyItemLedgerOpen((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -307,6 +379,119 @@ export default function Home() {
       newInvoice.id,
       newInvoice.invoiceNumber,
       `New Tax Invoice created for ${newInvoice.customerName} (${formatINR(newInvoice.grandTotal)})`
+    );
+  };
+
+  // BUSY Accounting Handlers
+  const handleSaveBusyVoucher = (v: BusyVoucher) => {
+    setBusyVouchers((prev) => [v, ...prev]);
+
+    // Update Party balance in Account Masters
+    if (v.partyId) {
+      setBusyAccounts((prev) =>
+        prev.map((acc) => {
+          if (acc.id === v.partyId || acc.name === v.partyName) {
+            let newBal = acc.currentBalance;
+            if (v.voucherType === "sales" || v.voucherType === "debit_note") {
+              newBal += v.totalAmount;
+            } else if (
+              v.voucherType === "purchase" ||
+              v.voucherType === "credit_note" ||
+              v.voucherType === "receipt"
+            ) {
+              newBal -= v.totalAmount;
+            }
+            return { ...acc, currentBalance: newBal };
+          }
+          return acc;
+        })
+      );
+    }
+
+    // Update item stock in Item Masters
+    if (v.items && v.items.length > 0) {
+      setBusyItems((prev) =>
+        prev.map((item) => {
+          const matched = v.items.find(
+            (vi) => vi.itemName === item.name || vi.itemId === item.id
+          );
+          if (matched) {
+            let updatedQty = item.currentQty;
+            if (v.voucherType === "purchase" || v.voucherType === "credit_note") {
+              updatedQty += matched.qty;
+            } else if (v.voucherType === "sales" || v.voucherType === "debit_note") {
+              updatedQty = Math.max(0, updatedQty - matched.qty);
+            }
+            return { ...item, currentQty: updatedQty };
+          }
+          return item;
+        })
+      );
+    }
+
+    // Append to MCA statutory audit trail
+    appendAuditLog(
+      "CREATE",
+      "BUSY Accounting",
+      v.id,
+      v.voucherNo,
+      `Voucher ${v.voucherNo} posted (${v.voucherType.toUpperCase()}) for ${v.partyName}. Amount: ${formatINR(v.totalAmount)}`
+    );
+  };
+
+  const handleDeleteBusyVoucher = (id: string) => {
+    const item = busyVouchers.find((v) => v.id === id);
+    setBusyVouchers((prev) => prev.filter((v) => v.id !== id));
+    appendAuditLog(
+      "DELETE",
+      "BUSY Accounting",
+      id,
+      item?.voucherNo || id,
+      `Voucher ${item?.voucherNo || id} cancelled and removed from general ledger sequence.`
+    );
+  };
+
+  const handleResetToBusyDefaults = () => {
+    setBusyAccounts(initialBusyAccountMasters);
+    setBusyItems(initialBusyItemMasters);
+    setBusyVouchers(initialBusyVouchers);
+    appendAuditLog(
+      "UPDATE",
+      "BUSY Accounting",
+      "BUSY-INIT",
+      "Auto-Setup Masters",
+      "Auto-initialized all 28 Account Masters, Item Masters, Bill Sundries and standard voucher sequences from course manual."
+    );
+    alert("BUSY Accounting Engine auto-initialized with 28 Master Ledgers, Stock Items, and Vouchers!");
+  };
+
+  const handleBackupData = () => {
+    const data = {
+      company,
+      busyAccounts,
+      busyItems,
+      busyVouchers,
+      invoices,
+      items,
+      auditLogs,
+      timestamp: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `BUSY_Complete_Accounting_Backup_${new Date()
+      .toISOString()
+      .substring(0, 10)}.json`;
+    a.click();
+    appendAuditLog(
+      "EXPORT",
+      "BUSY Housekeeping",
+      "BACKUP-01",
+      "JSON Backup",
+      "Generated and downloaded statutory financial database backup."
     );
   };
 
@@ -879,6 +1064,31 @@ export default function Home() {
             <ChartOfAccountsView tree={chartOfAccountsTree} />
           )}
 
+          {activeModule === "busy-accounting" && (
+            <BusyAccountingHub
+              company={company}
+              vouchers={busyVouchers}
+              accounts={busyAccounts}
+              items={busyItems}
+              onOpenNewVoucher={(type) => {
+                setBusyVoucherType(type);
+                setIsBusyVoucherOpen(true);
+              }}
+              onOpenLedger={(accId) => {
+                setSelectedLedgerAccountId(accId);
+                setIsBusyLedgerOpen(true);
+              }}
+              onOpenItemLedger={(itemId) => {
+                setSelectedItemLedgerId(itemId);
+                setIsBusyItemLedgerOpen(true);
+              }}
+              onOpenHelp={() => setIsBusyHelpOpen(true)}
+              onDeleteVoucher={handleDeleteBusyVoucher}
+              onResetToBusyDefaults={handleResetToBusyDefaults}
+              onBackupData={handleBackupData}
+            />
+          )}
+
           {activeModule === "audit-trail" && (
             <AuditTrailView logs={auditLogs} />
           )}
@@ -966,6 +1176,101 @@ export default function Home() {
         onClose={() => setIsHelpOpen(false)}
         activeModule={activeModule}
       />
+
+      {/* BUSY Accounting Modals */}
+      <BusyVoucherModal
+        isOpen={isBusyVoucherOpen}
+        onClose={() => setIsBusyVoucherOpen(false)}
+        onSave={handleSaveBusyVoucher}
+        initialType={busyVoucherType}
+        company={company}
+        accounts={busyAccounts}
+        items={busyItems}
+      />
+
+      <BusyLedgerModal
+        isOpen={isBusyLedgerOpen}
+        onClose={() => setIsBusyLedgerOpen(false)}
+        accounts={busyAccounts}
+        vouchers={busyVouchers}
+        company={company}
+        selectedAccountId={selectedLedgerAccountId}
+      />
+
+      <BusyItemLedgerModal
+        isOpen={isBusyItemLedgerOpen}
+        onClose={() => setIsBusyItemLedgerOpen(false)}
+        items={busyItems}
+        vouchers={busyVouchers}
+        company={company}
+        selectedItemId={selectedItemLedgerId}
+      />
+
+      <BusyHelpModal
+        isOpen={isBusyHelpOpen}
+        onClose={() => setIsBusyHelpOpen(false)}
+      />
+
+      {/* Persistent BUSY Accounting Shortcut Floating Dock (Bottom Left) */}
+      <div className="fixed bottom-5 left-5 z-40 hidden sm:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-700/80 shadow-2xl text-[11px] text-white">
+        <span className="px-2 font-black text-blue-400 border-r border-slate-700 mr-0.5">
+          BUSY
+        </span>
+        <button
+          onClick={() => {
+            setBusyVoucherType("sales");
+            setIsBusyVoucherOpen(true);
+          }}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600/80 hover:bg-emerald-500 font-bold transition-all"
+        >
+          <span>Sales</span>
+          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F8</kbd>
+        </button>
+        <button
+          onClick={() => {
+            setBusyVoucherType("purchase");
+            setIsBusyVoucherOpen(true);
+          }}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600/80 hover:bg-blue-500 font-bold transition-all"
+        >
+          <span>Purchase</span>
+          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F9</kbd>
+        </button>
+        <button
+          onClick={() => {
+            setBusyVoucherType("payment");
+            setIsBusyVoucherOpen(true);
+          }}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-600/80 hover:bg-purple-500 font-bold transition-all"
+        >
+          <span>Payment</span>
+          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F5</kbd>
+        </button>
+        <button
+          onClick={() => {
+            setBusyVoucherType("receipt");
+            setIsBusyVoucherOpen(true);
+          }}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-600/80 hover:bg-amber-500 font-bold transition-all"
+        >
+          <span>Receipt</span>
+          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F6</kbd>
+        </button>
+        <button
+          onClick={() => setIsBusyLedgerOpen(true)}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-600/80 hover:bg-rose-500 font-bold transition-all"
+        >
+          <span>Ledger</span>
+          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">Alt+L</kbd>
+        </button>
+        <button
+          onClick={() => setIsBusyHelpOpen(true)}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-700 hover:bg-slate-600 font-bold transition-all"
+        >
+          <span>Help</span>
+          <kbd className="bg-black/40 px-1 rounded text-[9px] font-mono">F1</kbd>
+        </button>
+      </div>
     </div>
   );
 }
