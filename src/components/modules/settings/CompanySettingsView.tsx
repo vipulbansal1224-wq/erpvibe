@@ -35,6 +35,10 @@ import {
   XCircle,
   UserCheck,
   ShieldAlert,
+  Calculator,
+  Package,
+  FileText,
+  Repeat,
 } from "lucide-react";
 import {
   CompanyInfo,
@@ -73,7 +77,7 @@ export function CompanySettingsView({
   onUpdateUser,
   onDeleteUser,
 }: CompanySettingsViewProps) {
-  const [activeTab, setActiveTab] = useState<"users" | "modules" | "profile" | "data">("users");
+  const [activeTab, setActiveTab] = useState<"modules" | "users" | "profile" | "data">("modules");
   const [formData, setFormData] = useState<CompanyInfo>(company);
   const [localSettings, setLocalSettings] = useState<ModuleSettings>(moduleSettings);
   const [savedAlert, setSavedAlert] = useState(false);
@@ -295,31 +299,66 @@ export function CompanySettingsView({
     icon: any;
   }[] = [
     {
+      key: "busyAccounting",
+      title: "Advanced Accounting & Voucher Master Engine",
+      description: "Indian statutory daily vouchers F1-F9 (Sales, Purchase, Payment, Receipt, Contra, Journal, Debit/Credit Notes), Bill Sundries, and Alt+L account ledger books.",
+      category: "Finance",
+      icon: Calculator,
+    },
+    {
+      key: "invoices",
+      title: "Tax Invoices (B2B & B2C)",
+      description: "GST-compliant tax invoices with automatic CGST/SGST/IGST breakdown, IRN QR code, and e-Way bill linkage.",
+      category: "Billing",
+      icon: Receipt,
+    },
+    {
+      key: "inventory",
+      title: "Stock & Item Master (Inventory)",
+      description: "Multi-godown inventory, HSN/SAC master, opening stock balances, reorder level alerts, and barcode scanning.",
+      category: "Supply Chain",
+      icon: Package,
+    },
+    {
+      key: "gstCompliance",
+      title: "India GST & Statutory Compliance Hub",
+      description: "Real-time GSTIN verification, e-Invoicing (IRN), e-Way Bills, GSTR-1/3B JSON generator, and TDS/TCS auto calculations.",
+      category: "Statutory",
+      icon: ShieldCheck,
+    },
+    {
+      key: "pos",
+      title: "Point of Sale (POS) Terminal",
+      description: "Fast retail register with touch grid, barcode search, dynamic UPI QR code, cash drawer, and thermal receipt printing.",
+      category: "Retail",
+      icon: ShoppingCart,
+    },
+    {
       key: "manufacturing",
       title: "Manufacturing & Production (BOM)",
-      description: "Bill of materials, work orders, raw material consumption, and production line scheduling.",
-      category: "Operations",
+      description: "Multi-level Bill of Materials (BOM), work orders execution, raw material consumption, and production line scheduling.",
+      category: "Supply Chain",
       icon: Factory,
     },
     {
       key: "quality",
       title: "Quality Management & Inspection (QM)",
       description: "Incoming GRN inspections, in-process tolerances, pre-dispatch quality certificates and non-conformance quarantine.",
-      category: "Operations",
+      category: "Supply Chain",
       icon: ShieldCheck,
     },
     {
       key: "fleet",
       title: "Fleet & Logistics Management (TMS)",
       description: "Commercial vehicle registry, driver assignments, fuel tracking, odometer logs, and insurance/fitness expiry alerts.",
-      category: "Operations",
+      category: "Supply Chain",
       icon: Truck,
     },
     {
       key: "jobwork",
       title: "Subcontracting & Job Work (Form GST ITC-04)",
       description: "GST Section 143 delivery challans, materials sent to processors, scrap accountability and 1-year return deadlines.",
-      category: "Operations",
+      category: "Supply Chain",
       icon: Factory,
     },
     {
@@ -327,14 +366,7 @@ export function CompanySettingsView({
       title: "Subscriptions & Recurring AMC",
       description: "SaaS subscriptions, annual maintenance contracts, MRR revenue metrics, and auto GST recurring invoice generation.",
       category: "Sales",
-      icon: Receipt,
-    },
-    {
-      key: "pos",
-      title: "Point of Sale (POS) Counter",
-      description: "Fast retail register with touch grid, barcode search, dynamic UPI QR code, and receipt printing.",
-      category: "Retail",
-      icon: ShoppingCart,
+      icon: Repeat,
     },
     {
       key: "projects",
@@ -383,13 +415,6 @@ export function CompanySettingsView({
       title: "Document Management & Legal Compliance Vault (DMS)",
       description: "AES-256 encrypted storage for PAN, CIN, GST certificates, factory licenses, leases and expiry alarms.",
       category: "Compliance",
-      icon: ShieldCheck,
-    },
-    {
-      key: "gstCompliance",
-      title: "India GST & Statutory Compliance",
-      description: "e-Invoicing (IRN), e-Way Bills, GSTR-1/3B JSON generator, HSN lookup, and TDS/TCS calculation.",
-      category: "Statutory",
       icon: ShieldCheck,
     },
     {
@@ -458,6 +483,20 @@ export function CompanySettingsView({
       {/* Tabs */}
       <div className="flex border-b border-slate-200 dark:border-slate-800 gap-2 text-xs font-semibold overflow-x-auto">
         <button
+          onClick={() => setActiveTab("modules")}
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
+            activeTab === "modules"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400 font-bold"
+              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
+          }`}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Module Switchboard (Enable / Disable Modules)
+          <span className="ml-1 rounded-full bg-blue-100 dark:bg-blue-950 px-2 py-0.5 text-[10px] text-blue-700 dark:text-blue-300 font-bold">
+            {Object.values(localSettings).filter(Boolean).length}/{moduleItems.length} Active
+          </span>
+        </button>
+        <button
           onClick={() => setActiveTab("users")}
           className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
             activeTab === "users"
@@ -470,17 +509,6 @@ export function CompanySettingsView({
           <span className="ml-1 rounded-full bg-indigo-100 dark:bg-indigo-950 px-2 py-0.5 text-[10px] text-indigo-700 dark:text-indigo-300 font-bold">
             {userList.length} Logins
           </span>
-        </button>
-        <button
-          onClick={() => setActiveTab("modules")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
-            activeTab === "modules"
-              ? "border-blue-600 text-blue-600 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
-          }`}
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Enable / Disable Modules (Feature Toggles)
         </button>
         <button
           onClick={() => setActiveTab("profile")}
@@ -760,12 +788,39 @@ export function CompanySettingsView({
       {/* TAB 1: MODULE SWITCHBOARD */}
       {activeTab === "modules" && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 p-4 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-blue-600" />
-              <span>
-                <strong>Tailor ERPVibe to your business:</strong> Turn off modules your company doesn't need (e.g. disable Manufacturing if you are a Service business, or disable POS if you are pure B2B).
-              </span>
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-900/60 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-blue-50/70 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-blue-950/30 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-sm">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
+                  <SlidersHorizontal className="h-4 w-4" />
+                </span>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Interactive Module Switchboard (Feature Toggles)
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold font-mono text-[10px]">
+                  {Object.values(localSettings).filter(Boolean).length} / {moduleItems.length} Enabled
+                </span>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 text-xs max-w-2xl">
+                Enable or disable any module below. Disabled modules are instantly hidden from the left sidebar, and the navigation menu automatically re-numbers (1 to N) in real time.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  const updated: ModuleSettings = { ...localSettings };
+                  (Object.keys(updated) as (keyof ModuleSettings)[]).forEach((k) => {
+                    updated[k] = true;
+                  });
+                  setLocalSettings(updated);
+                  onUpdateModuleSettings(updated);
+                }}
+                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all"
+              >
+                Enable All Modules
+              </button>
             </div>
           </div>
 

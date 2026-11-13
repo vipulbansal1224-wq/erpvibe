@@ -137,6 +137,10 @@ export default function Home() {
       if (savedSession) {
         setCurrentUser(JSON.parse(savedSession));
       }
+      const savedModules = localStorage.getItem("erpvibe_module_settings");
+      if (savedModules) {
+        setModuleSettings((prev) => ({ ...prev, ...JSON.parse(savedModules) }));
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -232,6 +236,13 @@ export default function Home() {
     invoices: true,
     inventory: true,
   });
+
+  const handleUpdateModuleSettings = (newSettings: ModuleSettings) => {
+    setModuleSettings(newSettings);
+    try {
+      localStorage.setItem("erpvibe_module_settings", JSON.stringify(newSettings));
+    } catch (e) {}
+  };
 
   // Switch to clean slate (Clear dummy data)
   const handleResetToCleanSlate = () => {
@@ -1189,7 +1200,7 @@ export default function Home() {
               company={company}
               moduleSettings={moduleSettings}
               onUpdateCompany={handleUpdateCompany}
-              onUpdateModuleSettings={setModuleSettings}
+              onUpdateModuleSettings={handleUpdateModuleSettings}
               onResetToCleanSlate={handleResetToCleanSlate}
               onRestoreDemoData={handleRestoreDemoData}
               users={users}
