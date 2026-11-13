@@ -46,6 +46,7 @@ import { BusyVoucherModal } from "@/components/modules/busy/BusyVoucherModal";
 import { BusyLedgerModal } from "@/components/modules/busy/BusyLedgerModal";
 import { BusyItemLedgerModal } from "@/components/modules/busy/BusyItemLedgerModal";
 import { BusyHelpModal } from "@/components/modules/busy/BusyHelpModal";
+import { ModuleSwitchboardModal } from "@/components/modules/settings/ModuleSwitchboardModal";
 import { LoginView } from "@/components/auth/LoginView";
 
 // Data & Types
@@ -121,6 +122,7 @@ import { generateMockIRN, formatINR } from "@/lib/utils";
 export default function Home() {
   const [activeModule, setActiveModule] = useState<ModuleType>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSwitchboardOpen, setIsSwitchboardOpen] = useState(false);
 
   // User Authentication & RBAC Session State
   const [users, setUsers] = useState<AppUser[]>(initialUsers);
@@ -951,6 +953,7 @@ export default function Home() {
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
         moduleSettings={moduleSettings}
+        onOpenSwitchboard={() => setIsSwitchboardOpen(true)}
       />
 
       {/* Main Workspace Area */}
@@ -1370,6 +1373,14 @@ export default function Home() {
       <BusyHelpModal
         isOpen={isBusyHelpOpen}
         onClose={() => setIsBusyHelpOpen(false)}
+      />
+
+      {/* Standalone Module Switchboard Modal (Feature Toggles) */}
+      <ModuleSwitchboardModal
+        isOpen={isSwitchboardOpen}
+        onClose={() => setIsSwitchboardOpen(false)}
+        moduleSettings={moduleSettings}
+        onUpdateModuleSettings={handleUpdateModuleSettings}
       />
     </div>
   );

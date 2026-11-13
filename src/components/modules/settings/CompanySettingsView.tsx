@@ -52,9 +52,9 @@ import { initialUsers } from "@/data/initialUsers";
 
 interface CompanySettingsViewProps {
   company: CompanyInfo;
-  moduleSettings: ModuleSettings;
+  moduleSettings?: ModuleSettings;
   onUpdateCompany: (company: CompanyInfo) => void;
-  onUpdateModuleSettings: (settings: ModuleSettings) => void;
+  onUpdateModuleSettings?: (settings: ModuleSettings) => void;
   onResetToCleanSlate: () => void;
   onRestoreDemoData: () => void;
   users?: AppUser[];
@@ -77,9 +77,8 @@ export function CompanySettingsView({
   onUpdateUser,
   onDeleteUser,
 }: CompanySettingsViewProps) {
-  const [activeTab, setActiveTab] = useState<"modules" | "users" | "profile" | "data">("modules");
+  const [activeTab, setActiveTab] = useState<"users" | "profile" | "data">("users");
   const [formData, setFormData] = useState<CompanyInfo>(company);
-  const [localSettings, setLocalSettings] = useState<ModuleSettings>(moduleSettings);
   const [savedAlert, setSavedAlert] = useState(false);
   const [cleanAlert, setCleanAlert] = useState(false);
 
@@ -291,190 +290,21 @@ export function CompanySettingsView({
     setTimeout(() => setSavedAlert(false), 3000);
   };
 
-  const handleToggleModule = (key: keyof ModuleSettings) => {
-    const updated = { ...localSettings, [key]: !localSettings[key] };
-    setLocalSettings(updated);
-    onUpdateModuleSettings(updated);
-  };
-
-  const moduleItems: {
-    key: keyof ModuleSettings;
-    title: string;
-    description: string;
-    category: string;
-    icon: any;
-  }[] = [
-    {
-      key: "busyAccounting",
-      title: "Advanced Accounting & Voucher Master Engine",
-      description: "Indian statutory daily vouchers F1-F9 (Sales, Purchase, Payment, Receipt, Contra, Journal, Debit/Credit Notes), Bill Sundries, and Alt+L account ledger books.",
-      category: "Finance",
-      icon: Calculator,
-    },
-    {
-      key: "invoices",
-      title: "Tax Invoices (B2B & B2C)",
-      description: "GST-compliant tax invoices with automatic CGST/SGST/IGST breakdown, IRN QR code, and e-Way bill linkage.",
-      category: "Billing",
-      icon: Receipt,
-    },
-    {
-      key: "inventory",
-      title: "Stock & Item Master (Inventory)",
-      description: "Multi-godown inventory, HSN/SAC master, opening stock balances, reorder level alerts, and barcode scanning.",
-      category: "Supply Chain",
-      icon: Package,
-    },
-    {
-      key: "gstCompliance",
-      title: "India GST & Statutory Compliance Hub",
-      description: "Real-time GSTIN verification, e-Invoicing (IRN), e-Way Bills, GSTR-1/3B JSON generator, and TDS/TCS auto calculations.",
-      category: "Statutory",
-      icon: ShieldCheck,
-    },
-    {
-      key: "pos",
-      title: "Point of Sale (POS) Terminal",
-      description: "Fast retail register with touch grid, barcode search, dynamic UPI QR code, cash drawer, and thermal receipt printing.",
-      category: "Retail",
-      icon: ShoppingCart,
-    },
-    {
-      key: "manufacturing",
-      title: "Manufacturing & Production (BOM)",
-      description: "Multi-level Bill of Materials (BOM), work orders execution, raw material consumption, and production line scheduling.",
-      category: "Supply Chain",
-      icon: Factory,
-    },
-    {
-      key: "quality",
-      title: "Quality Management & Inspection (QM)",
-      description: "Incoming GRN inspections, in-process tolerances, pre-dispatch quality certificates and non-conformance quarantine.",
-      category: "Supply Chain",
-      icon: ShieldCheck,
-    },
-    {
-      key: "fleet",
-      title: "Fleet & Logistics Management (TMS)",
-      description: "Commercial vehicle registry, driver assignments, fuel tracking, odometer logs, and insurance/fitness expiry alerts.",
-      category: "Supply Chain",
-      icon: Truck,
-    },
-    {
-      key: "jobwork",
-      title: "Subcontracting & Job Work (Form GST ITC-04)",
-      description: "GST Section 143 delivery challans, materials sent to processors, scrap accountability and 1-year return deadlines.",
-      category: "Supply Chain",
-      icon: Factory,
-    },
-    {
-      key: "subscriptions",
-      title: "Subscriptions & Recurring AMC",
-      description: "SaaS subscriptions, annual maintenance contracts, MRR revenue metrics, and auto GST recurring invoice generation.",
-      category: "Sales",
-      icon: Repeat,
-    },
-    {
-      key: "projects",
-      title: "Projects & Timesheet Billing",
-      description: "Client milestones, consultant assignments, task kanban, and billable hour logging.",
-      category: "Services",
-      icon: FolderKanban,
-    },
-    {
-      key: "banking",
-      title: "Banking & Bank Reconciliation",
-      description: "Multi-bank feeds (HDFC, ICICI, SBI) and 1-click matching of statement transactions against invoices.",
-      category: "Finance",
-      icon: CreditCard,
-    },
-    {
-      key: "expenses",
-      title: "Employee Expenses & Reimbursements",
-      description: "Staff expense claims, travel/food allowance receipts, multi-tier approvals, and payroll reconciliation.",
-      category: "Finance",
-      icon: Receipt,
-    },
-    {
-      key: "assets",
-      title: "Fixed Assets & Depreciation (Schedule II)",
-      description: "Automated Straight Line (SLM) and Written Down Value (WDV) depreciation under Companies Act 2013.",
-      category: "Finance",
-      icon: Boxes,
-    },
-    {
-      key: "helpdesk",
-      title: "Customer Support & SLA Helpdesk",
-      description: "Client ticketing system with SLA timers, priority queues, and customer feedback resolution.",
-      category: "Support",
-      icon: LifeBuoy,
-    },
-    {
-      key: "recruitment",
-      title: "Recruitment & Applicant Tracking (ATS)",
-      description: "Candidate pipeline, interview stage progression, star ratings, and direct transfer into payroll master.",
-      category: "Human Resources",
-      icon: Users,
-    },
-    {
-      key: "documents",
-      title: "Document Management & Legal Compliance Vault (DMS)",
-      description: "AES-256 encrypted storage for PAN, CIN, GST certificates, factory licenses, leases and expiry alarms.",
-      category: "Compliance",
-      icon: ShieldCheck,
-    },
-    {
-      key: "payroll",
-      title: "India Payroll & Deductions",
-      description: "Statutory employee deductions: EPF (12%), ESIC, State Professional Tax (PT), and Salary TDS.",
-      category: "Human Resources",
-      icon: BadgeIndianRupee,
-    },
-    {
-      key: "customers",
-      title: "Customers & Quotations (CRM)",
-      description: "Customer directory with GSTIN verification, credit limits, and commercial proposals.",
-      category: "Sales",
-      icon: Users,
-    },
-    {
-      key: "suppliers",
-      title: "Suppliers & MSME Purchasing",
-      description: "Vendor master tagged by MSME category for compliance with statutory 45-day payment rules.",
-      category: "Procurement",
-      icon: Truck,
-    },
-    {
-      key: "financialReports",
-      title: "Financial Statements (P&L / Balance Sheet)",
-      description: "Schedule III Balance Sheet, Profit & Loss statement, and Cash Flow statement with CSV export.",
-      category: "Finance",
-      icon: BarChart3,
-    },
-    {
-      key: "auditTrail",
-      title: "MCA Audit Trail (Edit Log)",
-      description: "Companies Act 2013 mandatory audit log tracking every transaction change, IP, and timestamp.",
-      category: "Compliance",
-      icon: ShieldCheck,
-    },
-  ];
-
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-              <SlidersHorizontal className="h-5 w-5" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+              <KeyRound className="h-5 w-5" />
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              System Settings & Feature Switchboard
+              Settings & User Access Control
             </h2>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Customize ERPVibe to your exact business model: enable/disable any module, configure your company GSTIN, or reset to fresh production data.
+            Manage corporate user logins, role permissions (RBAC), organization GSTIN profile, and system data mode.
           </p>
         </div>
 
@@ -488,20 +318,6 @@ export function CompanySettingsView({
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 dark:border-slate-800 gap-2 text-xs font-semibold overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("modules")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
-            activeTab === "modules"
-              ? "border-blue-600 text-blue-600 dark:text-blue-400 font-bold"
-              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
-          }`}
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Module Switchboard (Enable / Disable Modules)
-          <span className="ml-1 rounded-full bg-blue-100 dark:bg-blue-950 px-2 py-0.5 text-[10px] text-blue-700 dark:text-blue-300 font-bold">
-            {Object.values(localSettings).filter(Boolean).length}/{moduleItems.length} Active
-          </span>
-        </button>
         <button
           onClick={() => setActiveTab("users")}
           className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
@@ -520,7 +336,7 @@ export function CompanySettingsView({
           onClick={() => setActiveTab("profile")}
           className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
             activeTab === "profile"
-              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400 font-bold"
               : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
           }`}
         >
@@ -531,7 +347,7 @@ export function CompanySettingsView({
           onClick={() => setActiveTab("data")}
           className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
             activeTab === "data"
-              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400 font-bold"
               : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
           }`}
         >
@@ -791,105 +607,7 @@ export function CompanySettingsView({
         </div>
       )}
 
-      {/* TAB 1: MODULE SWITCHBOARD */}
-      {activeTab === "modules" && (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-blue-200 dark:border-blue-900/60 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-blue-50/70 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-blue-950/30 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-sm">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
-                  <SlidersHorizontal className="h-4 w-4" />
-                </span>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Interactive Module Switchboard (Feature Toggles)
-                </h3>
-                <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold font-mono text-[10px]">
-                  {Object.values(localSettings).filter(Boolean).length} / {moduleItems.length} Enabled
-                </span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 text-xs max-w-2xl">
-                Enable or disable any module below. Disabled modules are instantly hidden from the left sidebar, and the navigation menu automatically re-numbers (1 to N) in real time.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  const updated: ModuleSettings = { ...localSettings };
-                  (Object.keys(updated) as (keyof ModuleSettings)[]).forEach((k) => {
-                    updated[k] = true;
-                  });
-                  setLocalSettings(updated);
-                  onUpdateModuleSettings(updated);
-                }}
-                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-all"
-              >
-                Enable All Modules
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {moduleItems.map((item) => {
-              const Icon = item.icon;
-              const isEnabled = localSettings[item.key];
-              return (
-                <div
-                  key={item.key}
-                  className={`p-4 rounded-xl border transition-all flex items-start justify-between gap-4 ${
-                    isEnabled
-                      ? "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-                      : "border-slate-100 dark:border-slate-800/40 bg-slate-50/60 dark:bg-slate-900/40 opacity-75"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        isEnabled
-                          ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
-                          : "bg-slate-200 dark:bg-slate-800 text-slate-400"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-xs text-slate-900 dark:text-white">
-                          {item.title}
-                        </h4>
-                        <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded text-slate-500">
-                          {item.category}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Toggle Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleToggleModule(item.key)}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      isEnabled ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-700"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        isEnabled ? "translate-x-5" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: COMPANY PROFILE */}
+      {/* TAB 1: COMPANY PROFILE */}
       {activeTab === "profile" && (
         <form onSubmit={handleProfileSubmit} className="space-y-6">
           <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm space-y-4">

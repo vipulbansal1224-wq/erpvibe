@@ -42,6 +42,7 @@ interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   moduleSettings: ModuleSettings;
+  onOpenSwitchboard?: () => void;
 }
 
 export function Sidebar({
@@ -50,6 +51,7 @@ export function Sidebar({
   isOpen,
   setIsOpen,
   moduleSettings,
+  onOpenSwitchboard,
 }: SidebarProps) {
   const allNavSections = [
     {
@@ -247,12 +249,20 @@ export function Sidebar({
         {/* Bottom Banner */}
         <div className="border-t border-slate-800 p-4">
           <button
-            onClick={() => setActiveModule("settings")}
-            className="w-full text-left rounded-xl bg-gradient-to-r from-blue-950/60 to-indigo-950/60 border border-blue-800/40 p-3 hover:border-blue-500/60 transition-all"
+            type="button"
+            onClick={() => {
+              if (onOpenSwitchboard) {
+                onOpenSwitchboard();
+              } else {
+                setActiveModule("settings");
+              }
+              setIsOpen(false);
+            }}
+            className="w-full text-left rounded-xl bg-gradient-to-r from-blue-950/60 to-indigo-950/60 border border-blue-800/40 p-3 hover:border-blue-500/60 transition-all cursor-pointer group"
           >
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5">
-                <SlidersHorizontal className="h-4 w-4 text-blue-400" />
+                <SlidersHorizontal className="h-4 w-4 text-blue-400 group-hover:scale-110 transition-transform" />
                 <span className="text-xs font-bold text-blue-200">Module Switchboard</span>
               </div>
               <span className="text-[10px] bg-blue-500/30 text-blue-200 px-1.5 py-0.5 rounded font-black font-mono">
