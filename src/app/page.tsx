@@ -191,7 +191,9 @@ export default function Home() {
     try {
       localStorage.setItem("erpvibe_session", JSON.stringify(user));
     } catch (e) {}
-    appendAuditLog("UPDATE", "Authentication", user.id, user.username, `User logged in to session from IP 192.168.1.10`);
+    try {
+      appendAuditLog("UPDATE", "Authentication", user.id, user.username, `User logged in to session from IP 192.168.1.10`);
+    } catch (e) {}
   };
 
   const handleLogout = () => {

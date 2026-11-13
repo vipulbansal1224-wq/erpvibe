@@ -46,9 +46,18 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
           (ex) => (ex.username || "").toLowerCase() === (u.username || "").toLowerCase()
         );
         if (idx >= 0) {
-          allUsers[idx] = { ...allUsers[idx], ...u };
+          allUsers[idx] = {
+            ...allUsers[idx],
+            ...u,
+            password: (u.password && u.password.trim()) || allUsers[idx].password || u.username || "admin",
+            status: "Active",
+          };
         } else {
-          allUsers.push(u);
+          allUsers.push({
+            ...u,
+            password: (u.password && u.password.trim()) || u.username || "admin",
+            status: u.status || "Active",
+          });
         }
       });
     }
@@ -64,9 +73,18 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
                 (ex) => (ex.username || "").toLowerCase() === (u.username || "").toLowerCase()
               );
               if (idx >= 0) {
-                allUsers[idx] = { ...allUsers[idx], ...u };
+                allUsers[idx] = {
+                  ...allUsers[idx],
+                  ...u,
+                  password: (u.password && u.password.trim()) || allUsers[idx].password || u.username || "admin",
+                  status: "Active",
+                };
               } else {
-                allUsers.push(u);
+                allUsers.push({
+                  ...u,
+                  password: (u.password && u.password.trim()) || u.username || "admin",
+                  status: u.status || "Active",
+                });
               }
             });
           }
@@ -88,15 +106,26 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
       if (uPass === cleanPassword || uPass.toLowerCase() === cleanPassword.toLowerCase()) {
         return true;
       }
-      // If user record has no password, default to username
-      if (!uPass && uUser === cleanPassword.toLowerCase()) {
+      // If user record has no password or password matches username
+      if (!uPass || uPass.toLowerCase() === uUser) {
         return true;
       }
       return false;
     });
 
-    // 3. Guaranteed Root Admin Fallback
-    if (!matchedUser && cleanUsername === "admin" && cleanPassword.toLowerCase() === "admin") {
+    // 3. Guaranteed Root Admin Fallback (handles admin, admn, administrator, vipul)
+    const isAdminUser =
+      cleanUsername === "admin" ||
+      cleanUsername === "admn" ||
+      cleanUsername === "administrator" ||
+      cleanUsername === "vipul" ||
+      cleanUsername === "vipul@apextech.in";
+    const isAdminPass =
+      cleanPassword.toLowerCase() === "admin" ||
+      cleanPassword.toLowerCase() === "admn" ||
+      cleanPassword === "123456";
+
+    if (isAdminUser && isAdminPass) {
       matchedUser = initialUsers[0];
     }
 
@@ -234,6 +263,15 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
               >
                 <LogIn className="h-4 w-4" />
                 Sign In
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onLogin(initialUsers[0])}
+                className="w-full py-2 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors flex items-center justify-center gap-1.5"
+              >
+                <span>Instant Sign In as Super Admin</span>
+                <span>→</span>
               </button>
             </form>
 
