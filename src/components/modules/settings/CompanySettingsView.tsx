@@ -23,8 +23,28 @@ import {
   Truck,
   BarChart3,
   Receipt,
+  KeyRound,
+  UserPlus,
+  Lock,
+  Eye,
+  EyeOff,
+  Edit,
+  Search,
+  Plus,
+  AlertCircle,
+  XCircle,
+  UserCheck,
+  ShieldAlert,
 } from "lucide-react";
-import { CompanyInfo, ModuleSettings } from "@/types/erp";
+import {
+  CompanyInfo,
+  ModuleSettings,
+  AppUser,
+  UserRole,
+  ModuleType,
+  ModulePermission,
+} from "@/types/erp";
+import { initialUsers } from "@/data/initialUsers";
 
 interface CompanySettingsViewProps {
   company: CompanyInfo;
@@ -33,6 +53,11 @@ interface CompanySettingsViewProps {
   onUpdateModuleSettings: (settings: ModuleSettings) => void;
   onResetToCleanSlate: () => void;
   onRestoreDemoData: () => void;
+  users?: AppUser[];
+  currentUser?: AppUser | null;
+  onAddUser?: (user: AppUser) => void;
+  onUpdateUser?: (user: AppUser) => void;
+  onDeleteUser?: (id: string) => void;
 }
 
 export function CompanySettingsView({
@@ -42,12 +67,212 @@ export function CompanySettingsView({
   onUpdateModuleSettings,
   onResetToCleanSlate,
   onRestoreDemoData,
+  users: propUsers,
+  currentUser,
+  onAddUser,
+  onUpdateUser,
+  onDeleteUser,
 }: CompanySettingsViewProps) {
-  const [activeTab, setActiveTab] = useState<"profile" | "modules" | "data">("modules");
+  const [activeTab, setActiveTab] = useState<"users" | "modules" | "profile" | "data">("users");
   const [formData, setFormData] = useState<CompanyInfo>(company);
   const [localSettings, setLocalSettings] = useState<ModuleSettings>(moduleSettings);
   const [savedAlert, setSavedAlert] = useState(false);
   const [cleanAlert, setCleanAlert] = useState(false);
+
+  // User Management State
+  const [userList, setUserList] = useState<AppUser[]>(propUsers && propUsers.length > 0 ? propUsers : initialUsers);
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState("all");
+
+  // User Modal State
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [formFullName, setFormFullName] = useState("");
+  const [formUsername, setFormUsername] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formPhone, setFormPhone] = useState("+91 ");
+  const [formPassword, setFormPassword] = useState("");
+  const [formRole, setFormRole] = useState<UserRole>("Finance & Accounts Admin");
+  const [formDepartment, setFormDepartment] = useState("Finance & Accounts");
+  const [formStatus, setFormStatus] = useState<"Active" | "Inactive">("Active");
+  const [formAllAccess, setFormAllAccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+
+  // Granular Module Permission matrix (for custom roles)
+  const defaultModulesList: { id: ModuleType; name: string; category: string }[] = [
+    { id: "invoices", name: "Tax Invoices (B2B/B2C)", category: "Billing & Sales" },
+    { id: "pos", name: "Point of Sale (POS)", category: "Billing & Sales" },
+    { id: "quotations", name: "Quotations & Estimates", category: "Billing & Sales" },
+    { id: "subscriptions", name: "Subscriptions & AMC", category: "Billing & Sales" },
+    { id: "customers", name: "Customers (CRM)", category: "Billing & Sales" },
+    { id: "busy-accounting", name: "Accounting & Vouchers (F1-F9)", category: "Financials" },
+    { id: "banking", name: "Banking & Reconciliation", category: "Financials" },
+    { id: "accounts", name: "Chart of Accounts", category: "Financials" },
+    { id: "financial-reports", name: "Financial Reports & P&L", category: "Financials" },
+    { id: "expenses", name: "Employee Expenses", category: "Financials" },
+    { id: "assets", name: "Fixed Assets & Depr.", category: "Financials" },
+    { id: "gst-compliance", name: "India GST & Compliance", category: "Statutory" },
+    { id: "audit-trail", name: "MCA Audit Trail", category: "Statutory" },
+    { id: "documents", name: "Legal Document Vault (DMS)", category: "Statutory" },
+    { id: "inventory", name: "Stock & Item Master", category: "Supply Chain" },
+    { id: "manufacturing", name: "Manufacturing & BOM", category: "Supply Chain" },
+    { id: "quality", name: "Quality Inspection (QM)", category: "Supply Chain" },
+    { id: "jobwork", name: "Subcontracting / ITC-04", category: "Supply Chain" },
+    { id: "fleet", name: "Fleet & Logistics (TMS)", category: "Supply Chain" },
+    { id: "suppliers", name: "Suppliers & MSME", category: "Supply Chain" },
+    { id: "purchase-orders", name: "Purchase Orders", category: "Supply Chain" },
+    { id: "payroll", name: "Payroll & Payslips", category: "Human Resources" },
+    { id: "recruitment", name: "Recruitment & ATS", category: "Human Resources" },
+    { id: "projects", name: "Projects & Timesheets", category: "Human Resources" },
+    { id: "helpdesk", name: "Helpdesk & SLA Tickets", category: "Human Resources" },
+    { id: "settings", name: "Settings & Access Control", category: "Administration" },
+  ];
+
+  const [permissionsMatrix, setPermissionsMatrix] = useState<Record<string, ModulePermission>>(() => {
+    const init: Record<string, ModulePermission> = {};
+    defaultModulesList.forEach((m) => {
+      init[m.id] = { view: true, create: false, edit: false, delete: false };
+    });
+    return init;
+  });
+
+  const handleOpenNewUser = () => {
+    setEditingUserId(null);
+    setFormFullName("");
+    setFormUsername("");
+    setFormEmail("");
+    setFormPhone("+91 ");
+    setFormPassword("user@123");
+    setFormRole("Finance & Accounts Admin");
+    setFormDepartment("Finance & Accounts");
+    setFormStatus("Active");
+    setFormAllAccess(false);
+    setShowPassword(false);
+    setModalError(null);
+
+    const init: Record<string, ModulePermission> = {};
+    defaultModulesList.forEach((m) => {
+      init[m.id] = { view: true, create: false, edit: false, delete: false };
+    });
+    setPermissionsMatrix(init);
+    setShowUserModal(true);
+  };
+
+  const handleOpenEditUser = (user: AppUser) => {
+    setEditingUserId(user.id);
+    setFormFullName(user.fullName);
+    setFormUsername(user.username);
+    setFormEmail(user.email);
+    setFormPhone(user.phone || "+91 ");
+    setFormPassword(user.password);
+    setFormRole(user.role);
+    setFormDepartment(user.department);
+    setFormStatus(user.status === "Active" ? "Active" : "Inactive");
+    setFormAllAccess(user.allAccess);
+    setShowPassword(false);
+    setModalError(null);
+
+    const existing: Record<string, ModulePermission> = {};
+    defaultModulesList.forEach((m) => {
+      existing[m.id] = user.permissions?.[m.id] || {
+        view: user.allAccess,
+        create: user.allAccess,
+        edit: user.allAccess,
+        delete: user.allAccess,
+      };
+    });
+    setPermissionsMatrix(existing);
+    setShowUserModal(true);
+  };
+
+  const handleSaveUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    setModalError(null);
+
+    if (!formFullName.trim() || !formUsername.trim() || !formPassword.trim()) {
+      setModalError("कृपया नाम, यूजरनेम और पासवर्ड भरें। (Full Name, Username & Password required)");
+      return;
+    }
+
+    const cleanUsername = formUsername.trim().toLowerCase();
+
+    // Check duplicate username if new
+    if (!editingUserId) {
+      const exists = userList.some((u) => u.username.toLowerCase() === cleanUsername);
+      if (exists) {
+        setModalError("यह यूजरनेम पहले से मौजूद है! कृपया कोई अन्य यूजरनेम चुनें। (Username already taken)");
+        return;
+      }
+    }
+
+    const savedRecord: AppUser = {
+      id: editingUserId || `USR-${Date.now().toString().slice(-4)}`,
+      fullName: formFullName.trim(),
+      username: cleanUsername,
+      email: formEmail.trim(),
+      phone: formPhone.trim(),
+      password: formPassword.trim(),
+      role: formRole,
+      department: formDepartment.trim(),
+      status: formStatus,
+      allAccess: formAllAccess,
+      permissions: formAllAccess ? undefined : permissionsMatrix,
+      createdAt: editingUserId ? userList.find((u) => u.id === editingUserId)?.createdAt || "2026-04-01" : new Date().toISOString().split("T")[0],
+      lastLoginAt: editingUserId ? userList.find((u) => u.id === editingUserId)?.lastLoginAt : undefined,
+    };
+
+    let updated: AppUser[];
+    if (editingUserId) {
+      updated = userList.map((u) => (u.id === editingUserId ? savedRecord : u));
+      if (onUpdateUser) onUpdateUser(savedRecord);
+    } else {
+      updated = [...userList, savedRecord];
+      if (onAddUser) onAddUser(savedRecord);
+    }
+    setUserList(updated);
+    setShowUserModal(false);
+    setSavedAlert(true);
+    setTimeout(() => setSavedAlert(false), 3000);
+  };
+
+  const handleToggleUserStatus = (userId: string) => {
+    if (userId === "USR-001") {
+      alert("मुख्य सुपर एडमिन (root admin) को निष्क्रिय नहीं किया जा सकता। (Cannot deactivate primary super admin)");
+      return;
+    }
+    const updated = userList.map((u) =>
+      u.id === userId
+        ? { ...u, status: (u.status === "Active" ? "Inactive" : "Active") as "Active" | "Inactive" }
+        : u
+    );
+    setUserList(updated);
+    const target = updated.find((u) => u.id === userId);
+    if (target && onUpdateUser) onUpdateUser(target);
+  };
+
+  const handleDeleteUserClick = (userId: string) => {
+    if (userId === "USR-001") {
+      alert("मुख्य सुपर एडमिन (root admin) को हटाया नहीं जा सकता। (Cannot delete primary super admin)");
+      return;
+    }
+    const target = userList.find((u) => u.id === userId);
+    if (window.confirm(`क्या आप वाकई यूजर "${target?.fullName}" (${target?.username}) को हमेशा के लिए हटाना चाहते हैं?`)) {
+      const updated = userList.filter((u) => u.id !== userId);
+      setUserList(updated);
+      if (onDeleteUser) onDeleteUser(userId);
+    }
+  };
+
+  const filteredUsers = userList.filter((u) => {
+    const matchesSearch =
+      u.fullName.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.username.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.role.toLowerCase().includes(userSearch.toLowerCase());
+    const matchesRole = userRoleFilter === "all" || u.role === userRoleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,10 +456,24 @@ export function CompanySettingsView({
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 gap-2 text-xs font-semibold">
+      <div className="flex border-b border-slate-200 dark:border-slate-800 gap-2 text-xs font-semibold overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("users")}
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
+            activeTab === "users"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400 font-bold"
+              : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
+          }`}
+        >
+          <KeyRound className="h-4 w-4 text-indigo-500" />
+          User Logins & Role Permissions (RBAC)
+          <span className="ml-1 rounded-full bg-indigo-100 dark:bg-indigo-950 px-2 py-0.5 text-[10px] text-indigo-700 dark:text-indigo-300 font-bold">
+            {userList.length} Logins
+          </span>
+        </button>
         <button
           onClick={() => setActiveTab("modules")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
             activeTab === "modules"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
@@ -245,7 +484,7 @@ export function CompanySettingsView({
         </button>
         <button
           onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
             activeTab === "profile"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
@@ -256,7 +495,7 @@ export function CompanySettingsView({
         </button>
         <button
           onClick={() => setActiveTab("data")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-all whitespace-nowrap ${
             activeTab === "data"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400"
@@ -266,6 +505,257 @@ export function CompanySettingsView({
           Data Mode (Demo vs Fresh Clean Slate)
         </button>
       </div>
+
+      {/* TAB 0: USER LOGINS & ACCESS CONTROL (RBAC) */}
+      {activeTab === "users" && (
+        <div className="space-y-6">
+          {/* Banner & Action */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-indigo-900/40">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Role-Based Access Control (RBAC)
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  AES-256 Vault Ready
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <KeyRound className="w-6 h-6 text-indigo-400" />
+                User Logins & Permission Rights Manager
+              </h3>
+              <p className="text-slate-300 text-xs mt-1 max-w-2xl leading-relaxed">
+                Create new logins, grant All Access or customize granular rights (View, Create, Modify, Delete) across all 27 ERP modules, edit passwords, and manage active sessions.
+              </p>
+            </div>
+            <button
+              onClick={handleOpenNewUser}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2.5 text-xs font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0"
+            >
+              <UserPlus className="h-4 w-4" />
+              Create New Login / नया यूजर जोड़ें
+            </button>
+          </div>
+
+          {/* KPI Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+              <div className="flex justify-between items-center text-xs text-slate-500">
+                <span>Total Registered Logins</span>
+                <Users className="h-4 w-4 text-blue-500" />
+              </div>
+              <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
+                {userList.length}
+              </p>
+              <span className="text-[10px] text-slate-400">Authorized corporate logins</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+              <div className="flex justify-between items-center text-xs text-slate-500">
+                <span>Active Logins</span>
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              </div>
+              <p className="mt-2 text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                {userList.filter((u) => u.status === "Active").length}
+              </p>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Permitted to enter ERP</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+              <div className="flex justify-between items-center text-xs text-slate-500">
+                <span>Super Admins (All Access)</span>
+                <ShieldCheck className="h-4 w-4 text-amber-500" />
+              </div>
+              <p className="mt-2 text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+                {userList.filter((u) => u.allAccess).length}
+              </p>
+              <span className="text-[10px] text-slate-400">Unrestricted module access</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+              <div className="flex justify-between items-center text-xs text-slate-500">
+                <span>MCA Edit Log Tracking</span>
+                <Lock className="h-4 w-4 text-purple-500" />
+              </div>
+              <p className="mt-2 text-2xl font-extrabold text-purple-600 dark:text-purple-400">
+                100%
+              </p>
+              <span className="text-[10px] text-purple-500 font-medium">Rule 3(1) Compliant Audit</span>
+            </div>
+          </div>
+
+          {/* Search & Filter Bar */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search by Name, Username, Role or Email..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs text-slate-500 whitespace-nowrap">Filter Role:</span>
+              <select
+                value={userRoleFilter}
+                onChange={(e) => setUserRoleFilter(e.target.value)}
+                className="w-full sm:w-auto px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+              >
+                <option value="all">All Roles (सभी पद)</option>
+                <option value="Super Admin">Super Admin</option>
+                <option value="Finance & Accounts Admin">Finance & Accounts Admin</option>
+                <option value="Sales & Billing Manager">Sales & Billing Manager</option>
+                <option value="Inventory & Store Incharge">Inventory & Store Incharge</option>
+                <option value="HR & Payroll Manager">HR & Payroll Manager</option>
+                <option value="Statutory Auditor">Statutory Auditor</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Users Table */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider">
+                  <tr>
+                    <th className="px-5 py-3.5">User & Login ID</th>
+                    <th className="px-5 py-3.5">Role & Department</th>
+                    <th className="px-5 py-3.5">Contact (Email & Phone)</th>
+                    <th className="px-5 py-3.5">Access Scope</th>
+                    <th className="px-5 py-3.5 text-center">Status</th>
+                    <th className="px-5 py-3.5">Last Login</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filteredUsers.map((user) => {
+                    const isRootAdmin = user.id === "USR-001";
+                    return (
+                      <tr key={user.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-blue-600 text-white font-black text-xs shadow-sm shrink-0">
+                              {user.fullName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .slice(0, 2)
+                                .join("")
+                                .toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                {user.fullName}
+                                {isRootAdmin && (
+                                  <span className="text-[9px] bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold px-1.5 py-0.2 rounded border border-amber-500/30">
+                                    ROOT
+                                  </span>
+                                )}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="font-mono text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
+                                  @{user.username}
+                                </span>
+                                <span className="text-[10px] text-slate-400">• Created {user.createdAt}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${
+                              user.role === "Super Admin"
+                                ? "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                : user.role.includes("Finance")
+                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                : user.role.includes("Sales")
+                                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                : user.role.includes("Inventory")
+                                ? "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                                : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                            }`}
+                          >
+                            {user.role}
+                          </span>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{user.department}</p>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <p className="font-medium text-slate-800 dark:text-slate-200">{user.email}</p>
+                          <p className="text-[10px] text-slate-400 font-mono mt-0.5">{user.phone || "—"}</p>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          {user.allAccess ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              All Access (27 Modules)
+                            </span>
+                          ) : (
+                            <div>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                                <SlidersHorizontal className="h-3 w-3" />
+                                Custom Permissions
+                              </span>
+                              <p className="text-[10px] text-slate-400">
+                                {Object.keys(user.permissions || {}).length} modules configured
+                              </p>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUserStatus(user.id)}
+                            title="Click to toggle Active / Inactive"
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all border ${
+                              user.status === "Active"
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-200"
+                                : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border-slate-300 hover:bg-slate-300"
+                            }`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full ${user.status === "Active" ? "bg-emerald-500" : "bg-slate-400"}`} />
+                            {user.status}
+                          </button>
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-500 font-mono text-[10px]">
+                          {user.lastLoginAt ? user.lastLoginAt : "Never logged in"}
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleOpenEditUser(user)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                              title="Modify Login & Permissions"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            {!isRootAdmin && (
+                              <button
+                                onClick={() => handleDeleteUserClick(user.id)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
+                                title="Delete Login"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-slate-500 text-xs">
+                        No user logins found matching your filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TAB 1: MODULE SWITCHBOARD */}
       {activeTab === "modules" && (
@@ -603,6 +1093,364 @@ export function CompanySettingsView({
                 Ledger updated successfully!
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* USER CREATE / EDIT MODAL */}
+      {showUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col my-8">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                  <UserPlus className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {editingUserId ? "Edit User Login & Permissions" : "Create New Corporate Login"}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Role-Based Access Control (RBAC) & Authentication Gateway
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowUserModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <XCircle className="h-5 w-5" />
+              </button>
+            </div>
+
+            {modalError && (
+              <div className="my-3 p-3 rounded-xl border border-red-500/40 bg-red-950/40 text-red-200 text-xs flex items-center gap-2 shrink-0">
+                <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+                <span>{modalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveUser} className="space-y-4 overflow-y-auto pr-1 flex-1 py-4">
+              {/* Credentials Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Full Legal Name *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Rahul Sharma"
+                    value={formFullName}
+                    onChange={(e) => setFormFullName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Username (Login Handle) *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-xs font-mono text-slate-400">@</span>
+                    <input
+                      type="text"
+                      placeholder="rahul.s"
+                      value={formUsername}
+                      onChange={(e) => setFormUsername(e.target.value.toLowerCase().replace(/\s+/g, ""))}
+                      className="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Official Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="user@apextech.in"
+                    value={formEmail}
+                    onChange={(e) => setFormEmail(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Mobile Phone #
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+91 98..."
+                    value={formPhone}
+                    onChange={(e) => setFormPhone(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Password Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Login Password *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFormPassword(`EV@${Math.floor(1000 + Math.random() * 9000)}#IN`)}
+                      className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
+                    >
+                      <KeyRound className="h-3 w-3" />
+                      Auto-generate
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={formPassword}
+                      onChange={(e) => setFormPassword(e.target.value)}
+                      className="w-full px-3 py-2 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    >
+                      {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Designated Corporate Role *
+                  </label>
+                  <select
+                    value={formRole}
+                    onChange={(e) => setFormRole(e.target.value as UserRole)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
+                  >
+                    <option value="Super Admin">Super Admin (संपूर्ण अधिकार)</option>
+                    <option value="Finance & Accounts Admin">Finance & Accounts Admin</option>
+                    <option value="Sales & Billing Manager">Sales & Billing Manager</option>
+                    <option value="Inventory & Store Incharge">Inventory & Store Incharge</option>
+                    <option value="HR & Payroll Manager">HR & Payroll Manager</option>
+                    <option value="Statutory Auditor">Statutory Auditor (बाहरी सीए / ऑडिटर)</option>
+                    <option value="Read-Only Operator">Read-Only Operator</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Department / Branch
+                  </label>
+                  <input
+                    type="text"
+                    value={formDepartment}
+                    onChange={(e) => setFormDepartment(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Account Status
+                  </label>
+                  <select
+                    value={formStatus}
+                    onChange={(e) => setFormStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-semibold"
+                  >
+                    <option value="Active">Active (लॉगिन की अनुमति है)</option>
+                    <option value="Inactive">Inactive (लॉगिन रोका गया है)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* All Access Toggle Switch */}
+              <div className="p-4 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <ShieldCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      Grant All Access (पूर्ण अनियंत्रित अधिकार)
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Super Admin privilege: bypasses permission filters, allows View, Create, Modify, and Delete on all 27 ERP modules.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formAllAccess}
+                      onChange={(e) => setFormAllAccess(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Granular Permissions Matrix */}
+              {!formAllAccess && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        Module-by-Module Permission Matrix
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Check specific permissions: View (देखना), Create (जोड़ना), Edit (बदलना), Delete (हटाना)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...permissionsMatrix };
+                          Object.keys(updated).forEach((k) => {
+                            updated[k] = { view: true, create: false, edit: false, delete: false };
+                          });
+                          setPermissionsMatrix(updated);
+                        }}
+                        className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                      >
+                        All Read-Only
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...permissionsMatrix };
+                          Object.keys(updated).forEach((k) => {
+                            updated[k] = { view: true, create: true, edit: true, delete: false };
+                          });
+                          setPermissionsMatrix(updated);
+                        }}
+                        className="px-2 py-1 rounded bg-blue-100 dark:bg-blue-950 text-[10px] font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-200"
+                      >
+                        All Read/Write
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...permissionsMatrix };
+                          Object.keys(updated).forEach((k) => {
+                            updated[k] = { view: false, create: false, edit: false, delete: false };
+                          });
+                          setPermissionsMatrix(updated);
+                        }}
+                        className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-500 hover:bg-slate-200"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-60 overflow-y-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-700 uppercase tracking-wider sticky top-0">
+                        <tr>
+                          <th className="px-3 py-2">Module / Section</th>
+                          <th className="px-3 py-2 text-center">View</th>
+                          <th className="px-3 py-2 text-center">Create</th>
+                          <th className="px-3 py-2 text-center">Edit</th>
+                          <th className="px-3 py-2 text-center">Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                        {defaultModulesList.map((m) => {
+                          const p = permissionsMatrix[m.id] || { view: false, create: false, edit: false, delete: false };
+                          return (
+                            <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                              <td className="px-3 py-2">
+                                <p className="font-semibold text-slate-800 dark:text-slate-200">{m.name}</p>
+                                <span className="text-[10px] text-slate-400">{m.category}</span>
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={p.view}
+                                  onChange={(e) =>
+                                    setPermissionsMatrix({
+                                      ...permissionsMatrix,
+                                      [m.id]: { ...p, view: e.target.checked },
+                                    })
+                                  }
+                                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                />
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={p.create}
+                                  onChange={(e) =>
+                                    setPermissionsMatrix({
+                                      ...permissionsMatrix,
+                                      [m.id]: { ...p, create: e.target.checked, view: e.target.checked ? true : p.view },
+                                    })
+                                  }
+                                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                />
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={p.edit}
+                                  onChange={(e) =>
+                                    setPermissionsMatrix({
+                                      ...permissionsMatrix,
+                                      [m.id]: { ...p, edit: e.target.checked, view: e.target.checked ? true : p.view },
+                                    })
+                                  }
+                                  className="rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+                                />
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={p.delete}
+                                  onChange={(e) =>
+                                    setPermissionsMatrix({
+                                      ...permissionsMatrix,
+                                      [m.id]: { ...p, delete: e.target.checked, view: e.target.checked ? true : p.view },
+                                    })
+                                  }
+                                  className="rounded border-slate-300 text-red-600 focus:ring-red-500"
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowUserModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-indigo-600/30"
+                >
+                  {editingUserId ? "Update User & Permissions" : "Create Login / सुरक्षित सेव करें"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

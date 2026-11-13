@@ -123,7 +123,7 @@ export function Sidebar({
       title: "COMPLIANCE & SYSTEM",
       items: [
         { id: "audit-trail" as ModuleType, label: "MCA Audit Trail", icon: History, badge: "MCA Log", enabled: moduleSettings.auditTrail },
-        { id: "settings" as ModuleType, label: "Settings & Module Toggles", icon: Settings, enabled: true },
+        { id: "settings" as ModuleType, label: "Settings", icon: Settings, enabled: true },
       ],
     },
   ];

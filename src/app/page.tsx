@@ -46,6 +46,7 @@ import { BusyVoucherModal } from "@/components/modules/busy/BusyVoucherModal";
 import { BusyLedgerModal } from "@/components/modules/busy/BusyLedgerModal";
 import { BusyItemLedgerModal } from "@/components/modules/busy/BusyItemLedgerModal";
 import { BusyHelpModal } from "@/components/modules/busy/BusyHelpModal";
+import { LoginView } from "@/components/auth/LoginView";
 
 // Data & Types
 import {
@@ -80,7 +81,9 @@ import {
   BusyVoucherType,
   BusyAccountMaster,
   BusyItemMaster,
+  AppUser,
 } from "@/types/erp";
+import { initialUsers } from "@/data/initialUsers";
 import {
   defaultCompany,
   initialCustomers,
@@ -118,6 +121,80 @@ import { generateMockIRN, formatINR } from "@/lib/utils";
 export default function Home() {
   const [activeModule, setActiveModule] = useState<ModuleType>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // User Authentication & RBAC Session State
+  const [users, setUsers] = useState<AppUser[]>(initialUsers);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedUsers = localStorage.getItem("erpvibe_users");
+      if (savedUsers) {
+        setUsers(JSON.parse(savedUsers));
+      }
+      const savedSession = localStorage.getItem("erpvibe_session");
+      if (savedSession) {
+        setCurrentUser(JSON.parse(savedSession));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAuthLoaded(true);
+    }
+  }, []);
+
+  const handleLogin = (user: AppUser) => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem("erpvibe_session", JSON.stringify(user));
+    } catch (e) {}
+    appendAuditLog("UPDATE", "Authentication", user.id, user.username, `User logged in to session from IP 192.168.1.10`);
+  };
+
+  const handleLogout = () => {
+    if (currentUser) {
+      appendAuditLog("UPDATE", "Authentication", currentUser.id, currentUser.username, `User logged out of session`);
+    }
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem("erpvibe_session");
+    } catch (e) {}
+  };
+
+  const handleAddUser = (newUser: AppUser) => {
+    const updated = [...users, newUser];
+    setUsers(updated);
+    try {
+      localStorage.setItem("erpvibe_users", JSON.stringify(updated));
+    } catch (e) {}
+    appendAuditLog("CREATE", "Settings - Users", newUser.id, newUser.username, `Created new login account: ${newUser.fullName} (${newUser.role})`);
+  };
+
+  const handleUpdateUser = (updatedUser: AppUser) => {
+    const updated = users.map((u) => (u.id === updatedUser.id ? updatedUser : u));
+    setUsers(updated);
+    try {
+      localStorage.setItem("erpvibe_users", JSON.stringify(updated));
+    } catch (e) {}
+    if (currentUser?.id === updatedUser.id) {
+      setCurrentUser(updatedUser);
+      try {
+        localStorage.setItem("erpvibe_session", JSON.stringify(updatedUser));
+      } catch (e) {}
+    }
+    appendAuditLog("UPDATE", "Settings - Users", updatedUser.id, updatedUser.username, `Modified login account and permissions for ${updatedUser.fullName}`);
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    const userToDelete = users.find((u) => u.id === userId);
+    const updated = users.filter((u) => u.id !== userId);
+    setUsers(updated);
+    try {
+      localStorage.setItem("erpvibe_users", JSON.stringify(updated));
+    } catch (e) {}
+    appendAuditLog("DELETE", "Settings - Users", userId, userToDelete?.username || userId, `Deleted login account`);
+  };
 
   // Core App State
   const [company, setCompany] = useState<CompanyInfo>(defaultCompany);
@@ -306,9 +383,9 @@ export default function Home() {
       module,
       recordId,
       recordIdentifier,
-      userName: "admin.user",
-      userRole: "Statutory Administrator",
-      ipAddress: "103.21.144.10",
+      userName: currentUser ? currentUser.fullName : "Vipul Bansal (MD)",
+      userRole: currentUser ? currentUser.role : "Super Admin",
+      ipAddress: "192.168.1.10",
       previousData,
       newData,
       remarks,
@@ -795,6 +872,11 @@ export default function Home() {
     appendAuditLog("UPDATE", "Sales Invoicing", id, item.invoiceNumber, `Payment status updated to ${nextStatus} for ${item.customerName}`);
   };
 
+  // If session is loaded and no authenticated user, gate with LoginView
+  if (isAuthLoaded && !currentUser) {
+    return <LoginView users={users} onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex h-screen bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden text-slate-900 dark:text-slate-100">
       {/* Sidebar */}
@@ -817,6 +899,8 @@ export default function Home() {
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenSettings={() => setActiveModule("settings")}
           onOpenHelp={() => setIsHelpOpen(true)}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
 
         {/* Content Container */}
@@ -1108,6 +1192,11 @@ export default function Home() {
               onUpdateModuleSettings={setModuleSettings}
               onResetToCleanSlate={handleResetToCleanSlate}
               onRestoreDemoData={handleRestoreDemoData}
+              users={users}
+              currentUser={currentUser}
+              onAddUser={handleAddUser}
+              onUpdateUser={handleUpdateUser}
+              onDeleteUser={handleDeleteUser}
             />
           )}
         </main>

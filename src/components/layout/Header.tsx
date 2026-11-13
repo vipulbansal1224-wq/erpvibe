@@ -10,8 +10,11 @@ import {
   Sparkles,
   Plus,
   HelpCircle,
+  LogOut,
+  User,
+  Shield,
 } from "lucide-react";
-import { CompanyInfo, ModuleType } from "@/types/erp";
+import { CompanyInfo, ModuleType, AppUser } from "@/types/erp";
 import { moduleGuides } from "@/data/moduleGuides";
 
 interface HeaderProps {
@@ -22,6 +25,8 @@ interface HeaderProps {
   onOpenSearch: () => void;
   onOpenSettings?: () => void;
   onOpenHelp?: () => void;
+  currentUser?: AppUser | null;
+  onLogout?: () => void;
 }
 
 const moduleTitles: Record<ModuleType, { title: string; subtitle: string }> = {
@@ -51,7 +56,7 @@ const moduleTitles: Record<ModuleType, { title: string; subtitle: string }> = {
   payroll: { title: "Payroll & Payslips", subtitle: "India statutory deductions: PF, ESIC, Professional Tax, TDS" },
   accounts: { title: "Chart of Accounts", subtitle: "General ledger hierarchy, Assets, Liabilities and Trial Balance" },
   "audit-trail": { title: "MCA Audit Trail & Edit Log", subtitle: "Indian Companies Act 2013 mandatory audit tracking" },
-  settings: { title: "Company Profile & Statutory Settings", subtitle: "GSTIN, PAN, CIN, Bank Details and Invoice Templates" },
+  settings: { title: "Settings & User Access Control", subtitle: "User logins, role permissions, company profile, and module switchboard" },
 };
 
 export function Header({
@@ -62,6 +67,8 @@ export function Header({
   onOpenSearch,
   onOpenSettings,
   onOpenHelp,
+  currentUser,
+  onLogout,
 }: HeaderProps) {
   const currentInfo = moduleTitles[activeModule] || { title: "ERPVibe India", subtitle: "" };
   const currentGuide = moduleGuides[activeModule];
@@ -151,11 +158,48 @@ export function Header({
           </div>
         </button>
 
-        {/* User Avatar */}
-        <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white font-semibold text-xs shadow-sm">
-            EV
+        {/* User Profile & Logout */}
+        <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-blue-600 text-white font-bold text-xs shadow-sm ring-2 ring-blue-500/20">
+              {currentUser
+                ? currentUser.fullName
+                    .split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()
+                : "EV"}
+            </div>
+            {currentUser && (
+              <div className="hidden lg:block text-left text-xs">
+                <p className="font-bold text-slate-800 dark:text-slate-100 max-w-[130px] truncate leading-tight">
+                  {currentUser.fullName}
+                </p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                    {currentUser.role}
+                  </span>
+                  {currentUser.allAccess && (
+                    <span className="text-[9px] bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold px-1 rounded">
+                      ADMIN
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              title="Sign Out / लॉगआउट करें"
+              className="flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 transition-all shadow-sm"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

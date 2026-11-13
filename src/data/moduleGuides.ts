@@ -1383,15 +1383,15 @@ export const moduleGuides: Record<string, ModuleGuide> = {
 
   settings: {
     id: "settings",
-    number: 26,
-    titleEn: "Company Profile & Module Switchboard",
-    titleHi: "कंपनी प्रोफाइल और मॉड्यूल स्विचबोर्ड",
-    categoryEn: "Configuration & Switchboard",
-    categoryHi: "सिस्टम कॉन्फ़िगरेशन और सेटिंग्स",
-    taglineEn: "Corporate statutory credentials, bank settlement accounts, module feature toggles, and data slate controls.",
-    taglineHi: "कंपनी के वैधानिक दस्तावेज, जीएसटी/पैन/सीआईएन, बैंक खाते, 22 मॉड्यूल ऑन/ऑफ स्विच और डेटा रीसेट।",
-    descriptionEn: "The master control center for ERP Vibe India. Manage company legal credentials (GSTIN, PAN, CIN, MSME Udyam, Registered Address, Bank NEFT details), configure which modules are enabled via the visual 22-module switchboard, and switch between live production clean-slate and demo presentation mode.",
-    descriptionHi: "यह ईआरपी वाइब का मुख्य कंट्रोल सेंटर है। इसमें कंपनी का कानूनी नाम, ट्रेडमार्क, जीएसटी नंबर, पैन, सीआईएन, बैंक खाता और पता अपडेट किया जाता है। साथ ही यहाँ 22 मॉड्यूल्स का विजुअल स्विचबोर्ड है जहाँ से किसी भी मॉड्यूल को ऑन या ऑफ (सक्रिय/निष्क्रिय) किया जा सकता है।",
+    number: 27,
+    titleEn: "Settings & User Access Control",
+    titleHi: "सेटिंग्स और यूजर लॉगिन नियंत्रण",
+    categoryEn: "Configuration & User Access",
+    categoryHi: "सिस्टम सेटिंग्स और यूजर नियंत्रण",
+    taglineEn: "User logins, Role-Based Access Control (RBAC), corporate credentials, and module feature toggles.",
+    taglineHi: "यूजर लॉगिन, रोल-बेस्ड एक्सेस कंट्रोल (RBAC), कंपनी प्रोफाइल और 22 मॉड्यूल ऑन/ऑफ स्विच।",
+    descriptionEn: "The master administration center for ERP Vibe India. Create corporate logins, manage All Access vs granular permissions (View, Create, Modify, Delete) across modules, configure legal credentials (GSTIN, PAN, CIN), and toggle modules via the switchboard.",
+    descriptionHi: "यह ईआरपी वाइब का मुख्य एडमिनिस्ट्रेशन सेंटर है। यहाँ नए यूजर लॉगिन बनाए जाते हैं, ऑल एक्सेस या मॉड्यूल-वाइज अधिकार (देखना, जोड़ना, बदलना, मिटाना) तय किए जाते हैं, कंपनी प्रोफाइल और 22 मॉड्यूल्स का स्विचबोर्ड नियंत्रित किया जाता है।",
     workflowSteps: [
       {
         step: 1,

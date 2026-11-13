@@ -269,6 +269,38 @@ export interface SalarySlip {
   paymentStatus: "Processed" | "Paid" | "Pending";
 }
 
+export type UserRole =
+  | "Super Admin"
+  | "Finance & Accounts Admin"
+  | "Sales & Billing Manager"
+  | "Inventory & Store Incharge"
+  | "HR & Payroll Manager"
+  | "Statutory Auditor"
+  | "Read-Only Operator";
+
+export interface ModulePermission {
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+}
+
+export interface AppUser {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  department: string;
+  phone?: string;
+  status: "Active" | "Inactive" | "Locked";
+  allAccess: boolean;
+  permissions?: Partial<Record<ModuleType, ModulePermission>>;
+  lastLoginAt?: string;
+  createdAt: string;
+}
+
 export interface AuditLogEntry {
   id: string;
   timestamp: string;
