@@ -40,7 +40,12 @@ export function ExpensesView({
   const [employeeName, setEmployeeName] = useState("");
   const [category, setCategory] = useState<ExpenseClaim["category"]>("Travel & Fuel");
   const [amount, setAmount] = useState(2500);
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split("T")[0]);
   const [merchantName, setMerchantName] = useState("");
+  const [merchantGstin, setMerchantGstin] = useState("");
+  const [taxAmount, setTaxAmount] = useState(381);
+  const [projectAllocation, setProjectAllocation] = useState("Corporate Operations");
+  const [purposeNotes, setPurposeNotes] = useState("");
   const [taxInvoiceAvailable, setTaxInvoiceAvailable] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState<ExpenseClaim["paymentStatus"]>("Pending Approval");
 
@@ -64,7 +69,12 @@ export function ExpensesView({
     setClaimNo(`EXP/NOV/${Date.now().toString().slice(-3)}`);
     setEmployeeName("");
     setMerchantName("");
+    setMerchantGstin("");
+    setExpenseDate(new Date().toISOString().split("T")[0]);
     setAmount(2500);
+    setTaxAmount(381);
+    setProjectAllocation("Corporate Operations");
+    setPurposeNotes("");
     setPaymentStatus("Pending Approval");
     setShowModal(true);
   };
@@ -75,7 +85,12 @@ export function ExpensesView({
     setEmployeeName(c.employeeName);
     setCategory(c.category);
     setAmount(c.amount);
+    setExpenseDate(c.expenseDate || new Date().toISOString().split("T")[0]);
     setMerchantName(c.merchantName);
+    setMerchantGstin(c.merchantGstin || "");
+    setTaxAmount(c.taxAmount || Math.round((c.amount * 18) / 118));
+    setProjectAllocation(c.projectAllocation || "Corporate Operations");
+    setPurposeNotes(c.purposeNotes || "");
     setTaxInvoiceAvailable(c.taxInvoiceAvailable);
     setPaymentStatus(c.paymentStatus);
     setShowModal(true);
@@ -89,9 +104,13 @@ export function ExpensesView({
       claimNo,
       employeeName,
       category,
-      expenseDate: new Date().toISOString().split("T")[0],
+      expenseDate,
       amount: Number(amount) || 0,
       merchantName,
+      merchantGstin: merchantGstin || undefined,
+      taxAmount: Number(taxAmount) || 0,
+      projectAllocation,
+      purposeNotes,
       taxInvoiceAvailable,
       paymentStatus,
       approvedBy: paymentStatus !== "Pending Approval" ? "Finance Admin" : undefined,
@@ -261,7 +280,17 @@ export function ExpensesView({
                     </div>
                   </td>
                   <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                    {c.merchantName}
+                    <p className="font-medium text-slate-800 dark:text-slate-200">{c.merchantName}</p>
+                    {c.merchantGstin && (
+                      <span className="block font-mono text-[10px] text-slate-400 uppercase">
+                        GST: {c.merchantGstin}
+                      </span>
+                    )}
+                    {c.projectAllocation && (
+                      <span className="block text-[10px] text-blue-600 dark:text-blue-400">
+                        {c.projectAllocation}
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-xs">
                     {c.taxInvoiceAvailable ? (
@@ -361,61 +390,113 @@ export function ExpensesView({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Employee Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Aditya Patil (Field Tech)"
-                  value={employeeName}
-                  onChange={(e) => setEmployeeName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Merchant / Vendor & Description
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Indian Oil Petrol Pump / Hotel Taj Meeting"
-                  value={merchantName}
-                  onChange={(e) => setMerchantName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                  required
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Claim Amount (₹)
+                    Employee Name
                   </label>
                   <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
+                    type="text"
+                    placeholder="e.g. Aditya Patil (Field Tech)"
+                    value={employeeName}
+                    onChange={(e) => setEmployeeName(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Payment / Approval Status
+                    Expense Incurred Date
+                  </label>
+                  <input
+                    type="date"
+                    value={expenseDate}
+                    onChange={(e) => setExpenseDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Merchant / Vendor & Description
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Indian Oil Petrol Pump / Hotel Taj"
+                    value={merchantName}
+                    onChange={(e) => setMerchantName(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Merchant GSTIN (For ITC)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="27AAACP0123M1Z5"
+                    value={merchantGstin}
+                    onChange={(e) => setMerchantGstin(e.target.value.toUpperCase())}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono uppercase"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Total Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    GST / Tax (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={taxAmount}
+                    onChange={(e) => setTaxAmount(Number(e.target.value))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Status
                   </label>
                   <select
                     value={paymentStatus}
                     onChange={(e) => setPaymentStatus(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold"
                   >
                     <option value="Pending Approval">Pending Approval</option>
                     <option value="Approved">Approved</option>
                     <option value="Reimbursed / Paid">Reimbursed / Paid</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Project / Cost Center Allocation
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. ERP Cloud Integration / General Operations"
+                  value={projectAllocation}
+                  onChange={(e) => setProjectAllocation(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                />
               </div>
 
               <div className="flex items-center pt-2">

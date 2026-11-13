@@ -42,7 +42,21 @@ export function ProjectsView({
   const [clientName, setClientName] = useState("");
   const [budget, setBudget] = useState(500000);
   const [spentAmount, setSpentAmount] = useState(0);
+  const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [deadline, setDeadline] = useState("2026-12-31");
+  const [projectManager, setProjectManager] = useState("Aditya Patil (PMP)");
+  const [billingType, setBillingType] = useState<Project["billingType"]>("Fixed Price");
   const [status, setStatus] = useState<Project["status"]>("In Progress");
+
+  // Timesheet Modal state
+  const [showTimesheetModal, setShowTimesheetModal] = useState(false);
+  const [tsEmployeeName, setTsEmployeeName] = useState("Aditya Patil");
+  const [tsProjectName, setTsProjectName] = useState(projects[0]?.name || "ERP Integration");
+  const [tsTaskTitle, setTsTaskTitle] = useState("Sprint Review & Client Milestone Signoff");
+  const [tsDate, setTsDate] = useState(new Date().toISOString().split("T")[0]);
+  const [tsHours, setTsHours] = useState(8);
+  const [tsBillable, setTsBillable] = useState(true);
+  const [tsRemarks, setTsRemarks] = useState("Feature demonstration completed successfully");
 
   const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
   const totalSpent = projects.reduce((sum, p) => sum + p.spentAmount, 0);
@@ -55,6 +69,10 @@ export function ProjectsView({
     setClientName("");
     setBudget(500000);
     setSpentAmount(0);
+    setStartDate(new Date().toISOString().split("T")[0]);
+    setDeadline("2026-12-31");
+    setProjectManager("Aditya Patil (PMP)");
+    setBillingType("Fixed Price");
     setStatus("In Progress");
     setShowModal(true);
   };
@@ -66,6 +84,10 @@ export function ProjectsView({
     setClientName(p.clientName);
     setBudget(p.budget);
     setSpentAmount(p.spentAmount);
+    setStartDate(p.startDate || new Date().toISOString().split("T")[0]);
+    setDeadline(p.deadline || "2026-12-31");
+    setProjectManager(p.projectManager || "Aditya Patil (PMP)");
+    setBillingType(p.billingType || "Fixed Price");
     setStatus(p.status);
     setShowModal(true);
   };
@@ -79,8 +101,10 @@ export function ProjectsView({
       code,
       name,
       clientName,
-      startDate: new Date().toISOString().split("T")[0],
-      deadline: "2026-12-31",
+      startDate,
+      deadline,
+      projectManager,
+      billingType,
       budget: Number(budget) || 0,
       spentAmount: Number(spentAmount) || 0,
       status,
@@ -118,12 +142,42 @@ export function ProjectsView({
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
-            onClick={handleOpenNew}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition"
+            onClick={() => setActiveTab("projects")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+              activeTab === "projects"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+            }`}
           >
-            <Plus className="h-4 w-4" />
-            New Project
+            Client Projects ({projects.length})
           </button>
+          <button
+            onClick={() => setActiveTab("timesheets")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+              activeTab === "timesheets"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+            }`}
+          >
+            Logged Timesheets ({timesheets.length})
+          </button>
+          {activeTab === "projects" ? (
+            <button
+              onClick={handleOpenNew}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition"
+            >
+              <Plus className="h-4 w-4" />
+              New Project
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowTimesheetModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition"
+            >
+              <Plus className="h-4 w-4" />
+              Log Timesheet
+            </button>
+          )}
         </div>
       </div>
 
@@ -224,6 +278,11 @@ export function ProjectsView({
                       {proj.name}
                     </h3>
                     <p className="text-[11px] text-slate-500">{proj.clientName}</p>
+                    {proj.projectManager && (
+                      <span className="block text-[10px] text-slate-400 mt-0.5">
+                        Lead: {proj.projectManager} • {proj.billingType || "Fixed Price"}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 text-[10px] font-bold">
@@ -453,6 +512,59 @@ export function ProjectsView({
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Milestone Deadline
+                  </label>
+                  <input
+                    type="date"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Project Manager / Lead
+                  </label>
+                  <input
+                    type="text"
+                    value={projectManager}
+                    onChange={(e) => setProjectManager(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Billing Model
+                  </label>
+                  <select
+                    value={billingType}
+                    onChange={(e) => setBillingType(e.target.value as any)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-medium"
+                  >
+                    <option value="Fixed Price">Fixed Price Milestone</option>
+                    <option value="Time & Material">Time & Material (T&M)</option>
+                    <option value="Retainer">Monthly Retainer</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
@@ -466,6 +578,138 @@ export function ProjectsView({
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
                 >
                   {editingId ? "Update Project" : "Launch Project"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Timesheet Modal */}
+      {showTimesheetModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-6 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              Log Employee Timesheet Entry
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const newEntry: TimesheetEntry = {
+                  id: `TS-${Date.now()}`,
+                  employeeName: tsEmployeeName,
+                  projectName: tsProjectName,
+                  taskTitle: tsTaskTitle,
+                  date: tsDate,
+                  hours: Number(tsHours) || 8,
+                  billable: tsBillable,
+                  remarks: tsRemarks,
+                };
+                timesheets.unshift(newEntry);
+                setShowTimesheetModal(false);
+              }}
+              className="space-y-3"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Employee Name
+                  </label>
+                  <input
+                    type="text"
+                    value={tsEmployeeName}
+                    onChange={(e) => setTsEmployeeName(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Log Date
+                  </label>
+                  <input
+                    type="date"
+                    value={tsDate}
+                    onChange={(e) => setTsDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Project Title
+                </label>
+                <select
+                  value={tsProjectName}
+                  onChange={(e) => setTsProjectName(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.name}>
+                      {p.name} ({p.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Activity / Task Description
+                </label>
+                <input
+                  type="text"
+                  value={tsTaskTitle}
+                  onChange={(e) => setTsTaskTitle(e.target.value)}
+                  placeholder="e.g. Backend API Security & Penetration Testing"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Hours Worked
+                  </label>
+                  <input
+                    type="number"
+                    value={tsHours}
+                    onChange={(e) => setTsHours(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Billing Status
+                  </label>
+                  <select
+                    value={tsBillable ? "Billable" : "Non-Billable"}
+                    onChange={(e) => setTsBillable(e.target.value === "Billable")}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold"
+                  >
+                    <option value="Billable">Billable to Client</option>
+                    <option value="Non-Billable">Internal Overhead</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowTimesheetModal(false)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Save Timesheet
                 </button>
               </div>
             </form>

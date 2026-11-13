@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import {
-  BadgeDollarSign,
+  BadgeIndianRupee,
   Users,
   Eye,
   FileCheck2,
@@ -46,11 +46,24 @@ export function PayrollView({
   const [designation, setDesignation] = useState("Software Engineer");
   const [department, setDepartment] = useState("Engineering");
   const [joiningDate, setJoiningDate] = useState(new Date().toISOString().split("T")[0]);
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+91 ");
+  const [dob, setDob] = useState("1996-05-15");
+  const [gender, setGender] = useState<Employee["gender"]>("Male");
+  const [emergencyContact, setEmergencyContact] = useState("");
+  const [esicNo, setEsicNo] = useState("N/A (Exempt > 21k)");
   const [pan, setPan] = useState("ABCDE1234F");
   const [uan, setUan] = useState("101234567890");
   const [bankAccount, setBankAccount] = useState("50200012345678");
   const [bankIfsc, setBankIfsc] = useState("HDFC0000240");
   const [grossSalary, setGrossSalary] = useState(85000);
+
+  // Salary slip generation modal state
+  const [showSlipModal, setShowSlipModal] = useState(false);
+  const [slipEmployeeId, setSlipEmployeeId] = useState(employees[0]?.id || "");
+  const [slipMonth, setSlipMonth] = useState("November");
+  const [slipWorkingDays, setSlipWorkingDays] = useState(30);
+  const [slipPresentDays, setSlipPresentDays] = useState(30);
 
   const totalGrossPayroll = salarySlips.reduce((sum, s) => sum + s.grossEarnings, 0);
   const totalNetDisbursed = salarySlips.reduce((sum, s) => sum + s.netPayable, 0);
@@ -63,6 +76,11 @@ export function PayrollView({
     setName("");
     setDesignation("Software Engineer");
     setDepartment("Engineering");
+    setEmail("");
+    setPhone("+91 ");
+    setDob("1996-05-15");
+    setGender("Male");
+    setEmergencyContact("");
     setGrossSalary(85000);
     setShowModal(true);
   };
@@ -74,8 +92,14 @@ export function PayrollView({
     setDesignation(emp.designation);
     setDepartment(emp.department);
     setJoiningDate(emp.dateOfJoining);
+    setEmail(emp.email || "");
+    setPhone(emp.phone || "+91 ");
+    setDob(emp.dob || "1996-05-15");
+    setGender(emp.gender || "Male");
+    setEmergencyContact(emp.emergencyContact || "");
     setPan(emp.pan);
     setUan(emp.uan);
+    setEsicNo(emp.esicNo || "N/A (Exempt > 21k)");
     setBankAccount(emp.bankAccount);
     setBankIfsc(emp.bankIfsc);
     setGrossSalary(emp.grossSalary);
@@ -99,7 +123,7 @@ export function PayrollView({
       dateOfJoining: joiningDate,
       pan,
       uan,
-      esicNo: "N/A (Exempt > 21k)",
+      esicNo,
       bankAccount,
       bankIfsc,
       grossSalary: Number(grossSalary) || 0,
@@ -108,6 +132,11 @@ export function PayrollView({
       specialAllowance: Math.round(remaining * 0.7),
       conveyance: Math.round(remaining * 0.3),
       status: "Active",
+      email,
+      phone,
+      dob,
+      gender,
+      emergencyContact,
     };
 
     if (editingId && onUpdateEmployee) {
@@ -125,7 +154,7 @@ export function PayrollView({
         <div>
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <BadgeDollarSign className="h-5 w-5" />
+              <BadgeIndianRupee className="h-5 w-5" />
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               India Payroll & Statutory Deductions
@@ -172,7 +201,7 @@ export function PayrollView({
         <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Gross Monthly CTC</span>
-            <BadgeDollarSign className="h-4 w-4 text-emerald-500" />
+            <BadgeIndianRupee className="h-4 w-4 text-emerald-500" />
           </div>
           <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
             {formatINR(totalGrossPayroll)}
@@ -300,13 +329,17 @@ export function PayrollView({
                     <td className="px-6 py-3.5">
                       <p className="font-semibold text-slate-900 dark:text-white">{emp.name}</p>
                       <p className="text-[10px] text-slate-500">{emp.designation}</p>
+                      {emp.email && <p className="text-[10px] text-blue-500">{emp.email}</p>}
+                      {emp.phone && <p className="text-[10px] text-slate-400">{emp.phone}</p>}
                     </td>
                     <td className="px-6 py-3.5 text-slate-600 dark:text-slate-300">
-                      {emp.department}
+                      <p>{emp.department}</p>
+                      {emp.gender && <span className="text-[10px] text-slate-400">{emp.gender} • Joined {emp.dateOfJoining}</span>}
                     </td>
                     <td className="px-6 py-3.5 font-mono text-[11px]">
-                      <p>PAN: {emp.pan}</p>
-                      <p className="text-slate-500">UAN: {emp.uan}</p>
+                      <p><span className="text-slate-400">PAN:</span> {emp.pan}</p>
+                      <p><span className="text-slate-400">UAN:</span> {emp.uan}</p>
+                      {emp.esicNo && <p className="text-[10px] text-purple-500">ESIC: {emp.esicNo}</p>}
                     </td>
                     <td className="px-6 py-3.5 font-mono text-[11px] text-slate-600 dark:text-slate-400">
                       <p>A/C: {emp.bankAccount}</p>
@@ -400,6 +433,72 @@ export function PayrollView({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Work Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="emp@company.in"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Mobile Phone #
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Gender
+                  </label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value as Employee["gender"])}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Date of Joining
+                  </label>
+                  <input
+                    type="date"
+                    value={joiningDate}
+                    onChange={(e) => setJoiningDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
                     Designation
                   </label>
                   <input
@@ -469,6 +568,33 @@ export function PayrollView({
                     value={bankIfsc}
                     onChange={(e) => setBankIfsc(e.target.value.toUpperCase())}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono uppercase"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    ESIC IP Number
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ESIC Insurance # or Exempt"
+                    value={esicNo}
+                    onChange={(e) => setEsicNo(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Emergency Contact Name & Phone
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. S. Sharma (+91 98200...)"
+                    value={emergencyContact}
+                    onChange={(e) => setEmergencyContact(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
                   />
                 </div>
               </div>

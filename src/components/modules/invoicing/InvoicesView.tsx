@@ -126,8 +126,15 @@ export function InvoicesView({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filtered.map((inv) => (
                 <tr key={inv.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                  <td className="px-6 py-3.5 font-mono font-medium text-blue-600 dark:text-blue-400">
-                    {inv.invoiceNumber}
+                  <td className="px-6 py-3.5">
+                    <span className="font-mono font-medium text-blue-600 dark:text-blue-400">
+                      {inv.invoiceNumber}
+                    </span>
+                    {inv.poNumber && (
+                      <span className="block text-[10px] text-slate-400 font-mono">
+                        PO: {inv.poNumber}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-3.5 text-slate-600 dark:text-slate-400">
                     {inv.invoiceDate}
@@ -140,6 +147,11 @@ export function InvoicesView({
                     <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px]">
                       {inv.placeOfSupply}
                     </span>
+                    {inv.vehicleNo && (
+                      <span className="block text-[10px] text-slate-400 font-mono mt-0.5">
+                        🚛 {inv.vehicleNo}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-3.5 font-mono text-slate-700 dark:text-slate-300">
                     {formatINR(inv.subTotal)}

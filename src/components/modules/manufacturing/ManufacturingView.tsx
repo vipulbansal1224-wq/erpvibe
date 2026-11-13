@@ -44,6 +44,21 @@ export function ManufacturingView({
   const [quantityProduced, setQuantityProduced] = useState(0);
   const [status, setStatus] = useState<WorkOrder["status"]>("Planned");
   const [warehouse, setWarehouse] = useState("Mumbai Central Warehouse");
+  const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [targetDate, setTargetDate] = useState("2026-12-15");
+  const [supervisor, setSupervisor] = useState("Suresh Shinde (Shift Incharge)");
+  const [batchNo, setBatchNo] = useState(`BATCH-26-${Date.now().toString().slice(-4)}`);
+  const [scrapAllowance, setScrapAllowance] = useState(2);
+
+  // New BOM state
+  const [showBomModal, setShowBomModal] = useState(false);
+  const [newBomCode, setNewBomCode] = useState(`BOM-${Date.now().toString().slice(-3)}`);
+  const [newFinishedGoodName, setNewFinishedGoodName] = useState("");
+  const [newOutputQty, setNewOutputQty] = useState(1);
+  const [newOperationsCost, setNewOperationsCost] = useState(5000);
+  const [bomRawItemName, setBomRawItemName] = useState("Copper Busbars & Wiring");
+  const [bomRawQty, setBomRawQty] = useState(10);
+  const [bomRawRate, setBomRawRate] = useState(850);
 
   const handleOpenNew = () => {
     setEditingId(null);
@@ -52,6 +67,11 @@ export function ManufacturingView({
     setQuantityToProduce(50);
     setQuantityProduced(0);
     setStatus("Planned");
+    setStartDate(new Date().toISOString().split("T")[0]);
+    setTargetDate("2026-12-15");
+    setSupervisor("Suresh Shinde (Shift Incharge)");
+    setBatchNo(`BATCH-26-${Date.now().toString().slice(-4)}`);
+    setScrapAllowance(2);
     setShowModal(true);
   };
 
@@ -63,6 +83,11 @@ export function ManufacturingView({
     setQuantityProduced(wo.quantityProduced);
     setStatus(wo.status);
     setWarehouse(wo.warehouse);
+    setStartDate(wo.startDate || new Date().toISOString().split("T")[0]);
+    setTargetDate(wo.targetDate || "2026-12-15");
+    setSupervisor(wo.supervisor || "Suresh Shinde (Shift Incharge)");
+    setBatchNo(wo.batchNo || `BATCH-26-${Date.now().toString().slice(-4)}`);
+    setScrapAllowance(wo.scrapAllowance || 2);
     setShowModal(true);
   };
 
@@ -76,10 +101,13 @@ export function ManufacturingView({
       finishedGoodName,
       quantityToProduce: Number(quantityToProduce) || 1,
       quantityProduced: Number(quantityProduced) || 0,
-      startDate: new Date().toISOString().split("T")[0],
-      targetDate: "2026-11-30",
+      startDate,
+      targetDate,
       status: Number(quantityProduced) >= Number(quantityToProduce) ? "Completed" : Number(quantityProduced) > 0 ? "In Progress" : status,
       warehouse,
+      supervisor,
+      batchNo,
+      scrapAllowance: Number(scrapAllowance) || 0,
     };
 
     if (editingId && onUpdateWorkOrder) {
@@ -138,6 +166,19 @@ export function ManufacturingView({
               New Work Order
             </button>
           )}
+          {activeTab === "boms" && (
+            <button
+              onClick={() => {
+                setNewBomCode(`BOM-${Date.now().toString().slice(-3)}`);
+                setNewFinishedGoodName("");
+                setShowBomModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 shadow-sm transition"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add New BOM
+            </button>
+          )}
         </div>
       </div>
 
@@ -172,11 +213,23 @@ export function ManufacturingView({
                   );
                   return (
                     <tr key={wo.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                      <td className="px-6 py-3.5 font-mono font-medium text-slate-900 dark:text-white">
-                        {wo.orderNumber}
+                      <td className="px-6 py-3.5">
+                        <span className="font-mono font-medium text-slate-900 dark:text-white">
+                          {wo.orderNumber}
+                        </span>
+                        {wo.batchNo && (
+                          <span className="block font-mono text-[10px] text-amber-600 dark:text-amber-400">
+                            {wo.batchNo}
+                          </span>
+                        )}
                       </td>
-                      <td className="px-6 py-3.5 font-semibold text-slate-900 dark:text-white">
-                        {wo.finishedGoodName}
+                      <td className="px-6 py-3.5">
+                        <p className="font-semibold text-slate-900 dark:text-white">{wo.finishedGoodName}</p>
+                        {wo.supervisor && (
+                          <span className="text-[10px] text-slate-400">
+                            Sup: {wo.supervisor}
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2">
@@ -410,16 +463,80 @@ export function ManufacturingView({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Staging Warehouse
-                </label>
-                <input
-                  type="text"
-                  value={warehouse}
-                  onChange={(e) => setWarehouse(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Target Completion Date
+                  </label>
+                  <input
+                    type="date"
+                    value={targetDate}
+                    onChange={(e) => setTargetDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Batch / Lot Number
+                  </label>
+                  <input
+                    type="text"
+                    value={batchNo}
+                    onChange={(e) => setBatchNo(e.target.value)}
+                    placeholder="BATCH-26-001"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Shift Supervisor / Operator
+                  </label>
+                  <input
+                    type="text"
+                    value={supervisor}
+                    onChange={(e) => setSupervisor(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Staging Warehouse
+                  </label>
+                  <input
+                    type="text"
+                    value={warehouse}
+                    onChange={(e) => setWarehouse(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Scrap Allowance (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={scrapAllowance}
+                    onChange={(e) => setScrapAllowance(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-3">
@@ -435,6 +552,146 @@ export function ManufacturingView({
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-amber-600 text-white hover:bg-amber-700"
                 >
                   {editingId ? "Update Work Order" : "Issue Work Order"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* BOM Modal */}
+      {showBomModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-6 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-amber-600" />
+              Define New Bill of Materials (BOM)
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newFinishedGoodName) return;
+                const newBom: BillOfMaterial = {
+                  id: `BOM-${Date.now()}`,
+                  bomCode: newBomCode,
+                  finishedGoodId: `FG-${Date.now().toString().slice(-4)}`,
+                  finishedGoodName: newFinishedGoodName,
+                  quantityOutput: Number(newOutputQty) || 1,
+                  uom: "NOS",
+                  operationsCost: Number(newOperationsCost) || 0,
+                  totalProductionCost: (Number(bomRawQty) * Number(bomRawRate)) + (Number(newOperationsCost) || 0),
+                  status: "Active",
+                  items: [
+                    {
+                      itemId: `RAW-01`,
+                      itemName: bomRawItemName,
+                      sku: "SKU-RAW-101",
+                      quantityRequired: Number(bomRawQty) || 1,
+                      uom: "NOS",
+                      unitCost: Number(bomRawRate) || 0,
+                      totalCost: (Number(bomRawQty) || 1) * (Number(bomRawRate) || 0),
+                    },
+                  ],
+                };
+                boms.push(newBom);
+                setSelectedBOM(newBom);
+                setShowBomModal(false);
+              }}
+              className="space-y-3"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    BOM Code
+                  </label>
+                  <input
+                    type="text"
+                    value={newBomCode}
+                    onChange={(e) => setNewBomCode(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Output Qty (NOS)
+                  </label>
+                  <input
+                    type="number"
+                    value={newOutputQty}
+                    onChange={(e) => setNewOutputQty(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Finished Item Name *
+                </label>
+                <input
+                  type="text"
+                  value={newFinishedGoodName}
+                  onChange={(e) => setNewFinishedGoodName(e.target.value)}
+                  placeholder="e.g. Smart IoT Gateway 5G"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  required
+                />
+              </div>
+
+              <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-2.5 bg-slate-50 dark:bg-slate-800/40 space-y-2">
+                <span className="text-[10px] font-bold uppercase text-slate-500">Key Raw Material Component</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    type="text"
+                    value={bomRawItemName}
+                    onChange={(e) => setBomRawItemName(e.target.value)}
+                    placeholder="Component name"
+                    className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs col-span-1"
+                  />
+                  <input
+                    type="number"
+                    value={bomRawQty}
+                    onChange={(e) => setBomRawQty(Number(e.target.value))}
+                    placeholder="Qty"
+                    className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono"
+                  />
+                  <input
+                    type="number"
+                    value={bomRawRate}
+                    onChange={(e) => setBomRawRate(Number(e.target.value))}
+                    placeholder="Rate (₹)"
+                    className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Operations & Assembly Cost (₹)
+                </label>
+                <input
+                  type="number"
+                  value={newOperationsCost}
+                  onChange={(e) => setNewOperationsCost(Number(e.target.value))}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowBomModal(false)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-amber-600 text-white hover:bg-amber-700"
+                >
+                  Save Bill of Material
                 </button>
               </div>
             </form>

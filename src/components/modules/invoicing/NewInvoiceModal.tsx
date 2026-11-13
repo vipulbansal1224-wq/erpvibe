@@ -51,6 +51,13 @@ export function NewInvoiceModal({
       .toISOString()
       .split("T")[0]
   );
+  const [poNumber, setPoNumber] = useState("");
+  const [poDate, setPoDate] = useState(new Date().toISOString().split("T")[0]);
+  const [vehicleNo, setVehicleNo] = useState("");
+  const [transporterName, setTransporterName] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("Net 30 Days");
+  const [shippingAddress, setShippingAddress] = useState(selectedCustomer?.address || "");
+  const [remittanceBank, setRemittanceBank] = useState(`${company.bankName} (A/C: ${company.accountNumber})`);
   const [notes, setNotes] = useState("Thank you for your business.");
 
   // Check intra-state vs inter-state
@@ -193,6 +200,13 @@ export function NewInvoiceModal({
       amountInWords: amountWords,
       paymentStatus: "Unpaid",
       eInvoiceStatus: "Pending",
+      poNumber: poNumber || undefined,
+      poDate: poNumber ? poDate : undefined,
+      vehicleNo: vehicleNo || undefined,
+      transporterName: transporterName || undefined,
+      paymentTerms,
+      shippingAddress: shippingAddress || selectedCustomer.address,
+      remittanceBank,
       notes,
       termsAndConditions: "Payment due in 30 days. Subject to Mumbai Jurisdiction.",
     };
@@ -280,6 +294,61 @@ export function NewInvoiceModal({
                   className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Row 2: PO Details, Logistics & Terms */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                Buyer PO #
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. PO-2026/889"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1.5 text-xs font-mono"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                PO Date
+              </label>
+              <input
+                type="date"
+                value={poDate}
+                onChange={(e) => setPoDate(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1.5 text-xs"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                Vehicle No / Transporter
+              </label>
+              <input
+                type="text"
+                placeholder="MH-04-AB-1234 / SafeXpress"
+                value={vehicleNo}
+                onChange={(e) => setVehicleNo(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1.5 text-xs font-mono uppercase"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                Payment Terms
+              </label>
+              <select
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1.5 text-xs font-medium"
+              >
+                <option value="Net 30 Days">Net 30 Days</option>
+                <option value="Net 15 Days">Net 15 Days</option>
+                <option value="Net 45 Days">Net 45 Days</option>
+                <option value="Immediate / COD">Immediate / COD</option>
+                <option value="100% Advance">100% Advance</option>
+              </select>
             </div>
           </div>
 

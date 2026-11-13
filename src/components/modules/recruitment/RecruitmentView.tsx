@@ -43,6 +43,11 @@ export function RecruitmentView({
   const [experienceYears, setExperienceYears] = useState(4);
   const [stage, setStage] = useState<JobCandidate["stage"]>("Applied");
   const [rating, setRating] = useState<JobCandidate["rating"]>(4);
+  const [currentCtc, setCurrentCtc] = useState<number>(1200000);
+  const [expectedCtc, setExpectedCtc] = useState<number>(1800000);
+  const [noticePeriodDays, setNoticePeriodDays] = useState<number>(30);
+  const [currentEmployer, setCurrentEmployer] = useState("");
+  const [skillsStr, setSkillsStr] = useState("React, TypeScript, Node.js");
 
   const stages: JobCandidate["stage"][] = [
     "Applied",
@@ -74,6 +79,11 @@ export function RecruitmentView({
     setPhone("+91 ");
     setStage("Applied");
     setRating(4);
+    setCurrentCtc(1200000);
+    setExpectedCtc(1800000);
+    setNoticePeriodDays(30);
+    setCurrentEmployer("");
+    setSkillsStr("React, TypeScript, Node.js");
     setShowModal(true);
   };
 
@@ -86,6 +96,17 @@ export function RecruitmentView({
     setExperienceYears(c.experienceYears);
     setStage(c.stage);
     setRating(c.rating);
+    setCurrentCtc(c.currentCtc || 1200000);
+    setExpectedCtc(c.expectedCtc || 1800000);
+    setNoticePeriodDays(c.noticePeriodDays || 30);
+    setCurrentEmployer(c.currentEmployer || "");
+    setSkillsStr(
+      Array.isArray(c.skills)
+        ? c.skills.join(", ")
+        : typeof c.skills === "string"
+        ? c.skills
+        : "React, TypeScript"
+    );
     setShowModal(true);
   };
 
@@ -102,6 +123,11 @@ export function RecruitmentView({
       appliedDate: new Date().toISOString().split("T")[0],
       stage,
       rating,
+      currentCtc: Number(currentCtc) || undefined,
+      expectedCtc: Number(expectedCtc) || undefined,
+      noticePeriodDays: Number(noticePeriodDays) || undefined,
+      currentEmployer: currentEmployer || undefined,
+      skills: skillsStr ? skillsStr.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     };
 
     if (editingId && onUpdateCandidate) {
@@ -273,8 +299,31 @@ export function RecruitmentView({
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{c.experienceYears} Years Exp • Applied {c.appliedDate}</span>
+                  <span>{c.experienceYears} Years Exp • {c.currentEmployer || "Applied " + c.appliedDate}</span>
                 </div>
+                {(c.currentCtc || c.expectedCtc) && (
+                  <div className="flex items-center justify-between text-[11px] bg-slate-50 dark:bg-slate-900/60 px-2 py-1 rounded border border-slate-200/50 dark:border-slate-700/50">
+                    <span className="font-mono">₹{((c.currentCtc || 0) / 100000).toFixed(1)}L → ₹{((c.expectedCtc || 0) / 100000).toFixed(1)}L CTC</span>
+                    {c.noticePeriodDays && <span className="font-semibold text-amber-600 dark:text-amber-400">{c.noticePeriodDays}d Notice</span>}
+                  </div>
+                )}
+                {(() => {
+                  const skillsList = Array.isArray(c.skills)
+                    ? c.skills
+                    : typeof c.skills === "string"
+                    ? c.skills.split(",").map((s) => s.trim())
+                    : [];
+                  if (skillsList.length === 0) return null;
+                  return (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {skillsList.slice(0, 3).map((sk: string, idx: number) => (
+                        <span key={idx} className="px-1.5 py-0.5 rounded text-[10px] bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                          {sk}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
@@ -411,6 +460,70 @@ export function RecruitmentView({
                     <option value={1}>⭐ (1/5)</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Current Employer / Org
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Infosys / TCS / Freelance"
+                    value={currentEmployer}
+                    onChange={(e) => setCurrentEmployer(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Notice Period (Days)
+                  </label>
+                  <input
+                    type="number"
+                    value={noticePeriodDays}
+                    onChange={(e) => setNoticePeriodDays(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Current Annual CTC (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={currentCtc}
+                    onChange={(e) => setCurrentCtc(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Expected Annual CTC (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={expectedCtc}
+                    onChange={(e) => setExpectedCtc(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Primary Skills / Tags (comma separated)
+                </label>
+                <input
+                  type="text"
+                  placeholder="React, Next.js, Node.js, PostgreSQL"
+                  value={skillsStr}
+                  onChange={(e) => setSkillsStr(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                />
               </div>
 
               <div className="flex justify-end gap-3 pt-3">

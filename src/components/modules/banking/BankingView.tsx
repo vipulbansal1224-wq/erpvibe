@@ -22,24 +22,39 @@ interface BankingViewProps {
   onReconcile?: (txnId: string) => void;
   onAddTransaction?: (txn: BankTransaction) => void;
   onDeleteTransaction?: (id: string) => void;
+  onAddAccount?: (acc: BankAccount) => void;
 }
 
 export function BankingView({
-  accounts,
+  accounts: initialAccounts,
   transactions: initialTxns,
   onReconcile,
   onAddTransaction,
   onDeleteTransaction,
+  onAddAccount,
 }: BankingViewProps) {
+  const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
   const [transactions, setTransactions] = useState<BankTransaction[]>(initialTxns);
   const [filterReconciled, setFilterReconciled] = useState<string>("all");
   const [showModal, setShowModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
-  // Form states
+  // Form states for transaction
+  const [txnDate, setTxnDate] = useState(new Date().toISOString().split("T")[0]);
   const [referenceNo, setReferenceNo] = useState(`UTR${Date.now().toString().slice(-6)}`);
+  const [partyName, setPartyName] = useState("");
+  const [paymentMode, setPaymentMode] = useState<BankTransaction["paymentMode"]>("NEFT");
+  const [chequeNo, setChequeNo] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<"Credit" | "Debit">("Credit");
   const [amount, setAmount] = useState(25000);
+
+  // Form states for new bank account
+  const [newBankName, setNewBankName] = useState("State Bank of India");
+  const [newAccountNo, setNewAccountNo] = useState("");
+  const [newIfsc, setNewIfsc] = useState("SBIN0001234");
+  const [newAccountType, setNewAccountType] = useState<BankAccount["type"]>("Current");
+  const [newOpeningBal, setNewOpeningBal] = useState(100000);
 
   const totalBankBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
   const totalUnreconciled = transactions.filter((t) => !t.reconciled).length;
@@ -61,9 +76,12 @@ export function BankingView({
 
     const newTxn: BankTransaction = {
       id: `TXN-${Date.now()}`,
-      date: new Date().toISOString().split("T")[0],
+      date: txnDate,
       referenceNo,
       description,
+      partyName: partyName || undefined,
+      paymentMode,
+      chequeNo: chequeNo || undefined,
       debit: type === "Debit" ? Number(amount) : 0,
       credit: type === "Credit" ? Number(amount) : 0,
       balance: totalBankBalance + (type === "Credit" ? Number(amount) : -Number(amount)),
@@ -76,6 +94,29 @@ export function BankingView({
     }
     setShowModal(false);
     setDescription("");
+    setPartyName("");
+    setChequeNo("");
+  };
+
+  const handleAddAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAccountNo) return;
+    const newAcc: BankAccount = {
+      id: `ACC-${Date.now()}`,
+      bankName: newBankName,
+      accountNumber: newAccountNo,
+      ifscCode: newIfsc,
+      branch: "Main Branch",
+      type: newAccountType,
+      currentBalance: Number(newOpeningBal) || 0,
+      unreconciledBalance: 0,
+    };
+    setAccounts([...accounts, newAcc]);
+    if (onAddAccount) {
+      onAddAccount(newAcc);
+    }
+    setShowAccountModal(false);
+    setNewAccountNo("");
   };
 
   const handleDelete = (id: string) => {
@@ -109,7 +150,14 @@ export function BankingView({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setShowAccountModal(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 px-3 py-2 text-xs font-semibold shadow-sm transition"
+          >
+            <Plus className="h-4 w-4" />
+            Add Bank Account
+          </button>
           <button
             onClick={() => setShowModal(true)}
             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 text-xs font-semibold shadow-sm transition"
@@ -205,8 +253,21 @@ export function BankingView({
                   <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">
                     {txn.referenceNo}
                   </td>
-                  <td className="px-4 py-3 font-sans font-medium text-slate-900 dark:text-white max-w-xs truncate">
-                    {txn.description}
+                  <td className="px-4 py-3 font-sans">
+                    <p className="font-medium text-slate-900 dark:text-white max-w-xs truncate">{txn.description}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {txn.paymentMode && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-mono">
+                          {txn.paymentMode}
+                        </span>
+                      )}
+                      {txn.partyName && (
+                        <span className="text-[10px] text-slate-500 truncate">{txn.partyName}</span>
+                      )}
+                      {txn.chequeNo && (
+                        <span className="text-[10px] text-amber-600 font-mono">Chq: {txn.chequeNo}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right text-red-600 dark:text-red-400">
                     {txn.debit > 0 ? formatINR(txn.debit) : "-"}
@@ -254,7 +315,7 @@ export function BankingView({
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Transaction Entry Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
@@ -266,13 +327,13 @@ export function BankingView({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    UTR / Cheque Ref #
+                    Transaction Date
                   </label>
                   <input
-                    type="text"
-                    value={referenceNo}
-                    onChange={(e) => setReferenceNo(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                    type="date"
+                    value={txnDate}
+                    onChange={(e) => setTxnDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
                     required
                   />
                 </div>
@@ -288,6 +349,65 @@ export function BankingView({
                     <option value="Credit">Deposit / Credit (+)</option>
                     <option value="Debit">Withdrawal / Debit (-)</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    UTR / Cheque Ref #
+                  </label>
+                  <input
+                    type="text"
+                    value={referenceNo}
+                    onChange={(e) => setReferenceNo(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Payment Mode
+                  </label>
+                  <select
+                    value={paymentMode}
+                    onChange={(e) => setPaymentMode(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
+                  >
+                    <option value="NEFT">NEFT Transfer</option>
+                    <option value="RTGS">RTGS Real-Time</option>
+                    <option value="IMPS">IMPS Immediate</option>
+                    <option value="UPI">UPI Auto-Collect</option>
+                    <option value="Cheque">Bank CTS Cheque</option>
+                    <option value="NACH">NACH / e-Mandate</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Counterparty / Party Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Tata Consultancy Services"
+                    value={partyName}
+                    onChange={(e) => setPartyName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Cheque # (if applicable)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="000123"
+                    value={chequeNo}
+                    onChange={(e) => setChequeNo(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
                 </div>
               </div>
 
@@ -331,6 +451,106 @@ export function BankingView({
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
                 >
                   Post Transaction
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Bank Account Modal */}
+      {showAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+              <Landmark className="w-5 h-5 text-blue-600" />
+              Add Company Bank Account
+            </h2>
+            <form onSubmit={handleAddAccount} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Bank Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. HDFC Bank / State Bank of India / ICICI Bank"
+                  value={newBankName}
+                  onChange={(e) => setNewBankName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Account Number *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="502000..."
+                    value={newAccountNo}
+                    onChange={(e) => setNewAccountNo(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    IFSC Code *
+                  </label>
+                  <input
+                    type="text"
+                    value={newIfsc}
+                    onChange={(e) => setNewIfsc(e.target.value.toUpperCase())}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono uppercase"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Account Type
+                  </label>
+                  <select
+                    value={newAccountType}
+                    onChange={(e) => setNewAccountType(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  >
+                    <option value="Current">Current Account</option>
+                    <option value="Savings">Savings Account</option>
+                    <option value="Cash Credit">Cash Credit (CC)</option>
+                    <option value="Overdraft">Overdraft (OD)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Opening Balance (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={newOpeningBal}
+                    onChange={(e) => setNewOpeningBal(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAccountModal(false)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Save Account
                 </button>
               </div>
             </form>

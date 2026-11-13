@@ -27,11 +27,23 @@ export function CustomerModal({ isOpen, customer, onClose, onSave }: CustomerMod
     creditLimit: 500000,
     outstandingBalance: 0,
     status: "Active",
+    contactPerson: "",
+    shippingAddress: "",
+    creditDays: 30,
+    bankAccount: "",
+    bankIfsc: "",
   });
 
   useEffect(() => {
     if (customer) {
-      setFormData(customer);
+      setFormData({
+        ...customer,
+        contactPerson: customer.contactPerson || "",
+        shippingAddress: customer.shippingAddress || "",
+        creditDays: customer.creditDays || 30,
+        bankAccount: customer.bankAccount || "",
+        bankIfsc: customer.bankIfsc || "",
+      });
     } else {
       setFormData({
         id: `CUST-${Date.now().toString().slice(-4)}`,
@@ -48,6 +60,11 @@ export function CustomerModal({ isOpen, customer, onClose, onSave }: CustomerMod
         creditLimit: 500000,
         outstandingBalance: 0,
         status: "Active",
+        contactPerson: "",
+        shippingAddress: "",
+        creditDays: 30,
+        bankAccount: "",
+        bankIfsc: "",
       });
     }
   }, [customer, isOpen]);
@@ -124,6 +141,32 @@ export function CustomerModal({ isOpen, customer, onClose, onSave }: CustomerMod
                 onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
                 placeholder="AAACR1234E"
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-mono uppercase text-slate-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Contact Person Name & Designation
+              </label>
+              <input
+                type="text"
+                value={formData.contactPerson || ""}
+                onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                placeholder="e.g. Mr. Rajesh Kadam - Procurement Lead"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Credit Period (Days)
+              </label>
+              <input
+                type="number"
+                value={formData.creditDays || 30}
+                onChange={(e) => setFormData({ ...formData, creditDays: Number(e.target.value) })}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-mono text-slate-900 dark:text-white"
               />
             </div>
           </div>

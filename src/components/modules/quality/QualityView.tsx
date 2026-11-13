@@ -37,8 +37,13 @@ export function QualityView({
   const [inspectionType, setInspectionType] = useState<"Incoming (GRN)" | "In-Process" | "Dispatch QC">("Incoming (GRN)");
   const [itemName, setItemName] = useState("");
   const [lotBatchNo, setLotBatchNo] = useState("");
+  const [vendorName, setVendorName] = useState("Precision CNC Works Pvt Ltd");
   const [inspectedBy, setInspectedBy] = useState("Ramesh Pawar (QA)");
   const [sampleSize, setSampleSize] = useState(10);
+  const [inspectedQty, setInspectedQty] = useState(100);
+  const [acceptedQty, setAcceptedQty] = useState(98);
+  const [rejectedQty, setRejectedQty] = useState(2);
+  const [capaRemarks, setCapaRemarks] = useState("Deburring required on batch edge corners");
   const [paramName, setParamName] = useState("Dimensions & Tolerance");
   const [standardVal, setStandardVal] = useState("±0.05 mm");
   const [measuredVal, setMeasuredVal] = useState("0.02 mm");
@@ -62,6 +67,11 @@ export function QualityView({
     setInspectionNo(`QC-${Date.now().toString().slice(-4)}`);
     setItemName("");
     setLotBatchNo("");
+    setVendorName("Precision CNC Works Pvt Ltd");
+    setInspectedQty(100);
+    setAcceptedQty(98);
+    setRejectedQty(2);
+    setCapaRemarks("");
     setStatus("Accepted");
     setShowModal(true);
   };
@@ -72,8 +82,13 @@ export function QualityView({
     setInspectionType(item.inspectionType);
     setItemName(item.itemName);
     setLotBatchNo(item.lotBatchNo);
+    setVendorName(item.vendorName || "Precision CNC Works Pvt Ltd");
     setInspectedBy(item.inspectedBy);
     setSampleSize(item.sampleSize);
+    setInspectedQty(item.inspectedQty || 100);
+    setAcceptedQty(item.acceptedQty || item.sampleSize);
+    setRejectedQty(item.rejectedQty || 0);
+    setCapaRemarks(item.capaRemarks || "");
     setStatus(item.status);
     if (item.parameters && item.parameters.length > 0) {
       setParamName(item.parameters[0].name);
@@ -92,9 +107,14 @@ export function QualityView({
       inspectionType,
       itemName,
       lotBatchNo: lotBatchNo || `LOT-${Date.now().toString().slice(-4)}`,
+      vendorName,
       inspectedBy,
       date: new Date().toISOString().split("T")[0],
       sampleSize: Number(sampleSize) || 1,
+      inspectedQty: Number(inspectedQty) || 100,
+      acceptedQty: Number(acceptedQty) || 0,
+      rejectedQty: Number(rejectedQty) || 0,
+      capaRemarks,
       status,
       parameters: [
         {
@@ -252,9 +272,19 @@ export function QualityView({
                       {item.itemName}
                     </div>
                     <div className="text-xs text-slate-500 font-mono">Lot: {item.lotBatchNo}</div>
+                    {item.vendorName && (
+                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                        Src: {item.vendorName}
+                      </div>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                    {item.sampleSize} units
+                    <div>{item.sampleSize} units</div>
+                    {item.rejectedQty ? (
+                      <span className="text-[10px] text-red-600 font-mono font-bold">
+                        {item.rejectedQty} rejected
+                      </span>
+                    ) : null}
                   </td>
                   <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                     {item.inspectedBy}
@@ -358,44 +388,93 @@ export function QualityView({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Item / Part Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Mild Steel Sheet 2mm / Hydraulic Valve"
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                  required
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Batch / Lot No.
+                    Item / Part Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mild Steel Sheet 2mm / Hydraulic Valve"
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Supplier / Source Line
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Precision CNC Works Pvt Ltd"
+                    value={vendorName}
+                    onChange={(e) => setVendorName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Lot / Batch No.
                   </label>
                   <input
                     type="text"
                     placeholder="LOT-2026-X"
                     value={lotBatchNo}
                     onChange={(e) => setLotBatchNo(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Sample Size (Units)
+                  <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Lot Size
+                  </label>
+                  <input
+                    type="number"
+                    value={inspectedQty}
+                    onChange={(e) => setInspectedQty(Number(e.target.value))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Sample Qty
                   </label>
                   <input
                     type="number"
                     value={sampleSize}
                     onChange={(e) => setSampleSize(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
                   />
                 </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Rejected Qty
+                  </label>
+                  <input
+                    type="number"
+                    value={rejectedQty}
+                    onChange={(e) => setRejectedQty(Number(e.target.value))}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono font-bold text-red-600"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Corrective Action / CAPA Remarks
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Deburring required on batch edge corners"
+                  value={capaRemarks}
+                  onChange={(e) => setCapaRemarks(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                />
               </div>
 
               {/* Parameter Checked */}

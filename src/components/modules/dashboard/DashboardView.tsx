@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Truck,
   FileCheck2,
-  DollarSign,
+  IndianRupee,
   Download,
   Eye,
   CheckCircle2,
@@ -172,7 +172,7 @@ export function DashboardView({
                 <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-amber-500 text-slate-950 shadow">
                   F6
                 </span>
-                <DollarSign className="h-4 w-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                <IndianRupee className="h-4 w-4 text-amber-400 group-hover:scale-110 transition-transform" />
               </div>
               <span className="text-xs font-bold text-white leading-tight">Receipt Voucher</span>
               <span className="text-[10px] text-amber-300 mt-0.5">रसीद / Collections</span>

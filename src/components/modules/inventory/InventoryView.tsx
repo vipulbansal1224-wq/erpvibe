@@ -186,14 +186,26 @@ export function InventoryView({ items, onOpenNewItem, onSaveItem, onDeleteItem }
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filtered.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                  <td className="px-6 py-3.5 font-mono font-medium text-slate-900 dark:text-white">
-                    {item.sku}
+                  <td className="px-6 py-3.5">
+                    <span className="font-mono font-medium text-slate-900 dark:text-white">{item.sku}</span>
+                    {item.barcode && (
+                      <span className="block font-mono text-[10px] text-slate-400">
+                        {item.barcode}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-3.5">
                     <p className="font-semibold text-slate-900 dark:text-white">{item.name}</p>
-                    <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-500">
-                      {item.category}
-                    </span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-500">
+                        {item.category}
+                      </span>
+                      {item.batchTracking && (
+                        <span className="rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 px-1 py-0.2 text-[9px] font-mono">
+                          Batch Track
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-3.5 font-mono text-slate-700 dark:text-slate-300">
                     {item.hsnSacCode}

@@ -8,7 +8,7 @@ import {
   Search,
   Calendar,
   CheckCircle2,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   CreditCard,
   Edit,
@@ -36,6 +36,10 @@ export function SubscriptionsView({
   // Form states
   const [contractNo, setContractNo] = useState(`SUB/AMC/26-${Date.now().toString().slice(-3)}`);
   const [clientName, setClientName] = useState("");
+  const [clientGstin, setClientGstin] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contractDurationMonths, setContractDurationMonths] = useState(12);
+  const [paymentTermsDays, setPaymentTermsDays] = useState(15);
   const [planName, setPlanName] = useState("Enterprise ERP AMC Support");
   const [billingFrequency, setBillingFrequency] = useState<SubscriptionRecord["billingFrequency"]>("Monthly");
   const [recurringAmount, setRecurringAmount] = useState(25000);
@@ -69,6 +73,10 @@ export function SubscriptionsView({
     setEditingId(null);
     setContractNo(`SUB/AMC/26-${Date.now().toString().slice(-3)}`);
     setClientName("");
+    setClientGstin("");
+    setContactEmail("");
+    setContractDurationMonths(12);
+    setPaymentTermsDays(15);
     setPlanName("Enterprise ERP AMC Support");
     setRecurringAmount(25000);
     setStatus("Active");
@@ -79,6 +87,10 @@ export function SubscriptionsView({
     setEditingId(s.id);
     setContractNo(s.contractNo);
     setClientName(s.clientName);
+    setClientGstin(s.clientGstin || "");
+    setContactEmail(s.contactEmail || "");
+    setContractDurationMonths(s.contractDurationMonths || 12);
+    setPaymentTermsDays(s.paymentTermsDays || 15);
     setPlanName(s.planName);
     setBillingFrequency(s.billingFrequency);
     setRecurringAmount(s.recurringAmount);
@@ -97,6 +109,10 @@ export function SubscriptionsView({
       id: editingId || `SUB-${Date.now()}`,
       contractNo,
       clientName,
+      clientGstin,
+      contactEmail,
+      contractDurationMonths: Number(contractDurationMonths) || 12,
+      paymentTermsDays: Number(paymentTermsDays) || 15,
       planName,
       billingFrequency,
       recurringAmount: Number(recurringAmount) || 0,
@@ -169,7 +185,7 @@ export function SubscriptionsView({
         <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div className="flex justify-between items-center text-slate-500 text-xs font-medium uppercase tracking-wider">
             Total Contract Value
-            <DollarSign className="w-5 h-5 text-indigo-500" />
+            <IndianRupee className="w-5 h-5 text-indigo-500" />
           </div>
           <div className="text-2xl font-bold text-slate-800 dark:text-white mt-2">
             ₹
@@ -249,6 +265,9 @@ export function SubscriptionsView({
                       {s.clientName}
                     </div>
                     <div className="text-xs text-purple-600 font-medium">{s.planName}</div>
+                    {s.clientGstin && (
+                      <div className="text-[10px] text-slate-400 font-mono">GSTIN: {s.clientGstin}</div>
+                    )}
                   </td>
                   <td className="py-3 px-4">
                     <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
@@ -361,31 +380,84 @@ export function SubscriptionsView({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Client / Customer Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Tata Consultancy Enterprises Ltd"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Client / Customer Name *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Tata Consultancy Enterprises Ltd"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Client GSTIN
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="27AABCA9845E1ZP"
+                    value={clientGstin}
+                    onChange={(e) => setClientGstin(e.target.value.toUpperCase())}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono uppercase"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Plan / Service Package
-                </label>
-                <input
-                  type="text"
-                  value={planName}
-                  onChange={(e) => setPlanName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Plan / Service Package *
+                  </label>
+                  <input
+                    type="text"
+                    value={planName}
+                    onChange={(e) => setPlanName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Billing Contact Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="accounts@client.com"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Contract Period (Months)
+                  </label>
+                  <input
+                    type="number"
+                    value={contractDurationMonths}
+                    onChange={(e) => setContractDurationMonths(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Credit Terms (Days)
+                  </label>
+                  <input
+                    type="number"
+                    value={paymentTermsDays}
+                    onChange={(e) => setPaymentTermsDays(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-mono"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2">

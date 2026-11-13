@@ -7,7 +7,7 @@ import {
   ChevronDown,
   Folder,
   FileText,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   TrendingDown,
   CheckCircle2,

@@ -44,6 +44,10 @@ export function DocumentsVaultView({
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split("T")[0]);
   const [expiryDate, setExpiryDate] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<VaultDocument["verificationStatus"]>("Verified & Current");
+  const [confidentialityLevel, setConfidentialityLevel] = useState<VaultDocument["confidentialityLevel"]>("Confidential");
+  const [physicalLockerRef, setPhysicalLockerRef] = useState("Fireproof Safe Box-A1");
+  const [description, setDescription] = useState("");
+  const [keywordsStr, setKeywordsStr] = useState("");
 
   const categories: VaultDocument["category"][] = [
     "Statutory & Tax",
@@ -71,6 +75,10 @@ export function DocumentsVaultView({
     setAuthority("Government of India / MCA");
     setExpiryDate("");
     setVerificationStatus("Verified & Current");
+    setConfidentialityLevel("Confidential");
+    setPhysicalLockerRef("Fireproof Safe Box-A1");
+    setDescription("");
+    setKeywordsStr("");
     setShowModal(true);
   };
 
@@ -83,6 +91,16 @@ export function DocumentsVaultView({
     setIssueDate(doc.issueDate);
     setExpiryDate(doc.expiryDate || "");
     setVerificationStatus(doc.verificationStatus);
+    setConfidentialityLevel(doc.confidentialityLevel || "Confidential");
+    setPhysicalLockerRef(doc.physicalLockerRef || "Fireproof Safe Box-A1");
+    setDescription(doc.description || "");
+    setKeywordsStr(
+      Array.isArray(doc.keywords)
+        ? doc.keywords.join(", ")
+        : typeof doc.keywords === "string"
+        ? doc.keywords
+        : ""
+    );
     setShowModal(true);
   };
 
@@ -98,6 +116,10 @@ export function DocumentsVaultView({
       expiryDate: expiryDate || undefined,
       authority,
       verificationStatus,
+      confidentialityLevel,
+      physicalLockerRef,
+      description,
+      keywords: keywordsStr ? keywordsStr.split(",").map((k) => k.trim()).filter(Boolean) : undefined,
     };
 
     if (editingId && onUpdateDocument) {
@@ -237,7 +259,19 @@ export function DocumentsVaultView({
                       <FileCheck2 className="w-4 h-4 text-emerald-600" />
                       {doc.documentTitle}
                     </div>
-                    <div className="text-xs text-slate-500 font-mono mt-0.5">{doc.fileNumber}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-slate-500 font-mono">{doc.fileNumber}</span>
+                      {doc.physicalLockerRef && (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                          {doc.physicalLockerRef}
+                        </span>
+                      )}
+                      {doc.confidentialityLevel && (
+                        <span className="text-[10px] text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                          {doc.confidentialityLevel}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <span className="px-2.5 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
@@ -399,19 +433,76 @@ export function DocumentsVaultView({
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Compliance Status
+                  </label>
+                  <select
+                    value={verificationStatus}
+                    onChange={(e) => setVerificationStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
+                  >
+                    <option value="Verified & Current">Verified & Current</option>
+                    <option value="Permanent">Permanent (Charter / PAN)</option>
+                    <option value="Renewal Pending">Renewal Pending</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Confidentiality Classification
+                  </label>
+                  <select
+                    value={confidentialityLevel}
+                    onChange={(e) => setConfidentialityLevel(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
+                  >
+                    <option value="Public">Public (Govt Notice / Display)</option>
+                    <option value="Internal">Internal Company Wide</option>
+                    <option value="Restricted">Restricted (Directors Only)</option>
+                    <option value="Confidential">Confidential (Encrypted Vault)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Physical Locker / Binder Ref
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Safe Box A1, Binder 4"
+                    value={physicalLockerRef}
+                    onChange={(e) => setPhysicalLockerRef(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Search Keywords / Tags (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="gst, mca, lease, certificate"
+                    value={keywordsStr}
+                    onChange={(e) => setKeywordsStr(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Compliance Status
+                  Document Description & Purpose
                 </label>
-                <select
-                  value={verificationStatus}
-                  onChange={(e) => setVerificationStatus(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm font-semibold"
-                >
-                  <option value="Verified & Current">Verified & Current</option>
-                  <option value="Permanent">Permanent (Charter / PAN)</option>
-                  <option value="Renewal Pending">Renewal Pending</option>
-                </select>
+                <textarea
+                  rows={2}
+                  placeholder="Additional legal notes, clause summaries or renewal contacts..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
+                />
               </div>
 
               <div className="flex justify-end gap-3 pt-3">

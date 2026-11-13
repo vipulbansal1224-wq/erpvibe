@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Truck, Plus, Search, ShieldCheck, Mail, Phone, Clock, AlertCircle, Edit, Trash2 } from "lucide-react";
+import { Truck, Plus, Search, ShieldCheck, Mail, Phone, Clock, AlertCircle, Edit, Trash2, LayoutGrid, Table as TableIcon, Landmark } from "lucide-react";
 import { Supplier } from "@/types/erp";
 import { formatINR } from "@/lib/utils";
 import { SupplierModal } from "./SupplierModal";
@@ -20,6 +20,7 @@ export function SuppliersView({
   onDeleteSupplier,
 }: SuppliersViewProps) {
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
 
@@ -77,6 +78,23 @@ export function SuppliersView({
             />
           </div>
 
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode("table")}
+              className={`p-1.5 rounded-md transition ${viewMode === "table" ? "bg-white dark:bg-slate-700 text-purple-600 shadow-sm" : "text-slate-500"}`}
+              title="Table View"
+            >
+              <TableIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-1.5 rounded-md transition ${viewMode === "grid" ? "bg-white dark:bg-slate-700 text-purple-600 shadow-sm" : "text-slate-500"}`}
+              title="Grid View"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+          </div>
+
           <button
             onClick={handleOpenNew}
             className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition"
@@ -87,7 +105,96 @@ export function SuppliersView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {viewMode === "table" ? (
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Vendor Code & Name</th>
+                  <th className="px-5 py-3 font-semibold">GSTIN / PAN</th>
+                  <th className="px-5 py-3 font-semibold">MSME Cat & Udyam #</th>
+                  <th className="px-5 py-3 font-semibold">Bank A/C & IFSC</th>
+                  <th className="px-5 py-3 font-semibold">TDS Section</th>
+                  <th className="px-5 py-3 font-semibold">Terms (Sec 15)</th>
+                  <th className="px-5 py-3 font-semibold">Payable (₹)</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {filtered.map((supplier) => (
+                  <tr key={supplier.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                    <td className="px-5 py-3.5">
+                      <p className="font-semibold text-slate-900 dark:text-white">{supplier.name}</p>
+                      <span className="font-mono text-[10px] text-slate-400">{supplier.id}</span>
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-[11px]">
+                      <span className="font-medium text-slate-900 dark:text-white">{supplier.gstin}</span>
+                      <span className="block text-slate-400">PAN: {supplier.pan}</span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="rounded-full bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 px-2 py-0.5 text-[10px] font-semibold text-purple-700 dark:text-purple-300">
+                        {supplier.msmeCategory}
+                      </span>
+                      {supplier.udyamNumber && (
+                        <span className="block font-mono text-[10px] text-slate-500 mt-0.5 truncate max-w-[150px]">
+                          {supplier.udyamNumber}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                      {supplier.bankAccount ? (
+                        <>
+                          <span>{supplier.bankName || "Bank"}: {supplier.bankAccount}</span>
+                          <span className="block text-[10px] text-slate-400">{supplier.bankIfsc}</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-400 italic">Not Added</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-[11px] text-slate-600 dark:text-slate-300">
+                      {supplier.tdsSection || "194C (1%)"}
+                    </td>
+                    <td className="px-5 py-3.5 text-[11px] text-slate-600 dark:text-slate-300">
+                      {supplier.paymentTerms}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono font-bold text-slate-900 dark:text-white">
+                      {formatINR(supplier.balancePayable)}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                        {supplier.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => handleOpenEdit(supplier)}
+                          className="p-1.5 rounded text-slate-400 hover:text-purple-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                          title="Edit Supplier"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </button>
+                        {onDeleteSupplier && (
+                          <button
+                            onClick={() => onDeleteSupplier(supplier.id)}
+                            className="p-1.5 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
+                            title="Delete Supplier"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((supplier) => (
           <div
             key={supplier.id}
@@ -135,6 +242,12 @@ export function SuppliersView({
                     {supplier.pan}
                   </span>
                 </div>
+                {supplier.udyamNumber && (
+                  <div className="flex justify-between text-[10px]">
+                    <span className="text-slate-500">Udyam:</span>
+                    <span className="text-emerald-600 font-bold">{supplier.udyamNumber}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400 mt-2">
@@ -150,6 +263,12 @@ export function SuppliersView({
                   <Clock className="h-3.5 w-3.5 text-slate-400" />
                   <span>Terms: {supplier.paymentTerms} (Sec 15 MSME)</span>
                 </div>
+                {supplier.bankAccount && (
+                  <div className="flex items-center gap-2 text-[11px] font-mono text-purple-600 dark:text-purple-400">
+                    <Landmark className="h-3.5 w-3.5 text-purple-500" />
+                    <span>{supplier.bankName || "Bank"}: {supplier.bankAccount}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -170,6 +289,7 @@ export function SuppliersView({
           </div>
         ))}
       </div>
+      )}
 
       <SupplierModal
         isOpen={isModalOpen}

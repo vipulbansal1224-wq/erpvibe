@@ -7,7 +7,7 @@ import {
   TrendingDown,
   Calendar,
   CheckCircle2,
-  DollarSign,
+  IndianRupee,
   Edit,
   Trash2,
   X,
@@ -33,12 +33,17 @@ export function AssetsView({
 
   // Form states
   const [assetCode, setAssetCode] = useState(`AST-${Date.now().toString().slice(-4)}`);
+  const [tagNumber, setTagNumber] = useState(`TAG-26-${Date.now().toString().slice(-3)}`);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<FixedAsset["category"]>("Plant & Machinery");
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split("T")[0]);
   const [purchaseCost, setPurchaseCost] = useState(100000);
+  const [salvageValue, setSalvageValue] = useState(5000);
   const [usefulLifeYears, setUsefulLifeYears] = useState(10);
   const [depreciationMethod, setDepreciationMethod] = useState<FixedAsset["depreciationMethod"]>("Straight Line (SLM)");
+  const [location, setLocation] = useState("Plant Floor 1 - Production Bay");
+  const [vendorName, setVendorName] = useState("Siemens India Industrial Ltd");
+  const [invoiceReference, setInvoiceReference] = useState("INV/2026/8841");
   const [status, setStatus] = useState<FixedAsset["status"]>("Active");
 
   const totalOriginalCost = assets.reduce((sum, a) => sum + a.purchaseCost, 0);
@@ -48,9 +53,14 @@ export function AssetsView({
   const handleOpenNew = () => {
     setEditingId(null);
     setAssetCode(`AST-${Date.now().toString().slice(-4)}`);
+    setTagNumber(`TAG-26-${Date.now().toString().slice(-3)}`);
     setName("");
     setPurchaseCost(100000);
+    setSalvageValue(5000);
     setUsefulLifeYears(10);
+    setLocation("Plant Floor 1 - Production Bay");
+    setVendorName("Siemens India Industrial Ltd");
+    setInvoiceReference("INV/2026/8841");
     setDepreciationMethod("Straight Line (SLM)");
     setStatus("Active");
     setShowModal(true);
@@ -59,11 +69,16 @@ export function AssetsView({
   const handleOpenEdit = (ast: FixedAsset) => {
     setEditingId(ast.id);
     setAssetCode(ast.assetCode);
+    setTagNumber(ast.tagNumber || `TAG-26-${Date.now().toString().slice(-3)}`);
     setName(ast.name);
     setCategory(ast.category);
     setPurchaseDate(ast.purchaseDate);
     setPurchaseCost(ast.purchaseCost);
+    setSalvageValue(ast.salvageValue || Math.round(ast.purchaseCost * 0.05));
     setUsefulLifeYears(ast.usefulLifeYears);
+    setLocation(ast.location || "Plant Floor 1 - Production Bay");
+    setVendorName(ast.vendorName || "");
+    setInvoiceReference(ast.invoiceReference || "");
     setDepreciationMethod(ast.depreciationMethod);
     setStatus(ast.status);
     setShowModal(true);
@@ -85,12 +100,16 @@ export function AssetsView({
       category,
       purchaseDate,
       purchaseCost: Number(purchaseCost) || 0,
-      salvageValue: Math.round((Number(purchaseCost) || 0) * 0.05),
+      salvageValue: Number(salvageValue) || Math.round((Number(purchaseCost) || 0) * 0.05),
       usefulLifeYears: Number(usefulLifeYears) || 1,
       depreciationMethod,
       accumulatedDepreciation: estDepreciation,
       currentBookValue,
       status,
+      tagNumber,
+      location,
+      vendorName,
+      invoiceReference,
     };
 
     if (editingId && onUpdateAsset) {
@@ -135,7 +154,7 @@ export function AssetsView({
         <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Gross Block (Original Cost)</span>
-            <DollarSign className="h-4 w-4 text-indigo-500" />
+            <IndianRupee className="h-4 w-4 text-indigo-500" />
           </div>
           <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
             {formatINR(totalOriginalCost)}
@@ -198,11 +217,19 @@ export function AssetsView({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {assets.map((ast) => (
                 <tr key={ast.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                  <td className="px-6 py-3.5 font-mono font-bold text-slate-900 dark:text-white">
-                    {ast.assetCode}
+                  <td className="px-6 py-3.5">
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{ast.assetCode}</span>
+                    {ast.tagNumber && (
+                      <span className="block font-mono text-[10px] text-indigo-600 dark:text-indigo-400">
+                        {ast.tagNumber}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-3.5 font-semibold text-slate-900 dark:text-white">
-                    {ast.name}
+                    <p>{ast.name}</p>
+                    {ast.location && (
+                      <span className="text-[10px] text-slate-400 font-normal">📍 {ast.location}</span>
+                    )}
                   </td>
                   <td className="px-6 py-3.5 text-slate-600 dark:text-slate-300">
                     <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px]">
@@ -375,6 +402,60 @@ export function AssetsView({
                     <option value="Disposed">Disposed</option>
                     <option value="Written Off">Written Off</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Asset Tag / Barcode
+                  </label>
+                  <input
+                    type="text"
+                    value={tagNumber}
+                    onChange={(e) => setTagNumber(e.target.value)}
+                    placeholder="TAG-26-001"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Physical Location / Bay
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Plant Floor 1 - Bay A"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Vendor / Manufacturer
+                  </label>
+                  <input
+                    type="text"
+                    value={vendorName}
+                    onChange={(e) => setVendorName(e.target.value)}
+                    placeholder="e.g. Siemens India Ltd"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Purchase Invoice Ref
+                  </label>
+                  <input
+                    type="text"
+                    value={invoiceReference}
+                    onChange={(e) => setInvoiceReference(e.target.value)}
+                    placeholder="INV/2026/8841"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
                 </div>
               </div>
 

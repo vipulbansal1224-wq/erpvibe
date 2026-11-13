@@ -28,6 +28,14 @@ export function NewItemModal({
   const [currentStock, setCurrentStock] = useState(25);
   const [reorderLevel, setReorderLevel] = useState(10);
   const [warehouse, setWarehouse] = useState("Mumbai Central Warehouse");
+  const [barcode, setBarcode] = useState(`890${Math.floor(1000000000 + Math.random() * 9000000000)}`);
+  const [brand, setBrand] = useState("Enterprise Industrial");
+  const [binLocation, setBinLocation] = useState("Bin A-04, Rack 2");
+  const [minOrderQty, setMinOrderQty] = useState(5);
+  const [batchTracking, setBatchTracking] = useState(true);
+  const [expiryTracking, setExpiryTracking] = useState(false);
+  const [altUom, setAltUom] = useState("BOX");
+  const [conversionFactor, setConversionFactor] = useState(10);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +53,14 @@ export function NewItemModal({
       reorderLevel,
       warehouse,
       status: currentStock <= reorderLevel ? "Low Stock" : "In Stock",
+      barcode,
+      brand,
+      binLocation,
+      minOrderQty,
+      batchTracking,
+      expiryTracking,
+      altUom,
+      conversionFactor,
     };
     onSaveItem(newItem);
     onClose();
@@ -223,6 +239,99 @@ export function NewItemModal({
                 onChange={(e) => setReorderLevel(Number(e.target.value))}
                 className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-mono"
               />
+            </div>
+
+            <div>
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Barcode / EAN-13
+              </label>
+              <input
+                type="text"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                placeholder="8901234567890"
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Min Order Qty (MOQ)
+              </label>
+              <input
+                type="number"
+                value={minOrderQty}
+                onChange={(e) => setMinOrderQty(Number(e.target.value))}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Brand / Manufacturer
+              </label>
+              <input
+                type="text"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Godown / Bin Location
+              </label>
+              <input
+                type="text"
+                value={binLocation}
+                onChange={(e) => setBinLocation(e.target.value)}
+                placeholder="Rack A-04, Bin 2"
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Alt Unit & Factor (1 {altUom} = {conversionFactor} {uom})
+              </label>
+              <div className="flex gap-2 mt-1">
+                <input
+                  type="text"
+                  value={altUom}
+                  onChange={(e) => setAltUom(e.target.value.toUpperCase())}
+                  placeholder="BOX"
+                  className="w-1/2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-mono uppercase"
+                />
+                <input
+                  type="number"
+                  value={conversionFactor}
+                  onChange={(e) => setConversionFactor(Number(e.target.value))}
+                  placeholder="10"
+                  className="w-1/2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 pt-4">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={batchTracking}
+                  onChange={(e) => setBatchTracking(e.target.checked)}
+                  className="rounded text-blue-600 focus:ring-blue-500"
+                />
+                <span className="font-medium text-slate-700 dark:text-slate-300">Batch / Lot Tracking</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={expiryTracking}
+                  onChange={(e) => setExpiryTracking(e.target.checked)}
+                  className="rounded text-blue-600 focus:ring-blue-500"
+                />
+                <span className="font-medium text-slate-700 dark:text-slate-300">Expiry Tracking</span>
+              </label>
             </div>
           </div>
 

@@ -18,7 +18,7 @@ import {
   Boxes,
   LifeBuoy,
   CreditCard,
-  BadgeDollarSign,
+  BadgeIndianRupee,
   Users,
   Truck,
   BarChart3,
@@ -172,7 +172,7 @@ export function CompanySettingsView({
       title: "India Payroll & Deductions",
       description: "Statutory employee deductions: EPF (12%), ESIC, State Professional Tax (PT), and Salary TDS.",
       category: "Human Resources",
-      icon: BadgeDollarSign,
+      icon: BadgeIndianRupee,
     },
     {
       key: "customers",

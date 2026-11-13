@@ -7,7 +7,7 @@ import {
   Calendar,
   TrendingUp,
   TrendingDown,
-  DollarSign,
+  IndianRupee,
   PieChart,
   BarChart3,
   FileSpreadsheet,

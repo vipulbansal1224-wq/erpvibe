@@ -33,11 +33,29 @@ export function SupplierModal({
     paymentTerms: "45 Days",
     balancePayable: 0,
     status: "Active",
+    udyamNumber: "",
+    bankName: "",
+    bankAccount: "",
+    bankIfsc: "",
+    branch: "",
+    tdsSection: "194C - Contractor (1%/2%)",
+    contactPerson: "",
+    creditLimit: 200000,
   });
 
   useEffect(() => {
     if (supplier) {
-      setFormData(supplier);
+      setFormData({
+        ...supplier,
+        udyamNumber: supplier.udyamNumber || "",
+        bankName: supplier.bankName || "",
+        bankAccount: supplier.bankAccount || "",
+        bankIfsc: supplier.bankIfsc || "",
+        branch: supplier.branch || "",
+        tdsSection: supplier.tdsSection || "194C - Contractor (1%/2%)",
+        contactPerson: supplier.contactPerson || "",
+        creditLimit: supplier.creditLimit || 200000,
+      });
     } else {
       setFormData({
         id: `SUP-${Date.now().toString().slice(-4)}`,
@@ -55,6 +73,14 @@ export function SupplierModal({
         paymentTerms: "45 Days",
         balancePayable: 0,
         status: "Active",
+        udyamNumber: "",
+        bankName: "",
+        bankAccount: "",
+        bankIfsc: "",
+        branch: "",
+        tdsSection: "194C - Contractor (1%/2%)",
+        contactPerson: "",
+        creditLimit: 200000,
       });
     }
   }, [supplier, isOpen]);
@@ -171,6 +197,75 @@ export function SupplierModal({
                 <option value="Medium">Medium (Turnover &lt; 250 Cr)</option>
                 <option value="Non-MSME">Non-MSME Large Enterprise</option>
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                MSME Udyam Number (Sec 43Bh)
+              </label>
+              <input
+                type="text"
+                value={formData.udyamNumber || ""}
+                onChange={(e) => setFormData({ ...formData, udyamNumber: e.target.value.toUpperCase() })}
+                placeholder="UDYAM-MH-19-0045812"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-mono uppercase text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                TDS Withholding Section
+              </label>
+              <select
+                value={formData.tdsSection || "194C - Contractor (1%/2%)"}
+                onChange={(e) => setFormData({ ...formData, tdsSection: e.target.value })}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white font-medium"
+              >
+                <option value="194C - Contractor (1%/2%)">194C - Contractor (1%/2%)</option>
+                <option value="194J - Professional (10%/2%)">194J - Professional / Tech (10%/2%)</option>
+                <option value="194Q - Goods Purchase (0.1%)">194Q - Goods Purchase (0.1%)</option>
+                <option value="None / Exempt">None / Exempt</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Bank Payout Details */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 space-y-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
+              Bank Remittance Details (RTGS / NEFT)
+            </span>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Bank Name</label>
+                <input
+                  type="text"
+                  placeholder="HDFC Bank"
+                  value={formData.bankName || ""}
+                  onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                  className="w-full rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Account Number</label>
+                <input
+                  type="text"
+                  placeholder="50200012345678"
+                  value={formData.bankAccount || ""}
+                  onChange={(e) => setFormData({ ...formData, bankAccount: e.target.value })}
+                  className="w-full rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs font-mono text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">IFSC Code</label>
+                <input
+                  type="text"
+                  placeholder="HDFC0000240"
+                  value={formData.bankIfsc || ""}
+                  onChange={(e) => setFormData({ ...formData, bankIfsc: e.target.value.toUpperCase() })}
+                  className="w-full rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs font-mono uppercase text-slate-900 dark:text-white"
+                />
+              </div>
             </div>
           </div>
 

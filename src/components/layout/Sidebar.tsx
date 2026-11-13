@@ -10,7 +10,7 @@ import {
   Truck,
   FileSpreadsheet,
   FileText,
-  BadgeDollarSign,
+  BadgeIndianRupee,
   Landmark,
   History,
   Settings,
@@ -116,7 +116,7 @@ export function Sidebar({
         { id: "assets" as ModuleType, label: "Fixed Assets & Depr.", icon: Boxes, badge: "SLM/WDV", enabled: moduleSettings.assets },
         { id: "accounts" as ModuleType, label: "Chart of Accounts", icon: Landmark, enabled: true },
         { id: "recruitment" as ModuleType, label: "Recruitment & ATS", icon: UserCheck, badge: "Hiring", enabled: moduleSettings.recruitment },
-        { id: "payroll" as ModuleType, label: "Payroll & Payslips", icon: BadgeDollarSign, badge: "PF/ESIC", enabled: moduleSettings.payroll },
+        { id: "payroll" as ModuleType, label: "Payroll & Payslips", icon: BadgeIndianRupee, badge: "PF/ESIC", enabled: moduleSettings.payroll },
       ],
     },
     {

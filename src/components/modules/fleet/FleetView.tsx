@@ -46,6 +46,10 @@ export function FleetView({
   const [insuranceValidUntil, setInsuranceValidUntil] = useState("2027-12-31");
   const [pucValidUntil, setPucValidUntil] = useState("2027-06-30");
   const [fitnessValidUntil, setFitnessValidUntil] = useState("2028-12-31");
+  const [payloadCapacityMT, setPayloadCapacityMT] = useState(16);
+  const [fastagBalance, setFastagBalance] = useState(4500);
+  const [nationalPermitValidUntil, setNationalPermitValidUntil] = useState("2028-03-31");
+  const [currentLocation, setCurrentLocation] = useState("Bhiwandi Logistics Hub, MH");
   const [status, setStatus] = useState<FleetVehicle["status"]>("Available");
 
   const filtered = vehicles.filter((v) => {
@@ -67,6 +71,10 @@ export function FleetView({
     setModel("");
     setDriverName("");
     setDriverPhone("+91 ");
+    setPayloadCapacityMT(16);
+    setFastagBalance(4500);
+    setNationalPermitValidUntil("2028-03-31");
+    setCurrentLocation("Bhiwandi Logistics Hub, MH");
     setStatus("Available");
     setShowModal(true);
   };
@@ -83,6 +91,10 @@ export function FleetView({
     setInsuranceValidUntil(v.insuranceValidUntil);
     setPucValidUntil(v.pucValidUntil);
     setFitnessValidUntil(v.fitnessValidUntil);
+    setPayloadCapacityMT(v.payloadCapacityMT || 16);
+    setFastagBalance(v.fastagBalance || 4500);
+    setNationalPermitValidUntil(v.nationalPermitValidUntil || "2028-03-31");
+    setCurrentLocation(v.currentLocation || "Bhiwandi Logistics Hub, MH");
     setStatus(v.status);
     setShowModal(true);
   };
@@ -102,6 +114,10 @@ export function FleetView({
       insuranceValidUntil,
       pucValidUntil,
       fitnessValidUntil,
+      payloadCapacityMT: Number(payloadCapacityMT) || 0,
+      fastagBalance: Number(fastagBalance) || 0,
+      nationalPermitValidUntil,
+      currentLocation,
       status,
     };
 
@@ -277,6 +293,18 @@ export function FleetView({
                   </span>
                   <span className="font-medium font-mono">{v.fuelType} • {v.odometerKm.toLocaleString()} KM</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Payload & FASTag:</span>
+                  <span className="font-medium font-mono text-blue-600 dark:text-blue-400">
+                    {v.payloadCapacityMT || 16} MT • ₹{(v.fastagBalance || 4500).toLocaleString("en-IN")}
+                  </span>
+                </div>
+                {v.currentLocation && (
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-400">Current Hub:</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{v.currentLocation}</span>
+                  </div>
+                )}
               </div>
 
               {/* Statutory Expiries */}
@@ -468,6 +496,57 @@ export function FleetView({
                     value={fitnessValidUntil}
                     onChange={(e) => setFitnessValidUntil(e.target.value)}
                     className="w-full p-1.5 text-xs rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Payload Capacity (Metric Tons)
+                  </label>
+                  <input
+                    type="number"
+                    value={payloadCapacityMT}
+                    onChange={(e) => setPayloadCapacityMT(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    FASTag Wallet Balance (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={fastagBalance}
+                    onChange={(e) => setFastagBalance(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Current Logistics Hub / Depot
+                  </label>
+                  <input
+                    type="text"
+                    value={currentLocation}
+                    onChange={(e) => setCurrentLocation(e.target.value)}
+                    placeholder="Bhiwandi Logistics Hub, MH"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    National Permit Valid Until
+                  </label>
+                  <input
+                    type="date"
+                    value={nationalPermitValidUntil}
+                    onChange={(e) => setNationalPermitValidUntil(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
                   />
                 </div>
               </div>

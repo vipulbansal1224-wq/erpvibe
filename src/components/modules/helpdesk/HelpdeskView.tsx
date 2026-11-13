@@ -35,7 +35,11 @@ export function HelpdeskView({
   // Form states
   const [ticketNumber, setTicketNumber] = useState(`HD-2026-${Math.floor(100 + Math.random() * 900)}`);
   const [customerName, setCustomerName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [category, setCategory] = useState<SupportTicket["category"]>("Technical");
   const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<SupportTicket["priority"]>("Medium");
   const [status, setStatus] = useState<SupportTicket["status"]>("Open");
   const [assignedAgent, setAssignedAgent] = useState("Pooja Deshmukh");
@@ -57,7 +61,11 @@ export function HelpdeskView({
     setEditingId(null);
     setTicketNumber(`HD-2026-${Math.floor(100 + Math.random() * 900)}`);
     setCustomerName("");
+    setContactEmail("");
+    setContactPhone("");
+    setCategory("Technical");
     setSubject("");
+    setDescription("");
     setPriority("Medium");
     setStatus("Open");
     setSlaHoursLeft(8);
@@ -68,7 +76,11 @@ export function HelpdeskView({
     setEditingId(t.id);
     setTicketNumber(t.ticketNumber);
     setCustomerName(t.customerName);
+    setContactEmail(t.contactEmail || "");
+    setContactPhone(t.contactPhone || "");
+    setCategory(t.category || "Technical");
     setSubject(t.subject);
+    setDescription(t.description || "");
     setPriority(t.priority);
     setStatus(t.status);
     setAssignedAgent(t.assignedAgent);
@@ -84,7 +96,11 @@ export function HelpdeskView({
       id: editingId || `TCK-${Date.now()}`,
       ticketNumber,
       customerName,
+      contactEmail,
+      contactPhone,
+      category,
       subject,
+      description,
       priority,
       status,
       assignedAgent,
@@ -224,8 +240,16 @@ export function HelpdeskView({
                   <td className="px-6 py-3.5 font-mono font-bold text-slate-900 dark:text-white">
                     {t.ticketNumber}
                   </td>
-                  <td className="px-6 py-3.5 font-semibold text-slate-900 dark:text-white">
-                    {t.customerName}
+                  <td className="px-6 py-3.5">
+                    <p className="font-semibold text-slate-900 dark:text-white">{t.customerName}</p>
+                    {t.category && (
+                      <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {t.category}
+                      </span>
+                    )}
+                    {t.contactEmail && (
+                      <p className="text-[10px] text-slate-400">{t.contactEmail}</p>
+                    )}
                   </td>
                   <td className="px-6 py-3.5 font-medium text-slate-800 dark:text-slate-200 max-w-md">
                     {t.subject}
@@ -353,9 +377,52 @@ export function HelpdeskView({
                 />
               </div>
 
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Ticket Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as any)}
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  >
+                    <option value="Technical">Technical</option>
+                    <option value="Billing">Billing & Invoice</option>
+                    <option value="Product Training">Product Training</option>
+                    <option value="Bug Report">Bug Report</option>
+                    <option value="Hardware">Hardware / POS</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Requester Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="contact@client.in"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Requester Phone
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+91 98..."
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    className="w-full px-2 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Subject / Problem Description *
+                  Subject / Problem Title *
                 </label>
                 <input
                   type="text"
@@ -364,6 +431,19 @@ export function HelpdeskView({
                   onChange={(e) => setSubject(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Detailed Issue Notes / Root Cause
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Provide comprehensive details, error logs, or user steps..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
                 />
               </div>
 

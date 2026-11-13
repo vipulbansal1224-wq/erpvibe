@@ -93,6 +93,11 @@ export interface Customer {
   creditLimit: number;
   outstandingBalance: number;
   status: "Active" | "Inactive";
+  contactPerson?: string;
+  shippingAddress?: string;
+  creditDays?: number;
+  bankAccount?: string;
+  bankIfsc?: string;
 }
 
 export interface Supplier {
@@ -111,6 +116,14 @@ export interface Supplier {
   paymentTerms: string;
   balancePayable: number;
   status: "Active" | "Inactive";
+  udyamNumber?: string;
+  bankName?: string;
+  bankAccount?: string;
+  bankIfsc?: string;
+  branch?: string;
+  tdsSection?: string;
+  contactPerson?: string;
+  creditLimit?: number;
 }
 
 export interface InventoryItem {
@@ -127,6 +140,14 @@ export interface InventoryItem {
   reorderLevel: number;
   warehouse: string;
   status: "In Stock" | "Low Stock" | "Out of Stock";
+  barcode?: string;
+  batchTracking?: boolean;
+  expiryTracking?: boolean;
+  minOrderQty?: number;
+  altUom?: string;
+  conversionFactor?: number;
+  brand?: string;
+  binLocation?: string;
 }
 
 export interface InvoiceItem {
@@ -173,6 +194,13 @@ export interface SalesInvoice {
   ackNo?: string;
   ackDate?: string;
   eWayBillNo?: string;
+  poNumber?: string;
+  poDate?: string;
+  vehicleNo?: string;
+  transporterName?: string;
+  paymentTerms?: string;
+  shippingAddress?: string;
+  remittanceBank?: string;
   notes?: string;
   termsAndConditions?: string;
 }
@@ -211,6 +239,11 @@ export interface Employee {
   conveyance: number;
   grossSalary: number;
   status: "Active" | "On Leave" | "Relieved";
+  email?: string;
+  phone?: string;
+  dob?: string;
+  gender?: "Male" | "Female" | "Other";
+  emergencyContact?: string;
 }
 
 export interface SalarySlip {
@@ -239,7 +272,7 @@ export interface SalarySlip {
 export interface AuditLogEntry {
   id: string;
   timestamp: string;
-  action: "CREATE" | "UPDATE" | "DELETE" | "IRN_GENERATED" | "EWAYBILL_CREATED";
+  action: "CREATE" | "UPDATE" | "DELETE" | "IRN_GENERATED" | "EWAYBILL_CREATED" | "EXPORT";
   module: string;
   recordId: string;
   recordIdentifier: string;
@@ -303,6 +336,9 @@ export interface WorkOrder {
   targetDate: string;
   warehouse: string;
   status: "Planned" | "In Progress" | "Completed" | "Cancelled";
+  supervisor?: string;
+  batchNo?: string;
+  scrapAllowance?: number;
 }
 
 // 2. Projects & Timesheets
@@ -327,6 +363,8 @@ export interface Project {
   deadline: string;
   status: "Open" | "In Progress" | "Completed" | "On Hold";
   tasks: ProjectTask[];
+  projectManager?: string;
+  billingType?: "Fixed Price" | "Time & Material" | "Retainer";
 }
 
 export interface TimesheetEntry {
@@ -368,10 +406,10 @@ export interface BankAccount {
   bankName: string;
   accountNumber: string;
   ifscCode: string;
-  branch: string;
+  branch?: string;
   currentBalance: number;
-  unreconciledBalance: number;
-  type: "Current" | "OD / CC" | "Escrow";
+  unreconciledBalance?: number;
+  type: "Current" | "OD / CC" | "Escrow" | "Savings" | "Cash Credit" | "Overdraft";
 }
 
 export interface BankTransaction {
@@ -384,6 +422,9 @@ export interface BankTransaction {
   balance: number;
   reconciled: boolean;
   matchedInvoiceNo?: string;
+  paymentMode?: "NEFT" | "RTGS" | "IMPS" | "UPI" | "Cheque" | "NACH";
+  partyName?: string;
+  chequeNo?: string;
 }
 
 // 5. Assets & Depreciation
@@ -400,6 +441,10 @@ export interface FixedAsset {
   accumulatedDepreciation: number;
   currentBookValue: number;
   status: "Active" | "Disposed" | "Written Off";
+  tagNumber?: string;
+  location?: string;
+  vendorName?: string;
+  invoiceReference?: string;
 }
 
 // 6. Helpdesk & Support Tickets
@@ -413,6 +458,13 @@ export interface SupportTicket {
   assignedAgent: string;
   createdAt: string;
   slaHoursLeft: number;
+  clientEmail?: string;
+  clientPhone?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  category?: "Technical" | "Billing" | "Feature" | "Implementation" | "Product Training" | "Bug Report" | "Hardware";
+  description?: string;
+  resolutionNotes?: string;
 }
 
 // ==========================================
@@ -438,6 +490,11 @@ export interface QualityInspection {
   sampleSize: number;
   status: "Accepted" | "Rejected" | "Conditional Pass";
   parameters: QualityParameter[];
+  vendorName?: string;
+  inspectedQty?: number;
+  acceptedQty?: number;
+  rejectedQty?: number;
+  capaRemarks?: string;
 }
 
 // 8. Fleet & Logistics Management (TMS)
@@ -454,6 +511,10 @@ export interface FleetVehicle {
   pucValidUntil: string;
   fitnessValidUntil: string;
   status: "Available" | "On Delivery" | "Under Maintenance";
+  payloadCapacityMT?: number;
+  fastagBalance?: number;
+  nationalPermitValidUntil?: string;
+  currentLocation?: string;
 }
 
 // 9. Subcontracting & Job Work (Indian GST Sec 143 / ITC-04)
@@ -471,6 +532,10 @@ export interface JobWorkOrder {
   receivedQuantity: number;
   scrapGenerated: number;
   status: "Material Sent" | "Partially Received" | "Closed / Completed";
+  ewayBillNo?: string;
+  assessmentValue?: number;
+  processingRate?: number;
+  scrapAllowancePercent?: number;
 }
 
 // 10. Subscriptions & Recurring AMC Invoicing
@@ -486,6 +551,11 @@ export interface SubscriptionRecord {
   nextInvoiceDate: string;
   autoRenew: boolean;
   status: "Active" | "Paused" | "Cancelled";
+  clientGstin?: string;
+  clientEmail?: string;
+  contactEmail?: string;
+  contractDurationMonths?: number;
+  paymentTermsDays?: number;
 }
 
 // 11. Employee Expenses & Reimbursements
@@ -500,6 +570,10 @@ export interface ExpenseClaim {
   taxInvoiceAvailable: boolean;
   approvedBy?: string;
   paymentStatus: "Pending Approval" | "Approved" | "Reimbursed / Paid";
+  merchantGstin?: string;
+  taxAmount?: number;
+  projectAllocation?: string;
+  purposeNotes?: string;
 }
 
 // 12. Recruitment & Applicant Tracking System (ATS)
@@ -513,6 +587,11 @@ export interface JobCandidate {
   appliedDate: string;
   stage: "Applied" | "Screening" | "Technical Interview" | "HR Round" | "Hired" | "Rejected";
   rating: 1 | 2 | 3 | 4 | 5;
+  currentCtc?: number;
+  expectedCtc?: number;
+  noticePeriodDays?: number;
+  currentEmployer?: string;
+  skills?: string | string[];
 }
 
 // 13. Document Management & Legal Compliance Vault (DMS)
@@ -525,6 +604,12 @@ export interface VaultDocument {
   expiryDate?: string;
   authority: string;
   verificationStatus: "Verified & Current" | "Renewal Pending" | "Permanent";
+  description?: string;
+  keywords?: string | string[];
+  confidentiality?: "Public" | "Internal" | "Confidential" | "Board Only" | "Restricted";
+  confidentialityLevel?: "Public" | "Internal" | "Restricted" | "Confidential" | "Board Only";
+  lockerReference?: string;
+  physicalLockerRef?: string;
 }
 
 // 14. Enterprise Accounting & Vouchers System (Indian Statutory ERP Master Engine)

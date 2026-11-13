@@ -41,8 +41,13 @@ export function JobWorkView({
   const [inputItemName, setInputItemName] = useState("");
   const [inputQuantity, setInputQuantity] = useState(100);
   const [expectedOutputItem, setExpectedOutputItem] = useState("");
+  const [dispatchedDate, setDispatchedDate] = useState(new Date().toISOString().split("T")[0]);
   const [statutoryDueDate, setStatutoryDueDate] = useState("2027-11-12");
   const [receivedQuantity, setReceivedQuantity] = useState(0);
+  const [ewayBillNo, setEwayBillNo] = useState("");
+  const [assessmentValue, setAssessmentValue] = useState(150000);
+  const [processingRate, setProcessingRate] = useState(250);
+  const [scrapAllowancePercent, setScrapAllowancePercent] = useState(1.5);
   const [status, setStatus] = useState<JobWorkOrder["status"]>("Material Sent");
 
   const filtered = orders.filter((o) => {
@@ -66,6 +71,11 @@ export function JobWorkView({
     setInputItemName("");
     setInputQuantity(100);
     setReceivedQuantity(0);
+    setDispatchedDate(new Date().toISOString().split("T")[0]);
+    setEwayBillNo("");
+    setAssessmentValue(150000);
+    setProcessingRate(250);
+    setScrapAllowancePercent(1.5);
     setStatus("Material Sent");
     setShowModal(true);
   };
@@ -79,8 +89,13 @@ export function JobWorkView({
     setInputItemName(order.inputItemName);
     setInputQuantity(order.inputQuantity);
     setExpectedOutputItem(order.expectedOutputItem);
+    setDispatchedDate(order.dispatchedDate || new Date().toISOString().split("T")[0]);
     setStatutoryDueDate(order.statutoryDueDate);
     setReceivedQuantity(order.receivedQuantity);
+    setEwayBillNo(order.ewayBillNo || "");
+    setAssessmentValue(order.assessmentValue || 150000);
+    setProcessingRate(order.processingRate || 250);
+    setScrapAllowancePercent(order.scrapAllowancePercent || 1.5);
     setStatus(order.status);
     setShowModal(true);
   };
@@ -94,14 +109,18 @@ export function JobWorkView({
       jobWorkerName,
       jobWorkerGstin: jobWorkerGstin || "27AAAPL0000A1Z5",
       natureOfProcessing,
-      dispatchedDate: new Date().toISOString().split("T")[0],
+      dispatchedDate,
       statutoryDueDate,
       inputItemName,
       inputQuantity: Number(inputQuantity) || 1,
       expectedOutputItem: expectedOutputItem || inputItemName,
       receivedQuantity: Number(receivedQuantity) || 0,
-      scrapGenerated: 0,
+      scrapGenerated: Math.round((Number(inputQuantity) * (Number(scrapAllowancePercent) || 1.5)) / 100),
       status: Number(receivedQuantity) >= Number(inputQuantity) ? "Closed / Completed" : Number(receivedQuantity) > 0 ? "Partially Received" : status,
+      ewayBillNo: ewayBillNo || undefined,
+      assessmentValue: Number(assessmentValue) || 0,
+      processingRate: Number(processingRate) || 0,
+      scrapAllowancePercent: Number(scrapAllowancePercent) || 0,
     };
 
     if (editingId && onUpdateOrder) {
@@ -239,6 +258,11 @@ export function JobWorkView({
                       {o.challanNo}
                     </div>
                     <div className="text-xs text-slate-500">{o.dispatchedDate}</div>
+                    {o.ewayBillNo && (
+                      <span className="block font-mono text-[10px] text-blue-600 dark:text-blue-400">
+                        EWB: {o.ewayBillNo}
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-4">
                     <div className="font-medium text-slate-800 dark:text-slate-100">
@@ -401,6 +425,68 @@ export function JobWorkView({
                     onChange={(e) => setInputQuantity(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Dispatched Date
+                  </label>
+                  <input
+                    type="date"
+                    value={dispatchedDate}
+                    onChange={(e) => setDispatchedDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Statutory Return Due (1-Yr)
+                  </label>
+                  <input
+                    type="date"
+                    value={statutoryDueDate}
+                    onChange={(e) => setStatutoryDueDate(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Transit e-Way Bill #
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="241890123456"
+                    value={ewayBillNo}
+                    onChange={(e) => setEwayBillNo(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Goods Value (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={assessmentValue}
+                    onChange={(e) => setAssessmentValue(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Rate / Unit (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={processingRate}
+                    onChange={(e) => setProcessingRate(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono"
                   />
                 </div>
               </div>
