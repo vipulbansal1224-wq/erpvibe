@@ -264,22 +264,7 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
                 <LogIn className="h-4 w-4" />
                 Sign In
               </button>
-
-              <button
-                type="button"
-                onClick={() => onLogin(initialUsers[0])}
-                className="w-full py-2 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span>Instant Sign In as Super Admin</span>
-                <span>→</span>
-              </button>
             </form>
-
-            <div className="mt-6 pt-4 border-t border-slate-800 text-center">
-              <p className="text-[11px] text-slate-400">
-                Default Super Admin: <code className="text-blue-400 font-mono font-bold bg-slate-800 px-1.5 py-0.5 rounded">admin</code> / <code className="text-blue-400 font-mono font-bold bg-slate-800 px-1.5 py-0.5 rounded">admin</code>
-              </p>
-            </div>
           </div>
         </div>
       </main>
