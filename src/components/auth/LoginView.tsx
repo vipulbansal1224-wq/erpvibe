@@ -44,12 +44,12 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
     );
 
     if (!matchedUser) {
-      setError("अमान्य यूजरनेम या पासवर्ड! कृपया सही विवरण दर्ज करें। (Invalid username or password)");
+      setError("Invalid username or password. Please verify your credentials and try again.");
       return;
     }
 
     if (matchedUser.status !== "Active") {
-      setError(`यह यूजर खाता वर्तमान में ${matchedUser.status} है। कृपया सिस्टम एडमिनिस्ट्रेटर से संपर्क करें।`);
+      setError(`This user account is currently ${matchedUser.status}. Please contact your system administrator.`);
       return;
     }
 
@@ -120,45 +120,65 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
 
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                सुरक्षित लॉगिन एवं <br />
+                Enterprise Portal <br />
                 <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-                  संपूर्ण व्यापार नियंत्रण
+                  Secure Access Control
                 </span>
               </h1>
               <p className="mt-3 text-sm text-slate-300 leading-relaxed max-w-lg">
-                Sign in with your authorized corporate credentials. Access is restricted to designated personnel with strict MCA statutory edit-logging on all transactions.
+                Sign in with your authorized corporate credentials. Access is restricted to designated personnel with strict MCA Section 134(5) statutory edit-logging on all transactions.
               </p>
             </div>
 
             {/* Quick 1-Click Persona Logins */}
             <div className="space-y-2.5 pt-2">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <KeyRound className="h-3.5 w-3.5 text-blue-400" />
-                1-Click Quick Demo Sign-In (डेमो लॉगिन विकल्प)
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <KeyRound className="h-3.5 w-3.5 text-blue-400" />
+                  Quick Sign-In Accounts (Username & Password)
+                </p>
+                <span className="text-[10px] text-indigo-400 font-medium">Click any card to auto-fill & login</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {users.map((u) => (
                   <button
                     key={u.id}
                     type="button"
                     onClick={() => handleQuickLogin(u)}
-                    className="text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-indigo-500/50 transition-all group"
+                    className="text-left p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 hover:border-indigo-500/60 transition-all group shadow-sm flex flex-col justify-between"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white group-hover:text-blue-300 truncate">
-                        {u.username}
-                      </span>
-                      {u.allAccess ? (
-                        <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1 py-0.2 rounded font-bold">
-                          All Access
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="text-xs font-bold text-white group-hover:text-blue-300 truncate">
+                          {u.username}
                         </span>
-                      ) : (
-                        <span className="text-[9px] bg-slate-800 text-slate-400 px-1 py-0.2 rounded font-mono">
-                          RBAC
-                        </span>
-                      )}
+                        {u.allAccess ? (
+                          <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold border border-amber-500/30 shrink-0">
+                            All Access
+                          </span>
+                        ) : (
+                          <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono border border-slate-700 shrink-0">
+                            RBAC
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 truncate mb-2">{u.role}</p>
                     </div>
-                    <p className="text-[10px] text-slate-400 truncate mt-0.5">{u.role}</p>
+
+                    <div className="bg-slate-950/70 rounded-lg p-1.5 border border-slate-800 text-[10px] font-mono space-y-0.5">
+                      <div className="flex items-center justify-between text-slate-300">
+                        <span className="text-slate-500">User:</span>
+                        <span className="text-blue-400 font-bold">{u.username}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-slate-300">
+                        <span className="text-slate-500">Pass:</span>
+                        <span className="text-emerald-400 font-bold">{u.password}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-indigo-400 group-hover:text-indigo-300 mt-2 font-semibold text-center flex items-center justify-center gap-1">
+                      1-Click Login →
+                    </p>
                   </button>
                 ))}
               </div>
@@ -184,13 +204,56 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
           {/* Right Login Form Card */}
           <div className="lg:col-span-6">
             <div className="w-full max-w-md mx-auto rounded-3xl border border-slate-800 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl relative">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">Sign In / लॉगिन</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Sign In</h2>
                   <p className="text-xs text-slate-400 mt-1">Enter your ERPVibe login credentials</p>
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
                   <LogIn className="h-5 w-5" />
+                </div>
+              </div>
+
+              {/* Login Credentials Reference Box */}
+              <div className="mb-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
+                <p className="font-semibold text-slate-300 text-[11px] mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <KeyRound className="h-3 w-3 text-blue-400" />
+                    Available User Accounts & Passwords:
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">6 Pre-Configured</span>
+                </p>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-mono">
+                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
+                    <span className="text-slate-400">admin : </span>
+                    <span className="text-emerald-400 font-bold">admin</span>
+                    <span className="text-slate-500 block text-[9px]">Super Admin</span>
+                  </div>
+                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
+                    <span className="text-slate-400">finance : </span>
+                    <span className="text-emerald-400 font-bold">finance</span>
+                    <span className="text-slate-500 block text-[9px]">Accounts & CA</span>
+                  </div>
+                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
+                    <span className="text-slate-400">sales : </span>
+                    <span className="text-emerald-400 font-bold">sales</span>
+                    <span className="text-slate-500 block text-[9px]">Billing & POS</span>
+                  </div>
+                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
+                    <span className="text-slate-400">warehouse : </span>
+                    <span className="text-emerald-400 font-bold">warehouse</span>
+                    <span className="text-slate-500 block text-[9px]">Store & Supply</span>
+                  </div>
+                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
+                    <span className="text-slate-400">hr : </span>
+                    <span className="text-emerald-400 font-bold">hr</span>
+                    <span className="text-slate-500 block text-[9px]">Payroll & Staff</span>
+                  </div>
+                  <div className="bg-slate-900/90 px-2 py-1 rounded border border-slate-800">
+                    <span className="text-slate-400">auditor : </span>
+                    <span className="text-emerald-400 font-bold">auditor</span>
+                    <span className="text-slate-500 block text-[9px]">Statutory Audit</span>
+                  </div>
                 </div>
               </div>
 
@@ -204,7 +267,7 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Username or Email (यूजरनेम या ईमेल)
+                    Username or Official Email Address
                   </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
@@ -223,7 +286,7 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-slate-300">
-                      Password (पासवर्ड)
+                      Password
                     </label>
                     <span className="text-[11px] text-slate-400">
                       Default: <code className="text-blue-300 font-mono">admin</code>
@@ -258,7 +321,7 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500 h-4 w-4"
                     />
-                    <span className="text-xs text-slate-400">Remember session (सत्र याद रखें)</span>
+                    <span className="text-xs text-slate-400">Remember session on this device</span>
                   </label>
                   <span className="text-xs text-slate-400 font-medium">Session: Encrypted</span>
                 </div>
@@ -268,7 +331,7 @@ export function LoginView({ users, onLogin }: LoginViewProps) {
                   className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 mt-2"
                 >
                   <LogIn className="h-4 w-4" />
-                  Sign In to ERP Console / प्रवेश करें
+                  Sign In to ERP Console
                 </button>
               </form>
 

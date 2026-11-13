@@ -191,7 +191,7 @@ export function CompanySettingsView({
     setModalError(null);
 
     if (!formFullName.trim() || !formUsername.trim() || !formPassword.trim()) {
-      setModalError("कृपया नाम, यूजरनेम और पासवर्ड भरें। (Full Name, Username & Password required)");
+      setModalError("Full Name, Username, and Password are required fields.");
       return;
     }
 
@@ -201,7 +201,7 @@ export function CompanySettingsView({
     if (!editingUserId) {
       const exists = userList.some((u) => u.username.toLowerCase() === cleanUsername);
       if (exists) {
-        setModalError("यह यूजरनेम पहले से मौजूद है! कृपया कोई अन्य यूजरनेम चुनें। (Username already taken)");
+        setModalError("This username is already taken. Please choose another username.");
         return;
       }
     }
@@ -238,7 +238,7 @@ export function CompanySettingsView({
 
   const handleToggleUserStatus = (userId: string) => {
     if (userId === "USR-001") {
-      alert("मुख्य सुपर एडमिन (root admin) को निष्क्रिय नहीं किया जा सकता। (Cannot deactivate primary super admin)");
+      alert("Cannot deactivate the primary root Super Admin.");
       return;
     }
     const updated = userList.map((u) =>
@@ -253,11 +253,11 @@ export function CompanySettingsView({
 
   const handleDeleteUserClick = (userId: string) => {
     if (userId === "USR-001") {
-      alert("मुख्य सुपर एडमिन (root admin) को हटाया नहीं जा सकता। (Cannot delete primary super admin)");
+      alert("Cannot delete the primary root Super Admin.");
       return;
     }
     const target = userList.find((u) => u.id === userId);
-    if (window.confirm(`क्या आप वाकई यूजर "${target?.fullName}" (${target?.username}) को हमेशा के लिए हटाना चाहते हैं?`)) {
+    if (window.confirm(`Are you sure you want to permanently delete user "${target?.fullName}" (@${target?.username})?`)) {
       const updated = userList.filter((u) => u.id !== userId);
       setUserList(updated);
       if (onDeleteUser) onDeleteUser(userId);
@@ -533,7 +533,7 @@ export function CompanySettingsView({
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2.5 text-xs font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0"
             >
               <UserPlus className="h-4 w-4" />
-              Create New Login / नया यूजर जोड़ें
+              Create New Login
             </button>
           </div>
 
@@ -603,7 +603,7 @@ export function CompanySettingsView({
                 onChange={(e) => setUserRoleFilter(e.target.value)}
                 className="w-full sm:w-auto px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
               >
-                <option value="all">All Roles (सभी पद)</option>
+                <option value="all">All Roles</option>
                 <option value="Super Admin">Super Admin</option>
                 <option value="Finance & Accounts Admin">Finance & Accounts Admin</option>
                 <option value="Sales & Billing Manager">Sales & Billing Manager</option>
@@ -1236,12 +1236,12 @@ export function CompanySettingsView({
                     onChange={(e) => setFormRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-medium"
                   >
-                    <option value="Super Admin">Super Admin (संपूर्ण अधिकार)</option>
+                    <option value="Super Admin">Super Admin (Full Access)</option>
                     <option value="Finance & Accounts Admin">Finance & Accounts Admin</option>
                     <option value="Sales & Billing Manager">Sales & Billing Manager</option>
                     <option value="Inventory & Store Incharge">Inventory & Store Incharge</option>
                     <option value="HR & Payroll Manager">HR & Payroll Manager</option>
-                    <option value="Statutory Auditor">Statutory Auditor (बाहरी सीए / ऑडिटर)</option>
+                    <option value="Statutory Auditor">Statutory Auditor (External CA / Auditor)</option>
                     <option value="Read-Only Operator">Read-Only Operator</option>
                   </select>
                 </div>
@@ -1268,8 +1268,8 @@ export function CompanySettingsView({
                     onChange={(e) => setFormStatus(e.target.value as any)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-semibold"
                   >
-                    <option value="Active">Active (लॉगिन की अनुमति है)</option>
-                    <option value="Inactive">Inactive (लॉगिन रोका गया है)</option>
+                    <option value="Active">Active (Permitted to Login)</option>
+                    <option value="Inactive">Inactive (Access Suspended)</option>
                   </select>
                 </div>
               </div>
@@ -1280,7 +1280,7 @@ export function CompanySettingsView({
                   <div>
                     <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                       <ShieldCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                      Grant All Access (पूर्ण अनियंत्रित अधिकार)
+                      Grant All Access (Unrestricted Admin Rights)
                     </p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       Super Admin privilege: bypasses permission filters, allows View, Create, Modify, and Delete on all 27 ERP modules.
@@ -1307,7 +1307,7 @@ export function CompanySettingsView({
                         Module-by-Module Permission Matrix
                       </p>
                       <p className="text-[11px] text-slate-500">
-                        Check specific permissions: View (देखना), Create (जोड़ना), Edit (बदलना), Delete (हटाना)
+                        Configure specific permissions: View, Create, Modify, and Delete
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -1447,7 +1447,7 @@ export function CompanySettingsView({
                   type="submit"
                   className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-indigo-600/30"
                 >
-                  {editingUserId ? "Update User & Permissions" : "Create Login / सुरक्षित सेव करें"}
+                  {editingUserId ? "Update User & Permissions" : "Save User Login"}
                 </button>
               </div>
             </form>
